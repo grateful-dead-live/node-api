@@ -5,7 +5,10 @@ const N3 = require('n3');
 const PORT = 8060;
 const TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const LOCATION = "http://example.com/grateful_dead/vocabulary/location";
+const VENUE = "http://example.com/grateful_dead/vocabulary/venue";
 const TIME = "http://purl.org/NET/c4dm/event.owl#time";
+const DATE = "http://purl.org/NET/c4dm/timeline.owl#atDate";
+
 
 const app = express();
 app.use((req, res, next) => {
@@ -15,24 +18,45 @@ app.use((req, res, next) => {
 });
 
 const store = N3.Store();
-fs.readFile('rdf/event_main.ttl', 'utf8', (err, data) => {
-  N3.Parser().parse(data, (error, triple, prefixes) => {
-    triple ? store.addTriple(triple) : (error ? console.log(error) : null);
-  });
-});
+readRdfIntoStore('rdf/event_main.ttl')
+.then(() => readRdfIntoStore('rdf/dbpedia_venues.ttl'));
 
 app.get('/events', (req, res) => {
-  res.send(store.getTriples(null, LOCATION).map(t => t.subject));
+  res.send(store.getTriples(null, LOCATION).map(t => ({
+    id: t.subject,
+    date: getObject(getObject(t.subject, TIME), DATE),
+    location: getObject(t.subject, LOCATION).replace('http://dbpedia.org/resource/', '')
+  })));
 });
 
-app.get('/locations', (req, res) => {
-  res.send(store.getObjects(null, LOCATION));
-});
-
-app.get('/times', (req, res) => {
-  res.send(store.getObjects(null, TIME));
+app.get('/venue', (req, res) => {
+  res.send(getObject(req.query.event, VENUE).replace('http://dbpedia.org/resource/', ''));
 });
 
 app.listen(PORT, () => {
-  console.log('Audio server started at http://localhost:' + PORT);
+  console.log('grateful dead server started at http://localhost:' + PORT);
 });
+
+function readRdfIntoStore(path) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(path, 'utf8', (err, data) => {
+      N3.Parser().parse(data, (error, triple, prefixes) => {
+        if (triple) {
+          store.addTriple(triple);
+        } else if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      });
+    });
+  });
+}
+
+function getObject(subject, predicate) {
+  let object = store.getObjects(subject, predicate)[0];
+  if (N3.Util.isLiteral(object)) {
+    return N3.Util.getLiteralValue(object);
+  }
+  return object;
+}
