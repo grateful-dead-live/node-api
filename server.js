@@ -1,6 +1,7 @@
 const fs = require('fs');
 const express = require('express');
 const N3 = require('n3');
+const dbpedia = require('./dbpedia')
 
 const PORT = 8060;
 const TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
@@ -21,6 +22,8 @@ const store = N3.Store();
 readRdfIntoStore('rdf/event_main.ttl')
 .then(() => readRdfIntoStore('rdf/dbpedia_venues.ttl'));
 
+//dbpedia.getImage('dbr:London').then(t => console.log(t))
+
 app.get('/events', (req, res) => {
   res.send(store.getTriples(null, LOCATION).map(t => ({
     id: t.subject,
@@ -30,7 +33,25 @@ app.get('/events', (req, res) => {
 });
 
 app.get('/venue', (req, res) => {
-  res.send(getObject(req.query.event, VENUE).replace('http://dbpedia.org/resource/', ''));
+  let venue = getObject(req.query.event, VENUE);
+  if (venue) {
+    dbpedia.getImage(venue.replace('http://dbpedia.org/resource/', 'dbr:'))
+      .then(i => res.send({
+        name: venue.replace('http://dbpedia.org/resource/', ''),
+        image: i
+      }));
+  }
+});
+
+app.get('/location', (req, res) => {
+  let location = getObject(req.query.event, LOCATION);
+  if (location) {
+    dbpedia.getImage(location.replace('http://dbpedia.org/resource/', 'dbr:'))
+      .then(i => res.send({
+        name: location.replace('http://dbpedia.org/resource/', ''),
+        image: i
+      }));
+  }
 });
 
 app.listen(PORT, () => {
