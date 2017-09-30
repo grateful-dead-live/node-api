@@ -5,6 +5,8 @@ const dbpedia = require('./dbpedia')
 
 const PORT = 8060;
 const TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+const LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
+const SAMEAS = "http://www.w3.org/2002/07/owl#sameAs";
 const LOCATION = "http://example.com/grateful_dead/vocabulary/location";
 const VENUE = "http://example.com/grateful_dead/vocabulary/venue";
 const TIME = "http://purl.org/NET/c4dm/event.owl#time";
@@ -20,7 +22,7 @@ app.use((req, res, next) => {
 
 const store = N3.Store();
 readRdfIntoStore('rdf/event_main.ttl')
-.then(() => readRdfIntoStore('rdf/dbpedia_venues.ttl'));
+.then(() => readRdfIntoStore('rdf/dbpedia_venues_new1.ttl'));
 
 //dbpedia.getImage('dbr:London').then(t => console.log(t))
 
@@ -35,9 +37,12 @@ app.get('/events', (req, res) => {
 app.get('/venue', (req, res) => {
   let venue = getObject(req.query.event, VENUE);
   if (venue) {
-    dbpedia.getImage(venue.replace('http://dbpedia.org/resource/', 'dbr:'))
+    let label = getObject(venue, LABEL);
+    let dbpediaVenue = getObject(venue, SAMEAS);
+    dbpedia.getImage(dbpediaVenue.replace('http://dbpedia.org/resource/', 'dbr:'))
       .then(i => res.send({
-        name: venue.replace('http://dbpedia.org/resource/', ''),
+        name: label,
+        sameas: dbpediaVenue.replace('http://dbpedia.org/resource/', ''),
         image: i
       }));
   }
