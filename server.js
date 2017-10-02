@@ -44,6 +44,10 @@ app.get('/location', (req, res) => {
   }
 });
 
+app.get('/setlist', (req, res) => {
+  res.send(store.getSetlist(req.query.event));
+});
+
 app.listen(PORT, () => {
   console.log('grateful dead server started at http://localhost:' + PORT);
 });
