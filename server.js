@@ -44,12 +44,23 @@ app.get('/location', (req, res) => {
   }
 });
 
+app.get('/weather', (req, res) => {
+  res.send(store.getWeather(req.query.event));
+});
+
 app.get('/setlist', (req, res) => {
   res.send(store.getSetlist(req.query.event));
 });
 
 app.get('/performers', (req, res) => {
-  res.send(store.getPerformers(req.query.event));
+  let performers = store.getPerformers(req.query.event);
+  Promise.all(performers.map(p =>
+    dbpedia.getImage(p.sameAs.replace('http://dbpedia.org/resource/', 'dbr:'))
+      .then(image => p["image"] = image)
+      .then(() => p)
+      .catch(e => console.log("no image found for ", p.name))
+  ))
+  .then(ps => res.send(ps));
 });
 
 app.listen(PORT, () => {

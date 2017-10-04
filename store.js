@@ -18,8 +18,14 @@ const SINGER = MO+"singer";
 const PERFORMER = MO+"performer";
 const INSTRUMENT = MO+"instrument";
 const MIT = "http://purl.org/ontology/mo/mit#";
+const QUDT = "http://qudt.org/schema/qudt#";
+const NUMVAL = QUDT+"numericValue";
 const GD = "http://example.com/grateful_dead/vocabulary/";
 const LOCATION = GD+"location";
+const WEATHER = GD+"weather";
+const MAX_TEMP = GD+"maximum_temperature";
+const MIN_TEMP = GD+"minimum_temperature";
+const PRECIPITATION = GD+"precipitation";
 const VENUE = GD+"venue";
 const SETLIST = GD+"set_list";
 
@@ -42,6 +48,15 @@ exports.getLocation = function(eventId) {
   return getObject(eventId, LOCATION);
 }
 
+exports.getWeather = function(eventId) {
+  let weather = getObject(eventId, WEATHER);
+  return {
+    maxTemperature: parseFloat(getObject(getObject(weather, MAX_TEMP), NUMVAL)),
+    minTemperature: parseFloat(getObject(getObject(weather, MIN_TEMP), NUMVAL)),
+    precipitation: parseFloat(getObject(getObject(weather, PRECIPITATION), NUMVAL)),
+  };
+}
+
 exports.getVenue = function(eventId) {
   return getObject(eventId, VENUE);
 }
@@ -58,12 +73,17 @@ exports.getPerformers = function(eventId) {
     let instrument = singer ? MIT+"Voice" : getObject(p, INSTRUMENT);
     return {
       name: getObject(musician, LABEL),
-      instrument: instrument.replace(MIT, '')
+      instrument: instrument.replace(MIT, ''),
+      sameAs: getObject(musician, SAMEAS)
     }
   });
   //join same performers
   performers = _.chain(performers).groupBy('name')
-    .mapValues((v,k) => ({name: k, instruments: v.map(p => p.instrument)})).value();
+    .mapValues((v,k) => ({
+      name: k,
+      instruments: v.map(p => p.instrument),
+      sameAs: v[0].sameAs
+    })).value();
   return _.values(performers).filter(p => p.name != 'undefined');
 }
 
