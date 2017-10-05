@@ -48,8 +48,20 @@ app.get('/weather', (req, res) => {
   res.send(store.getWeather(req.query.event));
 });
 
+app.get('/posters', (req, res) => {
+  res.send(store.getPosters(req.query.event));
+});
+
+app.get('/tickets', (req, res) => {
+  res.send(store.getTickets(req.query.event));
+});
+
 app.get('/setlist', (req, res) => {
   res.send(store.getSetlist(req.query.event));
+});
+
+app.get('/recordings', (req, res) => {
+  res.send(store.getRecordings(req.query.event));
 });
 
 app.get('/performers', (req, res) => {

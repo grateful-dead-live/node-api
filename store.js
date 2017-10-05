@@ -28,13 +28,22 @@ const MIN_TEMP = GD+"minimum_temperature";
 const PRECIPITATION = GD+"precipitation";
 const VENUE = GD+"venue";
 const SETLIST = GD+"set_list";
+const ARTEFACT = GD+"artefact";
+const POSTER = GD+"Poster";
+const TICKET = GD+"Ticket";
+const DEPICTS = GD+"depicts";
+const IMAGE = GD+"image_file";
+const PERFORMANCE = GD+"etree_performance";
 
 const store = N3.Store();
 readRdfIntoStore('rdf/event_main.ttl')
-  .then(() => readRdfIntoStore('rdf/dbpedia_venues_new1.ttl'))
+  .then(() => readRdfIntoStore('rdf/dbpedia_venues.ttl'))
+  .then(() => readRdfIntoStore('rdf/venues_no_dbpedia.ttl'))
   .then(() => readRdfIntoStore('rdf/testsong_new.ttl'))
   .then(() => readRdfIntoStore('rdf/lineup_artists.ttl'))
-  .then(() => readRdfIntoStore('rdf/lineup_file_resources.ttl'));
+  .then(() => readRdfIntoStore('rdf/lineup_file_resources.ttl'))
+  .then(() => readRdfIntoStore('rdf/tickets.ttl'))
+  .then(() => readRdfIntoStore('rdf/posters.ttl'));
 
 exports.getEventIds = function() {
   return store.getTriples(null, LOCATION).map(t => t.subject);//getSubjects doesnt seem to work :(
@@ -61,8 +70,29 @@ exports.getVenue = function(eventId) {
   return getObject(eventId, VENUE);
 }
 
+exports.getPosters = function(eventId) {
+  return getArtefacts(eventId, POSTER);
+}
+
+exports.getRecordings = function(eventId) {
+  return store.getObjects(getObject(eventId, SUBEVENT), PERFORMANCE)
+    .map(p => p.replace('http://etree.linkedmusic.org/performance/', ''));
+}
+
+exports.getTickets = function(eventId) {
+  return getArtefacts(eventId, TICKET);
+}
+
+function getArtefacts(eventId, type) {
+  return store.getObjects(eventId, ARTEFACT)
+    .filter(a => getObject(a, TYPE) === type)
+    .map(p => store.getTriples(null, DEPICTS, p)[0])
+    .map(t => t.subject)
+    .map(t => getObject(t, IMAGE));
+}
+
 exports.getSetlist = function(eventId) {
-  return getList(getObject(eventId, SETLIST)).map(s => getObject(s, LABEL));
+  return getList(getObject(getObject(eventId, SUBEVENT), SETLIST)).map(s => getObject(s, LABEL));
 }
 
 exports.getPerformers = function(eventId) {
