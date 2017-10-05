@@ -20,16 +20,19 @@ app.get('/events', (req, res) => {
 });
 
 app.get('/venue', (req, res) => {
-  let venue = store.getVenue(req.query.event);
-  if (venue) {
-    let label = store.getLabel(venue);
-    let dbpediaVenue = store.getSameAs(venue);
-    dbpedia.getImage(dbpediaVenue.replace('http://dbpedia.org/resource/', 'dbr:'))
-      .then(i => res.send({
-        name: label,
-        sameas: dbpediaVenue.replace('http://dbpedia.org/resource/', ''),
-        image: i
-      }));
+  var venue = {
+    id: store.getVenue(req.query.event)
+  };
+  if (venue.id) {
+    venue.name = store.getLabel(venue.id);
+    if (!venue.name) { //it exists in dbpedia
+      dbpedia.getImage(venue.id.replace('http://dbpedia.org/resource/', 'dbr:'))
+        .then(i => venue["image"] = i)
+        .then(() => venue["name"] = venue.id.replace('http://dbpedia.org/resource/', ''))
+        .then(() => res.send(venue));
+    } else {
+      res.send(venue);
+    }
   }
 });
 
