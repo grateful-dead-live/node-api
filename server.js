@@ -1,6 +1,6 @@
 const express = require('express');
-const store = require('./store')
-const dbpedia = require('./dbpedia')
+const store = require('./store');
+const dbpedia = require('./dbpedia');
 
 const PORT = 8060;
 
@@ -19,31 +19,29 @@ app.get('/events', (req, res) => {
   })));
 });
 
-app.get('/venue', (req, res) => {
+app.get('/venue', async (req, res) => {
   var venue = {
     id: store.getVenue(req.query.event)
   };
   if (venue.id) {
     venue.name = store.getLabel(venue.id);
     if (!venue.name) { //it exists in dbpedia
-      dbpedia.getImage(venue.id.replace('http://dbpedia.org/resource/', 'dbr:'))
-        .then(i => venue["image"] = i)
-        .then(() => venue["name"] = venue.id.replace('http://dbpedia.org/resource/', ''))
-        .then(() => res.send(venue));
-    } else {
-      res.send(venue);
+      venue["name"] = venue.id.replace('http://dbpedia.org/resource/', '');
+      venue["image"] = await dbpedia.getImage(venue.id);
+      venue["comment"] = await dbpedia.getComment(venue.id);
     }
+    res.send(venue);
   }
 });
 
-app.get('/location', (req, res) => {
+app.get('/location', async (req, res) => {
   let location = store.getLocation(req.query.event);
   if (location) {
-    dbpedia.getImage(location.replace('http://dbpedia.org/resource/', 'dbr:'))
-      .then(i => res.send({
-        name: location.replace('http://dbpedia.org/resource/', ''),
-        image: i
-      }));
+    res.send({
+      name: location.replace('http://dbpedia.org/resource/', ''),
+      image: await dbpedia.getImage(location),
+      comment: await dbpedia.getComment(location)
+    });
   }
 });
 
@@ -67,15 +65,12 @@ app.get('/recordings', (req, res) => {
   res.send(store.getRecordings(req.query.event));
 });
 
-app.get('/performers', (req, res) => {
+app.get('/performers', async (req, res) => {
   let performers = store.getPerformers(req.query.event);
-  Promise.all(performers.map(p =>
-    dbpedia.getImage(p.sameAs.replace('http://dbpedia.org/resource/', 'dbr:'))
-      .then(image => p["image"] = image)
-      .then(() => p)
-      .catch(e => console.log("no image found for ", p.name))
-  ))
-  .then(ps => res.send(ps));
+  res.send(await Promise.all(performers.map(async p => {
+    p["image"] = await dbpedia.getImage(p.sameAs);
+    return p
+  })));
 });
 
 app.listen(PORT, () => {
