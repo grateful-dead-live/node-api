@@ -29,6 +29,7 @@ app.get('/venue', async (req, res) => {
       venue["name"] = venue.id.replace('http://dbpedia.org/resource/', '');
       venue["image"] = await dbpedia.getImage(venue.id);
       venue["comment"] = await dbpedia.getComment(venue.id);
+      venue["geoloc"] = await dbpedia.getGeolocation(venue.id);
     }
     res.send(venue);
   }
@@ -40,7 +41,8 @@ app.get('/location', async (req, res) => {
     res.send({
       name: location.replace('http://dbpedia.org/resource/', ''),
       image: await dbpedia.getImage(location),
-      comment: await dbpedia.getComment(location)
+      comment: await dbpedia.getComment(location),
+      geoloc: await dbpedia.getGeolocation(location)
     });
   }
 });
