@@ -36,14 +36,14 @@ const IMAGE = GD+"image_file";
 const PERFORMANCE = GD+"etree_performance";
 
 const store = N3.Store();
-readRdfIntoStore('rdf/event_main.ttl')
-  .then(() => readRdfIntoStore('rdf/dbpedia_venues.ttl'))
-  .then(() => readRdfIntoStore('rdf/venues_no_dbpedia.ttl'))
-  .then(() => readRdfIntoStore('rdf/testsong_new.ttl'))
-  .then(() => readRdfIntoStore('rdf/lineup_artists.ttl'))
-  .then(() => readRdfIntoStore('rdf/lineup_file_resources.ttl'))
-  .then(() => readRdfIntoStore('rdf/tickets.ttl'))
-  .then(() => readRdfIntoStore('rdf/posters.ttl'));
+readRdfIntoStore('rdf-data/event_main.ttl')
+  .then(() => readRdfIntoStore('rdf-data/dbpedia_venues.ttl'))
+  .then(() => readRdfIntoStore('rdf-data/venues_no_dbpedia.ttl'))
+  .then(() => readRdfIntoStore('rdf-data/testsong_new.ttl'))
+  .then(() => readRdfIntoStore('rdf-data/lineup_artists.ttl'))
+  .then(() => readRdfIntoStore('rdf-data/lineup_file_resources.ttl'))
+  .then(() => readRdfIntoStore('rdf-data/tickets.ttl'))
+  .then(() => readRdfIntoStore('rdf-data/posters.ttl'));
 
 exports.getEventIds = function() {
   return store.getTriples(null, LOCATION).map(t => t.subject);//getSubjects doesnt seem to work :(

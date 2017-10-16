@@ -1,0 +1,3 @@
+[submodule "rdf-data"]
+	path = rdf-data
+	url = https://github.com/grateful-dead-live/rdf-data.git
