@@ -28,10 +28,12 @@ exports.getComment = function(resource) {
 exports.getGeolocation = function(resource) {
   return getObjectFromDbpedia(resource, "geo:geometry")
     .then(g => {
-      g = g.split(" ");
-      return {
-        long: parseFloat(g[0].slice(6)),
-        lat: parseFloat(g[1].slice(0, g.indexOf(')')))
+      if (g) {
+        g = g.split(" ");
+        return {
+          long: parseFloat(g[0].slice(6)),
+          lat: parseFloat(g[1].slice(0, g.indexOf(')')))
+        }
       }
     });
 }
