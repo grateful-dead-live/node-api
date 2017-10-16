@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "",
   "main": "server.js",
+  "engines": {
+    "node": "8.4.0"
+  },
   "dependencies": {
     "express": "^4.15.5",
     "lodash": "^4.17.4",
