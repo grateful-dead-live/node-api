@@ -2,7 +2,7 @@ const express = require('express');
 const store = require('./store');
 const dbpedia = require('./dbpedia');
 
-const PORT = 8060;
+const PORT = process.env.PORT || 8060;
 
 const app = express();
 app.use((req, res, next) => {
