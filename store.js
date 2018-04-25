@@ -26,6 +26,8 @@ const WEATHER = GD+"weather";
 const MAX_TEMP = GD+"maximum_temperature";
 const MIN_TEMP = GD+"minimum_temperature";
 const PRECIPITATION = GD+"precipitation";
+const WIND = GD+"wind";
+const WIND_DIRECTION = GD+"wind_direction";
 const VENUE = GD+"venue";
 const SETLIST = GD+"set_list";
 const ARTEFACT = GD+"artefact";
@@ -34,12 +36,13 @@ const TICKET = GD+"Ticket";
 const DEPICTS = GD+"depicts";
 const IMAGE = GD+"image_file";
 const PERFORMANCE = GD+"etree_performance";
+const PLAYED_AT = GD+"played_at";
 
 const store = N3.Store();
 readRdfIntoStore('rdf-data/event_main.ttl')
   .then(() => readRdfIntoStore('rdf-data/dbpedia_venues.ttl'))
-  .then(() => readRdfIntoStore('rdf-data/venues_no_dbpedia.ttl'))
-  .then(() => readRdfIntoStore('rdf-data/testsong_new.ttl'))
+  .then(() => readRdfIntoStore('rdf-data/songs.ttl'))
+  .then(() => readRdfIntoStore('rdf-data/songs_inverse.ttl'))
   .then(() => readRdfIntoStore('rdf-data/lineup_artists.ttl'))
   .then(() => readRdfIntoStore('rdf-data/lineup_file_resources.ttl'))
   .then(() => readRdfIntoStore('rdf-data/tickets.ttl'))
@@ -50,12 +53,56 @@ exports.getEventIds = function() {
 }
 
 exports.getTime = function(eventId) {
+  //console.log(eventId);
   return getObject(getObject(eventId, TIME), DATE);
 }
+
+
+exports.getSubeventInfo = function(performanceId) {
+  let event_id = getSubject(SUBEVENT, performanceId);
+  let location = exports.getLocation(event_id);
+  if (location != null){
+    location = location.replace('http://dbpedia.org/resource/', '');
+  }
+  return {
+    id: event_id,
+    date: exports.getTime(event_id),
+    location: location
+  };
+}
+
+exports.getEventInfo = function(eventId) {
+  let location = exports.getLocation(eventId);
+  if (location != null){
+    location = location.replace('http://dbpedia.org/resource/', '');
+  }
+  let venue = exports.getVenue(eventId);
+  if (venue != null){
+    venue = venue.replace('http://dbpedia.org/resource/', '');
+  }
+  return {
+    id: eventId,
+    date: exports.getTime(eventId),
+    location: location,
+    venue: venue
+  };
+}
+
+
+exports.getLocationEvents = function(locationId) {
+  return store.getTriples(null, LOCATION, locationId).map(t => t.subject);
+}
+
+exports.getVenueEvents = function(venueId) {
+  return store.getTriples(null, VENUE, venueId).map(t => t.subject);
+}
+
 
 exports.getLocation = function(eventId) {
   return getObject(eventId, LOCATION);
 }
+
+
 
 exports.getWeather = function(eventId) {
   let weather = getObject(eventId, WEATHER);
@@ -63,6 +110,8 @@ exports.getWeather = function(eventId) {
     maxTemperature: parseFloat(getObject(getObject(weather, MAX_TEMP), NUMVAL)),
     minTemperature: parseFloat(getObject(getObject(weather, MIN_TEMP), NUMVAL)),
     precipitation: parseFloat(getObject(getObject(weather, PRECIPITATION), NUMVAL)),
+    wind: parseFloat(getObject(getObject(weather, WIND), NUMVAL)),
+    wind_direction: getObject(weather, WIND_DIRECTION)
   };
 }
 
@@ -91,8 +140,16 @@ function getArtefacts(eventId, type) {
     .map(t => getObject(t, IMAGE));
 }
 
+exports.getSongEvents = function(songId) {
+  return store.getTriples(songId, PLAYED_AT).map(t => t.object);
+}
+
+exports.getSongLabel = function(songId) {
+  return getObject(songId, LABEL)
+}
+
 exports.getSetlist = function(eventId) {
-  return getList(getObject(getObject(eventId, SUBEVENT), SETLIST)).map(s => getObject(s, LABEL));
+  return getList(getObject(getObject(eventId, SUBEVENT), SETLIST));
 }
 
 exports.getPerformers = function(eventId) {
@@ -149,11 +206,32 @@ function getObject(subject, predicate) {
   return object;
 }
 
-function getList(list) {
+function getSubject(predicate, object) {
+  return store.getSubjects(predicate, object)[0];
+}
+
+/*
+function _getList(list) {
   let elements = [];
   while (list != NIL) {
     elements.push(getObject(list, FIRST));
     list = getObject(list, REST);
   }
+  return elements;
+}
+*/
+
+function getList(seq) {
+  let elements = [];
+  let i = 0;
+  while (true) {
+    i++;
+    var songid = getObject(seq, RDF + "_" + i);
+    if (songid != null){
+      elements.push(songid); 
+    }
+    else { break; }
+  }
+
   return elements;
 }
