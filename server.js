@@ -2,6 +2,7 @@ const express = require('express');
 const store = require('./store');
 const dbpedia = require('./dbpedia');
 const etree = require('./etree');
+const features = require('./features');
 
 
 const PORT = process.env.PORT || 8060;
@@ -99,6 +100,13 @@ app.get('/etreeinfo', async (req, res) => {
 });
 
 
-app.listen(PORT, () => {
+app.get('/feature', async (req, res) => {
+  const beats = await features.loadFeature(req.query.songid, req.query.feature);
+  res.send(beats);
+});
+
+
+app.listen(PORT, async () => {
   console.log('grateful dead server started at http://localhost:' + PORT);
+  //console.log(await features.loadFeature('gd66-01-08.d1t45', 'beats'));
 });
