@@ -105,6 +105,12 @@ app.get('/feature', async (req, res) => {
   res.send(beats);
 });
 
+app.get('/featuresummary', async (req, res) => {
+  const songid = req.query.audiouri//TODO SOMEHOW GET FROM AUDIOURI
+  const beats = await features.loadSummarizedFeatures(req.query.songid);
+  res.send(beats);
+});
+
 
 app.listen(PORT, async () => {
   console.log('grateful dead server started at http://localhost:' + PORT);

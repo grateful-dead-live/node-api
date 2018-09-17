@@ -11,6 +11,13 @@ exports.loadFeature = function(songid, feature) {
   }
 }
 
+exports.loadSummarizedFeatures = function(songid) {
+  const file = getFile(songid, 'beatsummary');
+  if (file) {
+    return JSON.parse(fs.readFileSync(file, 'utf8'));
+  }
+}
+
 function getFile(songid, feature) {
   let files = fs.readdirSync(FOLDER);
   files = files.filter(f => f.indexOf(songid) >= 0);
