@@ -3,6 +3,7 @@ const store = require('./store');
 const dbpedia = require('./dbpedia');
 const etree = require('./etree');
 const features = require('./features');
+const chunker = require('./audio-chunker');
 
 
 const PORT = process.env.PORT || 8060;
@@ -94,7 +95,7 @@ app.get('/performers', async (req, res) => {
 });
 
 app.get('/etreeinfo', async (req, res) => {
-  console.log(req.query.recording)
+  //console.log(req.query.recording)
   let e = await etree.getInfoFromEtree(req.query.recording)
   .then(e => res.send(e));
 });
@@ -106,13 +107,28 @@ app.get('/feature', async (req, res) => {
 });
 
 app.get('/featuresummary', async (req, res) => {
-  const songid = req.query.audiouri//TODO SOMEHOW GET FROM AUDIOURI
-  const beats = await features.loadSummarizedFeatures(req.query.songid);
-  res.send(beats);
+  res.send(await features.loadSummarizedFeatures(req.query.audiouri));
+});
+
+app.get('/audiochunk', (req, res, next) => {
+  //http://localhost:8060/audiochunk?filename=http://archive.org/download/gd1985-03-13.sbd.miller.77347.flac16/gd85-03-13d1t03.mp3&fromsecond=4&tosecond=6
+  const filename = req.query.filename;
+  const fromSecond = parseFloat(req.query.fromsecond);
+  const toSecond = parseFloat(req.query.tosecond);
+  if (filename && !isNaN(fromSecond) && !isNaN(toSecond)) {
+    chunker.pipeWavChunk(filename, fromSecond, toSecond, res);
+  }
+});
+
+app.get('/diachronic', async (req, res, next) => {
+  res.send(await features.getDiachronicVersionsAudio(req.query.songname, 10));
 });
 
 
 app.listen(PORT, async () => {
   console.log('grateful dead server started at http://localhost:' + PORT);
   //console.log(await features.loadFeature('gd66-01-08.d1t45', 'beats'));
+  //console.log(await features.getDiachronicVersionsAudio('goodlovin', 10));
+  //console.log(await features.loadSummarizedFeatures('http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3'))
+  //console.log(await features.loadSummarizedFeatures('goodlovin', 'gd1969-11-21.set2.sbd.gmb.96580.flac16/gd1969-11-21t01.mp3'));
 });
