@@ -63,3 +63,32 @@ function getArchiveAudioPath(versionFolder, featureFile) {
 function getLocalPath(audioUri) {
   return audioUri.replace('mp3', 'json').replace(ARCHIVE, '');
 }
+
+////////
+
+exports.correctSummarizedFeatures = function() {
+  const songs = getVisibleFiles(FOLDER);
+  songs.forEach(s => {
+    const versions = getVisibleFiles(FOLDER+s+'/')
+    versions.forEach(v => {
+      const folder = FOLDER+s+'/'+v+'/';
+      const path = fs.readdirSync(folder)[0];
+      const json = JSON.parse(fs.readFileSync(folder+path, 'utf8'));
+      Object.keys(json).forEach(feature => {
+        json[feature].forEach(entry => {
+          if (entry["time"] && !entry["time"]["value"]) {
+            entry["time"] = {value: entry["time"]};
+          }
+          if (entry["label"] && !entry["label"]["value"]) {
+            entry["label"] = {value: entry["label"]};
+          }
+          if (entry["label"] && entry["label"]["value"] && typeof entry["label"]["value"] == "number") {
+            entry["label"]["value"] = entry["label"]["value"].toString();
+          }
+        });
+      });
+      fs.writeFileSync(folder+path, JSON.stringify(json));
+    });
+  });
+  console.log("done");
+}

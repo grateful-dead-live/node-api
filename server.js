@@ -3,7 +3,7 @@ const store = require('./store');
 const dbpedia = require('./dbpedia');
 const etree = require('./etree');
 const features = require('./features');
-const chunker = require('./audio-chunker');
+const chunker = require('./chunker');
 
 
 const PORT = process.env.PORT || 8060;
@@ -116,7 +116,8 @@ app.get('/audiochunk', (req, res, next) => {
   const fromSecond = parseFloat(req.query.fromsecond);
   const toSecond = parseFloat(req.query.tosecond);
   if (filename && !isNaN(fromSecond) && !isNaN(toSecond)) {
-    chunker.pipeWavChunk(filename, fromSecond, toSecond, res);
+    res.setHeader('Content-Type', 'audio/wav');
+    chunker.pipeMp3Chunk(filename, fromSecond, toSecond, res);
   }
 });
 
@@ -127,6 +128,9 @@ app.get('/diachronic', async (req, res, next) => {
 
 app.listen(PORT, async () => {
   console.log('grateful dead server started at http://localhost:' + PORT);
+  const AUDIO_URI = 'http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3';
+  //features.correctSummarizedFeatures();
+  //chunker.pipeMp3Chunk(AUDIO_URI, 10, 12, null);
   //console.log(await features.loadFeature('gd66-01-08.d1t45', 'beats'));
   //console.log(await features.getDiachronicVersionsAudio('goodlovin', 10));
   //console.log(await features.loadSummarizedFeatures('http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3'))
