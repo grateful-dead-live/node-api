@@ -116,7 +116,7 @@ app.get('/audiochunk', (req, res, next) => {
   const fromSecond = parseFloat(req.query.fromsecond);
   const toSecond = parseFloat(req.query.tosecond);
   if (filename && !isNaN(fromSecond) && !isNaN(toSecond)) {
-    res.setHeader('Content-Type', 'audio/wav');
+    res.setHeader('Content-Type', 'audio/mpeg');
     chunker.pipeMp3Chunk(filename, fromSecond, toSecond, res);
   }
 });

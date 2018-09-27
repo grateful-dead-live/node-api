@@ -1,17 +1,11 @@
 const request = require('request');
 const wav = require('wav');
 const lame = require('lame');
-//const AV = require('av');
-//require('mp3.js');
-const Speaker = require('speaker');
 
 exports.pipeMp3Chunk = function(filepath, fromSecond, toSecond, response) {
-  const writer = new wav.Writer();
-  writer.pipe(response);
-
+  let encoder;
   const decoder = new lame.Decoder();
-  const input = request(filepath);
-  input.pipe(decoder);
+  request(filepath).pipe(decoder);
 
   let format, fromSample, toSample, totalSize;
   var numSamplesStreamed = 0;
@@ -19,8 +13,9 @@ exports.pipeMp3Chunk = function(filepath, fromSecond, toSecond, response) {
   var samples = []; // array that holds all the chunks
 
   decoder.on('format', f => {
-    //console.log("format", f);
     format = f;
+    encoder = new lame.Encoder(f);
+    encoder.pipe(response);
     const factor = f.sampleRate*f.channels*(f.bitDepth/8);
     fromSample = Math.round(fromSecond*factor);
     toSample = Math.round(toSecond*factor);
@@ -38,22 +33,22 @@ exports.pipeMp3Chunk = function(filepath, fromSecond, toSecond, response) {
         if (chunksToGo < chunk.length) {
           chunk = chunk.slice(0, chunksToGo);
         }
-        writer.write(chunk);
+        encoder.write(chunk);
         numSamplesAccumulated += chunk.length;
       }
       numSamplesStreamed += chunkSize;
     } else {
-      writer.end();
+      encoder.end();
       decoder.end();
-      //console.log("DONE")
     }
   });
   decoder.on('error', function() {
-    writer.end();
+    console.log("error loading", filepath);
+    encoder.end();
   })
   decoder.on('end', function() {
     console.log("piped", fromSecond, "to", toSecond, "of", filepath)
-    writer.end();
+    encoder.end();
   });
 }
 
