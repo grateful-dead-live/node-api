@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs');
 const store = require('./store');
 const dbpedia = require('./dbpedia');
 const etree = require('./etree');
@@ -107,17 +108,29 @@ app.get('/feature', async (req, res) => {
 });
 
 app.get('/featuresummary', async (req, res) => {
-  res.send(await features.loadSummarizedFeatures(req.query.audiouri));
+  let audio = req.query.audiouri;
+  if (audio.indexOf('audiochunk')) {
+    audio = audio.replace('http://localhost:8060/audiochunk?filename=', '');
+    const paramsIndex = audio.indexOf('&fromsecond');
+    if (paramsIndex > 0) {
+      audio = audio.slice(0, paramsIndex);
+    }
+  }
+  res.send(await features.loadSummarizedFeatures(audio));
 });
 
-app.get('/audiochunk', (req, res, next) => {
+app.get('/audiochunk', async (req, res, next) => {
   //http://localhost:8060/audiochunk?filename=http://archive.org/download/gd1985-03-13.sbd.miller.77347.flac16/gd85-03-13d1t03.mp3&fromsecond=4&tosecond=6
   const filename = req.query.filename;
-  const fromSecond = parseFloat(req.query.fromsecond);
-  const toSecond = parseFloat(req.query.tosecond);
+  const fromSecond = req.query.fromsecond ? parseFloat(req.query.fromsecond) : 0;
+  const toSecond = req.query.tosecond ? parseFloat(req.query.tosecond) : 90;
   if (filename && !isNaN(fromSecond) && !isNaN(toSecond)) {
-    res.setHeader('Content-Type', 'audio/mpeg');
-    chunker.pipeMp3Chunk(filename, fromSecond, toSecond, res);
+    res.setHeader('Content-Type', 'audio/mp3');
+    //curiously this is by far the fastest!
+    await chunker.saveMp3Chunk(filename, fromSecond, toSecond, 'temp-audio/temp.mp3');
+    res.send(fs.readFileSync('temp-audio/temp.mp3'));
+    //chunker.pipeMp3Chunk(filename, fromSecond, toSecond, res);
+    //const buffer = await chunker.getMp3Chunk(filename, fromSecond, toSecond);
   }
 });
 
@@ -129,6 +142,7 @@ app.get('/diachronic', async (req, res, next) => {
 app.listen(PORT, async () => {
   console.log('grateful dead server started at http://localhost:' + PORT);
   const AUDIO_URI = 'http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3';
+  //console.log(await chunker.getMp3Chunk(AUDIO_URI, 0, 30));
   //features.correctSummarizedFeatures();
   //chunker.pipeMp3Chunk(AUDIO_URI, 10, 12, null);
   //console.log(await features.loadFeature('gd66-01-08.d1t45', 'beats'));
