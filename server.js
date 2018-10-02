@@ -101,6 +101,22 @@ app.get('/etreeinfo', async (req, res) => {
   .then(e => res.send(e));
 });
 
+app.get('/images', async (req, res) => {
+  const eventId = store.getEventId(req.query.recording);
+  let images = [];
+  images = images.concat(store.getPosters(eventId));
+  images = images.concat(store.getTickets(eventId));
+  const location = store.getLocation(eventId);
+  if (location) {
+    images = images.concat(await dbpedia.getThumbnail(location));
+  }
+  const venue = store.getVenue(eventId);
+  if (venue) {
+    images = images.concat(await dbpedia.getThumbnail(venue));
+  }
+  res.send(images);
+});
+
 
 app.get('/feature', async (req, res) => {
   const beats = await features.loadFeature(req.query.songid, req.query.feature);
@@ -140,6 +156,7 @@ app.get('/diachronic', async (req, res, next) => {
 
 
 app.listen(PORT, async () => {
+  await store.isReady;
   console.log('grateful dead server started at http://localhost:' + PORT);
   const AUDIO_URI = 'http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3';
   //console.log(await chunker.getMp3Chunk(AUDIO_URI, 0, 30));

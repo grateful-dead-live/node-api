@@ -37,9 +37,10 @@ const DEPICTS = GD+"depicts";
 const IMAGE = GD+"image_file";
 const PERFORMANCE = GD+"etree_performance";
 const PLAYED_AT = GD+"played_at";
+const ETREE_PERFORMANCE = 'http://etree.linkedmusic.org/performance/';
 
 const store = N3.Store();
-readRdfIntoStore('rdf-data/event_main.ttl')
+exports.isReady = readRdfIntoStore('rdf-data/event_main.ttl')
   .then(() => readRdfIntoStore('rdf-data/dbpedia_venues.ttl'))
   .then(() => readRdfIntoStore('rdf-data/songs.ttl'))
   .then(() => readRdfIntoStore('rdf-data/songs_inverse.ttl'))
@@ -125,7 +126,12 @@ exports.getPosters = function(eventId) {
 
 exports.getRecordings = function(eventId) {
   return store.getObjects(getObject(eventId, SUBEVENT), PERFORMANCE)
-    .map(p => p.replace('http://etree.linkedmusic.org/performance/', ''));
+    .map(p => p.replace(ETREE_PERFORMANCE, ''));
+}
+
+exports.getEventId = function(recording) {
+  const subevent = getSubject(PERFORMANCE, ETREE_PERFORMANCE+recording);
+  return getSubject(SUBEVENT, subevent);
 }
 
 exports.getTickets = function(eventId) {
@@ -228,7 +234,7 @@ function getList(seq) {
     i++;
     var songid = getObject(seq, RDF + "_" + i);
     if (songid != null){
-      elements.push(songid); 
+      elements.push(songid);
     }
     else { break; }
   }
