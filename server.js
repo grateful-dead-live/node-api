@@ -101,16 +101,18 @@ app.get('/etreeinfo', async (req, res) => {
   .then(e => res.send(e));
 });
 
-app.get('/images', async (req, res) => {
+app.get('/eventinfo', async (req, res) => {
   const splitPath = req.query.audiouri.split('/');
   const recording = splitPath[splitPath.length-2];
   const eventId = store.getEventId(recording);
+  const eventInfo = store.getEventInfo(eventId);
   let images = [];
   images = images.concat(store.getPosters(eventId));
   images = images.concat(store.getTickets(eventId));
   images = images.concat(await getDbpediaImages(eventId, 'getVenue'));
   images = images.concat(await getDbpediaImages(eventId, 'getLocation'));
-  res.send(images);
+  eventInfo['images'] = images;
+  res.send(eventInfo);
 });
 
 async function getDbpediaImages(eventId, storeFunc) {
