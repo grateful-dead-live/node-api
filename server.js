@@ -102,20 +102,25 @@ app.get('/etreeinfo', async (req, res) => {
 });
 
 app.get('/images', async (req, res) => {
-  const eventId = store.getEventId(req.query.recording);
+  const splitPath = req.query.audiouri.split('/');
+  const recording = splitPath[splitPath.length-2];
+  const eventId = store.getEventId(recording);
   let images = [];
   images = images.concat(store.getPosters(eventId));
   images = images.concat(store.getTickets(eventId));
-  const location = store.getLocation(eventId);
-  if (location) {
-    images = images.concat(await dbpedia.getThumbnail(location));
-  }
-  const venue = store.getVenue(eventId);
-  if (venue) {
-    images = images.concat(await dbpedia.getThumbnail(venue));
-  }
+  images = images.concat(await getDbpediaImages(eventId, 'getVenue'));
+  images = images.concat(await getDbpediaImages(eventId, 'getLocation'));
   res.send(images);
 });
+
+async function getDbpediaImages(eventId, storeFunc) {
+  const storeResult = store[storeFunc](eventId);
+  if (storeResult) {
+    const images = await dbpedia.getThumbnail(storeResult);
+    if (images) return images;
+  }
+  return [];
+}
 
 
 app.get('/feature', async (req, res) => {
@@ -159,6 +164,9 @@ app.listen(PORT, async () => {
   await store.isReady;
   console.log('grateful dead server started at http://localhost:' + PORT);
   const AUDIO_URI = 'http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3';
+  /*console.log(await store.getEventId('gd1969-11-08.sbd.wise.17433.shnf'))
+  console.log(await store.getEventId('gd1969-11-02.sbd.miller.32273.flac16'))
+  console.log(await store.getEventId('d1969-11-07.sbd.kaplan.21762.shnf'))*/
   //console.log(await chunker.getMp3Chunk(AUDIO_URI, 0, 30));
   //features.correctSummarizedFeatures();
   //chunker.pipeMp3Chunk(AUDIO_URI, 10, 12, null);
