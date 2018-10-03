@@ -20,9 +20,10 @@ exports.loadSummarizedFeatures = function(audioUri) {
 }
 
 //TODO DO VIA TRIPLE STORE
-exports.getDiachronicVersionsAudio = function(songname, count) {
-  let versions = fs.readdirSync(FOLDER+songname+'/').slice(0, count);
-  versions = versions.filter(v => v[0] != '.');
+exports.getDiachronicVersionsAudio = function(songname, count, skip) {
+  if (skip >= 0) count *= (skip+1);
+  let versions = fs.readdirSync(FOLDER+songname+'/').filter(v => v[0] != '.');
+  versions = versions.slice(0, count).filter((v,i) => i % (skip+1) == 0);
   return versions.map(v => {
     const localPath = FOLDER+songname+'/'+v+'/';
     return ARCHIVE+v+'/'+fs.readdirSync(localPath)[0].replace('json', 'mp3');

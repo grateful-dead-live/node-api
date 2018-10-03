@@ -8,6 +8,7 @@ const chunker = require('./chunker');
 
 
 const PORT = process.env.PORT || 8060;
+const ADDRESS = "http://localhost:8060/"//"https://grateful-dead-api.herokuapp.com/";//"http://localhost:8060/";
 
 const app = express();
 app.use((req, res, next) => {
@@ -137,7 +138,7 @@ app.get('/feature', async (req, res) => {
 app.get('/featuresummary', async (req, res) => {
   let audio = req.query.audiouri;
   if (audio.indexOf('audiochunk')) {
-    audio = audio.replace('http://localhost:8060/audiochunk?filename=', '');
+    audio = audio.replace(ADDRESS+'audiochunk?filename=', '');
     const paramsIndex = audio.indexOf('&fromsecond');
     if (paramsIndex > 0) {
       audio = audio.slice(0, paramsIndex);
@@ -150,7 +151,7 @@ app.get('/audiochunk', async (req, res, next) => {
   //http://localhost:8060/audiochunk?filename=http://archive.org/download/gd1985-03-13.sbd.miller.77347.flac16/gd85-03-13d1t03.mp3&fromsecond=4&tosecond=6
   const filename = req.query.filename;
   const fromSecond = req.query.fromsecond ? parseFloat(req.query.fromsecond) : 0;
-  const toSecond = req.query.tosecond ? parseFloat(req.query.tosecond) : 90;
+  const toSecond = req.query.tosecond ? parseFloat(req.query.tosecond) : 120;
   if (filename && !isNaN(fromSecond) && !isNaN(toSecond)) {
     res.setHeader('Content-Type', 'audio/mp3');
     //curiously this is by far the fastest!
@@ -162,13 +163,15 @@ app.get('/audiochunk', async (req, res, next) => {
 });
 
 app.get('/diachronic', async (req, res, next) => {
-  res.send(await features.getDiachronicVersionsAudio(req.query.songname, 10));
+  const count = req.query.count ? req.query.count : 30;
+  const skip = req.query.skip ? req.query.skip : 0;
+  res.send(await features.getDiachronicVersionsAudio(req.query.songname, count, skip));
 });
 
 
 app.listen(PORT, async () => {
   await store.isReady;
-  console.log('grateful dead server started at http://localhost:' + PORT);
+  console.log('grateful dead server started on port ' + PORT);
   const AUDIO_URI = 'http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3';
   /*console.log(await store.getEventId('gd1969-11-08.sbd.wise.17433.shnf'))
   console.log(await store.getEventId('gd1969-11-02.sbd.miller.32273.flac16'))
