@@ -104,15 +104,19 @@ app.get('/etreeinfo', async (req, res) => {
 app.get('/eventinfo', async (req, res) => {
   const splitPath = req.query.audiouri.split('/');
   const recording = splitPath[splitPath.length-2];
-  const eventId = store.getEventId(recording);
-  const eventInfo = store.getEventInfo(eventId);
-  let images = [];
-  images = images.concat(store.getPosters(eventId));
-  images = images.concat(store.getTickets(eventId));
-  images = images.concat(await getDbpediaImages(eventId, 'getVenue'));
-  images = images.concat(await getDbpediaImages(eventId, 'getLocation'));
-  eventInfo['images'] = images;
-  res.send(eventInfo);
+  if (recording != null) {
+    const eventId = store.getEventId(recording);
+    const eventInfo = store.getEventInfo(eventId);
+    let images = [];
+    images = images.concat(store.getPosters(eventId));
+    images = images.concat(store.getTickets(eventId));
+    images = images.concat(await getDbpediaImages(eventId, 'getVenue'));
+    images = images.concat(await getDbpediaImages(eventId, 'getLocation'));
+    eventInfo['images'] = images;
+    res.send(eventInfo);
+  } else {
+    res.send({});
+  }
 });
 
 async function getDbpediaImages(eventId, storeFunc) {

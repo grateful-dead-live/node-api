@@ -75,11 +75,11 @@ exports.getSubeventInfo = function(performanceId) {
 exports.getEventInfo = function(eventId) {
   let location = exports.getLocation(eventId);
   if (location != null){
-    location = location.replace('http://dbpedia.org/resource/', '').replace('_', ' ');
+    location = location.replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ');
   }
   let venue = exports.getVenue(eventId);
   if (venue != null){
-    venue = venue.replace('http://dbpedia.org/resource/', '').replace('_', ' ');
+    venue = venue.replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ');
   }
   return {
     id: eventId,
