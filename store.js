@@ -108,10 +108,10 @@ exports.getLocation = function(eventId) {
 exports.getWeather = function(eventId) {
   let weather = getObject(eventId, WEATHER);
   return {
-    maxTemperature: parseFloat(getObject(getObject(weather, MAX_TEMP), NUMVAL)),
+    maxTemperature: Math.round(parseFloat(getObject(getObject(weather, MAX_TEMP), NUMVAL)) * 9/5 + 32),
     minTemperature: parseFloat(getObject(getObject(weather, MIN_TEMP), NUMVAL)),
-    precipitation: parseFloat(getObject(getObject(weather, PRECIPITATION), NUMVAL)),
-    wind: parseFloat(getObject(getObject(weather, WIND), NUMVAL)),
+    precipitation: Math.round(parseFloat(getObject(getObject(weather, PRECIPITATION), NUMVAL)) / 25.4 * 10) / 10,
+    wind: Math.round(parseFloat(getObject(getObject(weather, WIND), NUMVAL)) * 1.609),
     wind_direction: getObject(weather, WIND_DIRECTION)
   };
 }
