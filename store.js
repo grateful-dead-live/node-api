@@ -104,7 +104,6 @@ exports.getLocation = function(eventId) {
 }
 
 
-
 exports.getWeather = function(eventId) {
   let weather = getObject(eventId, WEATHER);
   return {

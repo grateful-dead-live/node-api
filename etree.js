@@ -5,20 +5,20 @@ function createInfoQuery(resource) {
   + " etree:notes ?notes ; "
   + "etree:source ?source ; "
   + "etree:lineage ?lineage . } "; 
-  console.log(query);
+ //console.log(query);
   return "http://etree.linkedmusic.org/sparql?default-graph-uri=&query="+encodeURIComponent(query)+"&format=json";
 }
 
 function createKeywordQuery(resource){
   let query = "PREFIX etree: <http://etree.linkedmusic.org/vocab/> SELECT ?keyword { <http://etree.linkedmusic.org/performance/" + resource + ">"
 + " etree:keyword ?keyword . } "; 
-console.log(query);
+//console.log(query);
 return "http://etree.linkedmusic.org/sparql?default-graph-uri=&query="+encodeURIComponent(query)+"&format=json";
 
 }
 
 exports.getInfoFromEtree = function(resource) {
-  console.log(resource);
+  //console.log(resource);
 
   //console.log(createTracksQuery(resource));
 
@@ -48,13 +48,13 @@ exports.getInfoFromEtree = function(resource) {
 }
 
 function getKeywordFromEtree(resource) {
-  console.log("KEYWORDS:")
+  //console.log("KEYWORDS:")
   return fetch(createKeywordQuery(resource))
   .then(r => r.text())
   .then(t => JSON.parse(t))
   .then(j => { 
     let res = getString(j.results.bindings);
-    console.log(res);
+    //console.log(res);
     return res
   })
 }
@@ -97,7 +97,7 @@ async function getTrackList(resource, res){
 }
 
 function getTracksFromEtree(resource) {
-  console.log("TRACKS:")
+  //console.log("TRACKS:")
   return fetch(createTracksQuery(resource))
   .then(r => r.text())
   .then(t => JSON.parse(t))
@@ -110,7 +110,7 @@ function getTracksFromEtree(resource) {
 
 function spectrogramExists(resource, track){
   let image_url = 'https://archive.org/download/' + resource + '/' + track + '_spectrogram.png'
-  console.log(image_url)
+  //console.log(image_url)
 
   return fetch(image_url)
   .then(r => r.status != 404)
