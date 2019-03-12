@@ -6,7 +6,7 @@ const etree = require('./etree');
 const features = require('./features');
 const chunker = require('./chunker');
 const news = require('./news');
-
+//const news2 = require('./news2');
 
 const PORT = process.env.PORT || 8060;
 const ADDRESS = "http://localhost:8060/"//"https://grateful-dead-api.herokuapp.com/";//"http://localhost:8060/";
@@ -67,11 +67,15 @@ app.get('/posters', (req, res) => {
 });
 
 app.get('/news', async (req, res) => {
-  let t = store.getTime(req.query.event).replace(/-/g, '');
+  let t = store.getTime(req.query.event);
   //console.log(t);
   res.send(await news.getObjectFromNytimes(t));
-  //await news.getObjectFromNytimes();
-  //res.send(store.getNews(req.query.event));
+});
+
+app.get('/news2', async (req, res) => {
+  let t = store.getTime(req.query.event);
+  //res.send(await news.getObjectFromNytimes(t));
+  res.send(await news.getObjectFromGuardian(t));
 });
 
 app.get('/tickets', (req, res) => {
