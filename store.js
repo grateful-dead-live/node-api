@@ -28,6 +28,7 @@ const MIN_TEMP = GD+"minimum_temperature";
 const PRECIPITATION = GD+"precipitation";
 const WIND = GD+"wind";
 const WIND_DIRECTION = GD+"wind_direction";
+const WEATHER_CONDITION = GD+"weather_condition";
 const VENUE = GD+"venue";
 const SETLIST = GD+"set_list";
 const ARTEFACT = GD+"artefact";
@@ -38,6 +39,43 @@ const IMAGE = GD+"image_file";
 const PERFORMANCE = GD+"etree_performance";
 const PLAYED_AT = GD+"played_at";
 const ETREE_PERFORMANCE = 'http://etree.linkedmusic.org/performance/';
+
+const weatherDict = {
+  'clear': 'wi-day-sunny',
+  'drizzle': 'wi-sprinkle',
+  'fog': 'wi-fog',
+  'light drizzle': 'wi-sprinkle',
+  'light freezing drizzle': 'wi-sleet',
+  'light rain': 'wi-sprinkle',
+  'light rain showers': 'wi-showers',
+  'light snow': 'wi-snow',
+  'light snow showers': 'wi-snow',
+  'mostly cloudy': 'wi-cloud',
+  'overcast': 'wi-cloudy',
+  'partly cloudy': 'wi-day-cloudy-high',
+  'rain': 'wi-rain',
+  'rain showers': 'wi-showers',
+  'scattered clouds': 'wi-day-cloudy',
+  'smoke': 'wi-smoke',
+  'snow': 'wi-snow',
+  'thunderstorms and rain': 'wi-thunderstorm'
+};
+
+const windDict = { 
+  'ENE': 'wi-direction-down-left',
+  'ESE': 'wi-direction-up-left',
+  'NE': 'wi-direction-down-left',
+  'NNE': 'wi-direction-down-left',
+  'NNW': 'wi-direction-down-right',
+  'NW': 'wi-direction-down-right',
+  'SE': 'wi-direction-up-left',
+  'SSE': 'wi-direction-up-left',
+  'SSW': 'wi-direction-up-right',
+  'SW': 'wi-direction-up-right',
+  'WNW': 'wi-direction-down-right',
+  'WSW': 'wi-direction-up-right'
+};
+
 
 const store = N3.Store();
 exports.isReady = readRdfIntoStore('rdf-data/event_main.ttl')
@@ -109,9 +147,12 @@ exports.getWeather = function(eventId) {
   return {
     maxTemperature: Math.round(parseFloat(getObject(getObject(weather, MAX_TEMP), NUMVAL)) * 9/5 + 32),
     minTemperature: parseFloat(getObject(getObject(weather, MIN_TEMP), NUMVAL)),
-    precipitation: Math.round(parseFloat(getObject(getObject(weather, PRECIPITATION), NUMVAL)) / 25.4 * 10) / 10,
+    precipitation: (parseFloat(getObject(getObject(weather, PRECIPITATION), NUMVAL)) / 25.4).toFixed(2),
     wind: Math.round(parseFloat(getObject(getObject(weather, WIND), NUMVAL)) * 1.609),
-    wind_direction: getObject(weather, WIND_DIRECTION)
+    windDirection: getObject(weather, WIND_DIRECTION),
+    windDirectionIcon: windDict[getObject(weather, WIND_DIRECTION)],
+    condition: getObject(weather, WEATHER_CONDITION),
+    conditionIcon: weatherDict[getObject(weather, WEATHER_CONDITION)]
   };
 }
 
