@@ -144,15 +144,17 @@ exports.getLocation = function(eventId) {
 
 exports.getWeather = function(eventId) {
   let weather = getObject(eventId, WEATHER);
+  let windDirection = getObject(weather, WIND_DIRECTION);
+  let condition = getObject(weather, WEATHER_CONDITION);
   return {
     maxTemperature: Math.round(parseFloat(getObject(getObject(weather, MAX_TEMP), NUMVAL)) * 9/5 + 32),
     minTemperature: parseFloat(getObject(getObject(weather, MIN_TEMP), NUMVAL)),
     precipitation: (parseFloat(getObject(getObject(weather, PRECIPITATION), NUMVAL)) / 25.4).toFixed(2),
     wind: Math.round(parseFloat(getObject(getObject(weather, WIND), NUMVAL)) * 1.609),
-    windDirection: getObject(weather, WIND_DIRECTION),
-    windDirectionIcon: windDict[getObject(weather, WIND_DIRECTION)],
-    condition: getObject(weather, WEATHER_CONDITION),
-    conditionIcon: weatherDict[getObject(weather, WEATHER_CONDITION)]
+    windDirection: windDirection,
+    windDirectionIcon: windDict[windDirection],
+    condition: condition,
+    conditionIcon: weatherDict[condition] || "wi-na"
   };
 }
 
@@ -281,3 +283,4 @@ function getList(seq) {
 
   return elements;
 }
+
