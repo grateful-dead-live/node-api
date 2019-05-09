@@ -18,17 +18,34 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/events', (req, res) => {
+app.get('/events', (req, res) =>
   res.send(store.getEventIds().map(e => ({
     id: e,
     date: store.getTime(e),
     location: store.getLocation(e).replace('http://dbpedia.org/resource/', '')
-  })));
-});
+  })))
+);
+
+app.get('/details', async (req, res) =>
+  res.send({
+    date: store.getTime(req.query.event),
+    location: store.getLocation(req.query.event)
+      .replace('http://dbpedia.org/resource/', ''),
+    venue: getVenue(req.query.event),
+    setlist: await this.getSetlist(req.query.event),
+    weather: await this.getWeather(req.query.event),
+    recordings: await this.getRecordings(req.query.event),
+    performers: await this.getPerformers(req.query.event)
+  })
+)
 
 app.get('/venue', async (req, res) => {
+  res.send(await getVenue(req.query.event));
+});
+
+async function getVenue(event) {
   var venue = {
-    id: store.getVenue(req.query.event)
+    id: store.getVenue(event)
   };
   if (venue.id) {
     venue.name = store.getLabel(venue.id);
@@ -40,9 +57,9 @@ app.get('/venue', async (req, res) => {
       venue["comment"] = await dbpedia.getComment(venue.id);
       venue["geoloc"] = await dbpedia.getGeolocation(venue.id);
     }
-    res.send(venue);
   }
-});
+  return venue;
+}
 
 app.get('/location', async (req, res) => {
   let location = store.getLocation(req.query.event);
@@ -87,12 +104,16 @@ app.get('/tickets', (req, res) => {
 //});
 
 app.get('/setlist', (req, res) => {
-  res.send(store.getSetlist(req.query.event).map(r => ({
+  res.send(getSetlist(req.query.event));
+});
+
+function getSetlist(event) {
+  return store.getSetlist(event).map(r => ({
     song_id: r,
     name: store.getSongLabel(r, "http://www.w3.org/2000/01/rdf-schema#label"),
     events: store.getSongEvents(r).map(q => store.getSubeventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date))
-  })));
-});
+  }));
+}
 
 app.get('/recordings', (req, res) => {
   res.send(store.getRecordings(req.query.event));

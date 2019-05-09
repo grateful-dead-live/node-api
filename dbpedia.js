@@ -17,7 +17,7 @@ function getObjectFromDbpedia(resource, predicate, language) {
     .catch(() => console.log("no "+predicate+" found for "+resource));
 }
 
-exports.getImage = function(resource) {;
+exports.getImage = function(resource) {
   return getObjectFromDbpedia(resource, "foaf:depiction");
 }
 
