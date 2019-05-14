@@ -56,11 +56,11 @@ async function getVenue(eventId: string): Promise<Venue> {
     venue.name = store.getLabel(venue.id);
     venue.events = store.getVenueEvents(venue.id).map(q => store.getEventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date));
     if (!venue.name) { //it exists in dbpedia
-      venue["name"] = venue.id.replace('http://dbpedia.org/resource/', '');
-      venue["image"] = await dbpedia.getImage(venue.id);
-      venue["thumbnail"] = await dbpedia.getThumbnail(venue.id);
-      venue["comment"] = await dbpedia.getComment(venue.id);
-      venue["geoloc"] = await dbpedia.getGeolocation(venue.id);
+      venue.name = venue.id.replace('http://dbpedia.org/resource/', '');
+      venue.image = await dbpedia.getImage(venue.id);
+      venue.thumbnail = await dbpedia.getThumbnail(venue.id);
+      venue.comment = await dbpedia.getComment(venue.id);
+      venue.geoloc = await dbpedia.getGeolocation(venue.id);
     }
   }
   return venue;
@@ -86,10 +86,6 @@ app.get('/weather', (req, res) => {
   res.send(store.getWeather(req.query.event));
 });
 
-app.get('/posters', (req, res) => {
-  res.send(store.getPosters(req.query.event));
-});
-
 app.get('/news', async (req, res) => {
   let t = store.getTime(req.query.event);
   //console.log(t);
@@ -102,9 +98,17 @@ app.get('/news2', async (req, res) => {
   res.send(await news.getObjectFromGuardian(t));
 });
 
-app.get('/tickets', (req, res) => {
-  res.send(store.getTickets(req.query.event));
-});
+app.get('/posters', (req, res) =>
+  res.send(store.getPosters(req.query.event))
+);
+
+app.get('/tickets', (req, res) =>
+  res.send(store.getTickets(req.query.event))
+);
+
+app.get('/passes', (req, res) =>
+  res.send(store.getPasses(req.query.event))
+);
 
 //app.get('/setlist', (req, res) => {
 //  res.send(store.getSetlist(req.query.event));

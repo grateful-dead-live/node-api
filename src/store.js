@@ -34,6 +34,7 @@ const SETLIST = GD+"set_list";
 const ARTEFACT = GD+"artefact";
 const POSTER = GD+"Poster";
 const TICKET = GD+"Ticket";
+const PASS = GD+"BackstagePass";
 const DEPICTS = GD+"depicts";
 const IMAGE = GD+"image_file";
 const PERFORMANCE = GD+"etree_performance";
@@ -162,10 +163,6 @@ exports.getVenue = function(eventId) {
   return getObject(eventId, VENUE);
 }
 
-exports.getPosters = function(eventId) {
-  return getArtefacts(eventId, POSTER);
-}
-
 exports.getRecordings = function(eventId) {
   return store.getObjects(getObject(eventId, SUBEVENT), PERFORMANCE)
     .map(p => p.replace(ETREE_PERFORMANCE, ''));
@@ -176,8 +173,16 @@ exports.getEventId = function(recording) {
   return getSubject(SUBEVENT, subevent);
 }
 
+exports.getPosters = function(eventId) {
+  return getArtefacts(eventId, POSTER);
+}
+
 exports.getTickets = function(eventId) {
   return getArtefacts(eventId, TICKET);
+}
+
+exports.getPasses = function(eventId) {
+  return getArtefacts(eventId, PASS);
 }
 
 function getArtefacts(eventId, type) {
