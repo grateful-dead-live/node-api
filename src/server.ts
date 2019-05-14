@@ -1,30 +1,33 @@
-const express = require('express');
-const fs = require('fs');
-const store = require('./store');
-const dbpedia = require('./dbpedia');
-const etree = require('./etree');
-const features = require('./features');
-const chunker = require('./chunker');
-const news = require('./news');
-//const news2 = require('./news2');
+import * as express from 'express';
+import * as fs from 'fs';
+import * as store from './store';
+import * as dbpedia from './dbpedia';
+import * as etree from './etree';
+import * as features from './features';
+import * as chunker from './chunker';
+import * as news from './news';
+//import * as news2 from './news2';
+import { DeadEvent, Venue, Location } from './types';
 
 const PORT = process.env.PORT || 8060;
 const ADDRESS = "http://localhost:8060/"//"https://grateful-dead-api.herokuapp.com/";//"http://localhost:8060/";
 
 const app = express();
-app.use((req, res, next) => {
+app.use((_, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
 
-app.get('/events', (req, res) =>
-  res.send(store.getEventIds().map(e => ({
+app.get('/events', (_, res) => {
+  const ids: string[] = store.getEventIds();
+  const events: DeadEvent[] = ids.map(e => ({
     id: e,
     date: store.getTime(e),
     location: store.getLocation(e).replace('http://dbpedia.org/resource/', '')
-  })))
-);
+  }));
+  res.send(events);
+});
 
 app.get('/details', async (req, res) =>
   res.send({
@@ -43,9 +46,11 @@ app.get('/venue', async (req, res) => {
   res.send(await getVenue(req.query.event));
 });
 
-async function getVenue(event) {
-  var venue = {
-    id: store.getVenue(event)
+async function getVenue(eventId: string): Promise<Venue> {
+  const venue: Venue = {
+    id: store.getVenue(eventId),
+    name: "",
+    events: []
   };
   if (venue.id) {
     venue.name = store.getLabel(venue.id);
@@ -62,16 +67,18 @@ async function getVenue(event) {
 }
 
 app.get('/location', async (req, res) => {
-  let location = store.getLocation(req.query.event);
-  if (location) {
-    res.send({
-      name: location.replace('http://dbpedia.org/resource/', ''),
-      events: store.getLocationEvents(location).map(q => store.getEventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
-      image: await dbpedia.getImage(location),
-      thumbnail: await dbpedia.getThumbnail(location),
-      comment: await dbpedia.getComment(location),
-      geoloc: await dbpedia.getGeolocation(location)
-    });
+  let id = store.getLocation(req.query.event);
+  if (id) {
+    const location: Location = {
+      name: id.replace('http://dbpedia.org/resource/', ''),
+      events: store.getLocationEvents(id).map(q => store.getEventInfo(q))
+        .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
+      image: await dbpedia.getImage(id),
+      thumbnail: await dbpedia.getThumbnail(id),
+      comment: await dbpedia.getComment(id),
+      geoloc: await dbpedia.getGeolocation(id)
+    }
+    res.send(location);
   }
 });
 
@@ -110,7 +117,7 @@ app.get('/setlist', (req, res) => {
 function getSetlist(event) {
   return store.getSetlist(event).map(r => ({
     song_id: r,
-    name: store.getSongLabel(r, "http://www.w3.org/2000/01/rdf-schema#label"),
+    name: store.getSongLabel(r),//, "http://www.w3.org/2000/01/rdf-schema#label"),
     events: store.getSongEvents(r).map(q => store.getSubeventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date))
   }));
 }

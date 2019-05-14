@@ -5,3 +5,5 @@ features
 features.zip
 
 temp-audio/*
+
+lib/
