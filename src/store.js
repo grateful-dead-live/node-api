@@ -40,8 +40,8 @@ const IMAGE = GD+"image_file";
 const PERFORMANCE = GD+"etree_performance";
 const PLAYED_AT = GD+"played_at";
 const ETREE_PERFORMANCE = 'http://etree.linkedmusic.org/performance/';
-const COUNTRY = 'http://dbpedia.org/ontology/country'
-const STATE = 'http://dbpedia.org/ontology/isPartOf'
+const COUNTRY = 'http://dbpedia.org/ontology/country';
+const STATE = 'http://dbpedia.org/ontology/isPartOf';
 
 const weatherDict = {
   'clear': 'wi-day-sunny',
