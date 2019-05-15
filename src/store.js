@@ -4,9 +4,9 @@ const N3 = require('n3');
 
 const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 const TYPE = RDF+"type";
-const FIRST = RDF+"first";
-const REST = RDF+"rest";
-const NIL = RDF+"nil";
+//const FIRST = RDF+"first";
+//const REST = RDF+"rest";
+//const NIL = RDF+"nil";
 const LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
 const SAMEAS = "http://www.w3.org/2002/07/owl#sameAs";
 const EVENT = "http://purl.org/NET/c4dm/event.owl#";
@@ -40,6 +40,8 @@ const IMAGE = GD+"image_file";
 const PERFORMANCE = GD+"etree_performance";
 const PLAYED_AT = GD+"played_at";
 const ETREE_PERFORMANCE = 'http://etree.linkedmusic.org/performance/';
+const COUNTRY = 'http://dbpedia.org/ontology/country'
+const STATE = 'http://dbpedia.org/ontology/isPartOf'
 
 const weatherDict = {
   'clear': 'wi-day-sunny',
@@ -80,6 +82,7 @@ const windDict = {
 
 const store = N3.Store();
 exports.isReady = readRdfIntoStore('rdf-data/event_main.ttl')
+  .then(() => readRdfIntoStore('rdf-data/states_countries.ttl'))
   .then(() => readRdfIntoStore('rdf-data/dbpedia_venues.ttl'))
   .then(() => readRdfIntoStore('rdf-data/songs.ttl'))
   .then(() => readRdfIntoStore('rdf-data/songs_inverse.ttl'))
@@ -112,9 +115,11 @@ exports.getSubeventInfo = function(performanceId) {
 }
 
 exports.getEventInfo = function(eventId) {
-  let location = exports.getLocation(eventId);
-  if (location != null){
-    location = location.replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ');
+  let locationId = exports.getLocation(eventId);
+  var location, state;
+  if (locationId != null){
+    location = locationId.replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ').split(",")[0];
+    state = exports.getStateOrCountry(locationId).replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ');
   }
   let venue = exports.getVenue(eventId);
   if (venue != null){
@@ -124,10 +129,10 @@ exports.getEventInfo = function(eventId) {
     id: eventId,
     date: exports.getTime(eventId),
     location: location,
+    state: state,
     venue: venue
   };
 }
-
 
 exports.getLocationEvents = function(locationId) {
   return store.getTriples(null, LOCATION, locationId).map(t => t.subject);
@@ -137,11 +142,19 @@ exports.getVenueEvents = function(venueId) {
   return store.getTriples(null, VENUE, venueId).map(t => t.subject);
 }
 
+exports.getStateOrCountry = function(locationId) {
+  let countryId = getObject(locationId, COUNTRY);
+  let stateId = getObject(locationId, STATE);
+  if (countryId != null){
+    return countryId;
+  } else if (stateId != null) {
+    return stateId;
+  }
+}
 
 exports.getLocation = function(eventId) {
   return getObject(eventId, LOCATION);
 }
-
 
 exports.getWeather = function(eventId) {
   let weather = getObject(eventId, WEATHER);

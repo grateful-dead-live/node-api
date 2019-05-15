@@ -69,8 +69,9 @@ async function getVenue(eventId: string): Promise<Venue> {
 app.get('/location', async (req, res) => {
   let id = store.getLocation(req.query.event);
   if (id) {
+    let state = store.getStateOrCountry(id).replace('http://dbpedia.org/resource/', '');
     const location: Location = {
-      name: id.replace('http://dbpedia.org/resource/', ''),
+      name: id.replace('http://dbpedia.org/resource/', '').split(',')[0] + ', ' + state,
       events: store.getLocationEvents(id).map(q => store.getEventInfo(q))
         .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
       image: await dbpedia.getImage(id),
