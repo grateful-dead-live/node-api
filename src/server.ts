@@ -7,7 +7,7 @@ import * as features from './features';
 import * as chunker from './chunker';
 import * as news from './news';
 //import * as news2 from './news2';
-import { DeadEvent, Venue, Location } from './types';
+import { DeadEventInfo, DeadEventDetails, Venue, Location } from './types';
 
 const PORT = process.env.PORT || 8060;
 const ADDRESS = "http://localhost:8060/"//"https://grateful-dead-api.herokuapp.com/";//"http://localhost:8060/";
@@ -21,66 +21,77 @@ app.use((_, res, next) => {
 
 app.get('/events', (_, res) => {
   const ids: string[] = store.getEventIds();
-  const events: DeadEvent[] = ids.map(e => ({
+  const events: DeadEventInfo[] = ids.map(e => ({
     id: e,
     date: store.getTime(e),
-    location: store.getLocation(e).replace('http://dbpedia.org/resource/', '')
+    locationName: store.getLocationNameForEvent(e),
+    venueName: store.getVenueNameForEvent(e)
   }));
   res.send(events);
 });
 
-app.get('/details', async (req, res) =>
-  res.send({
+app.get('/details', async (req, res) => {
+  const [loc, ven, per] = await Promise.all([
+    getLocation(store.getLocationForEvent(req.query.event)),
+    getVenue(store.getVenueForEvent(req.query.event)),
+    getPerformers(req.query.event)
+  ]);
+  const artifacts = [];
+  store.getTickets(req.query.event).forEach(t => artifacts.push({type: 'ticket', image: t}));
+  store.getPosters(req.query.event).forEach(p => artifacts.push({type: 'poster', image: p}));
+  store.getPasses(req.query.event).forEach(p => artifacts.push({type: 'pass', image: p}));
+  const info: DeadEventDetails = {
+    id: req.query.event,
     date: store.getTime(req.query.event),
-    location: store.getLocation(req.query.event)
-      .replace('http://dbpedia.org/resource/', ''),
-    venue: getVenue(req.query.event),
-    setlist: await this.getSetlist(req.query.event),
-    weather: await this.getWeather(req.query.event),
-    recordings: await this.getRecordings(req.query.event),
-    performers: await this.getPerformers(req.query.event)
-  })
-)
-
-app.get('/venue', async (req, res) => {
-  res.send(await getVenue(req.query.event));
+    location: loc,
+    venue: ven,
+    setlist: getSetlist(req.query.event),
+    weather: store.getWeather(req.query.event),
+    recordings: store.getRecordings(req.query.event),
+    performers: per,
+    artifacts: artifacts
+  };
+  res.send(info);
 });
 
-async function getVenue(eventId: string): Promise<Venue> {
-  const venue: Venue = {
-    id: store.getVenue(eventId),
-    name: "",
-    events: []
-  };
-  if (venue.id) {
-    venue.name = store.getLabel(venue.id);
-    venue.events = store.getVenueEvents(venue.id).map(q => store.getEventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date));
-    if (!venue.name) { //it exists in dbpedia
-      venue.name = venue.id.replace('http://dbpedia.org/resource/', '');
-      venue.image = await dbpedia.getImage(venue.id);
-      venue.thumbnail = await dbpedia.getThumbnail(venue.id);
-      venue.comment = await dbpedia.getComment(venue.id);
-      venue.geoloc = await dbpedia.getGeolocation(venue.id);
+app.get('/venue', async (req, res) =>
+  res.send(await getVenue(req.query.id))
+);
+
+async function getVenue(venueId: string): Promise<Venue> {
+  if (venueId) {
+    const label = store.getLabel(venueId);
+    return {
+      id: venueId,
+      name: label ? label : store.dbpediaToName(venueId),
+      events: store.getVenueEvents(venueId).map(q => store.getEventInfo(q))
+        .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
+      image: await dbpedia.getImage(venueId),
+      thumbnail: await dbpedia.getThumbnail(venueId),
+      comment: await dbpedia.getComment(venueId),
+      geoloc: await dbpedia.getGeolocation(venueId),
     }
   }
-  return venue;
 }
 
-app.get('/location', async (req, res) => {
-  let id = store.getLocation(req.query.event);
-  if (id) {
-    const location: Location = {
-      name: id.replace('http://dbpedia.org/resource/', ''),
-      events: store.getLocationEvents(id).map(q => store.getEventInfo(q))
+app.get('/location', async (req, res) =>
+  res.send(await getLocation(req.query.id))
+);
+
+async function getLocation(locationId: string): Promise<Location> {
+  if (locationId) {
+    return {
+      id: locationId,
+      name: store.dbpediaToName(locationId),
+      events: store.getLocationEvents(locationId).map(q => store.getEventInfo(q))
         .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
-      image: await dbpedia.getImage(id),
-      thumbnail: await dbpedia.getThumbnail(id),
-      comment: await dbpedia.getComment(id),
-      geoloc: await dbpedia.getGeolocation(id)
+      image: await dbpedia.getImage(locationId),
+      thumbnail: await dbpedia.getThumbnail(locationId),
+      comment: await dbpedia.getComment(locationId),
+      geoloc: await dbpedia.getGeolocation(locationId)
     }
-    res.send(location);
   }
-});
+}
 
 app.get('/weather', (req, res) => {
   res.send(store.getWeather(req.query.event));
@@ -131,13 +142,17 @@ app.get('/recordings', (req, res) => {
 });
 
 app.get('/performers', async (req, res) => {
-  let performers = store.getPerformers(req.query.event);
-  res.send(await Promise.all(performers.map(async p => {
+  res.send(await getPerformers(req.query.event));
+});
+
+async function getPerformers(eventId: string) {
+  const performers = store.getPerformers(eventId);
+  return Promise.all(performers.map(async p => {
     p["image"] = await dbpedia.getImage(p.sameAs);
     p["thumbnail"] = await dbpedia.getThumbnail(p.sameAs);
     return p
-  })));
-});
+  }));
+}
 
 app.get('/etreeinfo', async (req, res) => {
   //console.log(req.query.recording)
@@ -213,7 +228,7 @@ app.get('/diachronic', async (req, res, next) => {
 
 
 app.listen(PORT, async () => {
-  await store.isReady;
+  await store.isReady();
   console.log('grateful dead server started on port ' + PORT);
   const AUDIO_URI = 'http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3';
   /*console.log(await store.getEventId('gd1969-11-08.sbd.wise.17433.shnf'))

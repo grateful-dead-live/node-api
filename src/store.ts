@@ -1,6 +1,6 @@
-const fs = require('fs');
-const _ = require('lodash');
-const N3 = require('n3');
+import * as fs from 'fs';
+import * as _ from 'lodash';
+import * as N3 from 'n3';
 
 const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 const TYPE = RDF+"type";
@@ -79,71 +79,66 @@ const windDict = {
 
 
 const store = N3.Store();
-exports.isReady = readRdfIntoStore('rdf-data/event_main.ttl')
-  .then(() => readRdfIntoStore('rdf-data/dbpedia_venues.ttl'))
-  .then(() => readRdfIntoStore('rdf-data/songs.ttl'))
-  .then(() => readRdfIntoStore('rdf-data/songs_inverse.ttl'))
-  .then(() => readRdfIntoStore('rdf-data/lineup_artists.ttl'))
-  .then(() => readRdfIntoStore('rdf-data/lineup_file_resources.ttl'))
-  .then(() => readRdfIntoStore('rdf-data/tickets.ttl'))
-  .then(() => readRdfIntoStore('rdf-data/posters.ttl'));
 
-exports.getEventIds = function() {
+export async function isReady() {
+  await readRdfIntoStore('rdf-data/event_main.ttl');
+  await readRdfIntoStore('rdf-data/dbpedia_venues.ttl');
+  await readRdfIntoStore('rdf-data/songs.ttl');
+  await readRdfIntoStore('rdf-data/songs_inverse.ttl');
+  await readRdfIntoStore('rdf-data/lineup_artists.ttl');
+  await readRdfIntoStore('rdf-data/lineup_file_resources.ttl');
+  await readRdfIntoStore('rdf-data/tickets.ttl');
+  await readRdfIntoStore('rdf-data/posters.ttl');
+}
+
+export function getEventIds() {
   return store.getTriples(null, LOCATION).map(t => t.subject);//getSubjects doesnt seem to work :(
 }
 
-exports.getTime = function(eventId) {
+export function getTime(eventId) {
   //console.log(eventId);
   return getObject(getObject(eventId, TIME), DATE);
 }
 
 
-exports.getSubeventInfo = function(performanceId) {
-  let event_id = getSubject(SUBEVENT, performanceId);
-  let location = exports.getLocation(event_id);
-  if (location != null){
-    location = location.replace('http://dbpedia.org/resource/', '');
-  }
+export function getSubeventInfo(performanceId: string) {
+  const event_id = getSubject(SUBEVENT, performanceId);
   return {
     id: event_id,
-    date: exports.getTime(event_id),
-    location: location
+    date: getTime(event_id),
+    location: getLocationNameForEvent(event_id)
   };
 }
 
-exports.getEventInfo = function(eventId) {
-  let location = exports.getLocation(eventId);
-  if (location != null){
-    location = location.replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ');
-  }
-  let venue = exports.getVenue(eventId);
-  if (venue != null){
-    venue = venue.replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ');
-  }
+export function getEventInfo(eventId: string) {
   return {
     id: eventId,
-    date: exports.getTime(eventId),
-    location: location,
-    venue: venue
+    date: getTime(eventId),
+    location: getLocationNameForEvent(eventId),
+    venue: getVenueNameForEvent(eventId)
   };
 }
 
 
-exports.getLocationEvents = function(locationId) {
+export function getLocationEvents(locationId: string) {
   return store.getTriples(null, LOCATION, locationId).map(t => t.subject);
 }
 
-exports.getVenueEvents = function(venueId) {
+export function getVenueEvents(venueId: string) {
   return store.getTriples(null, VENUE, venueId).map(t => t.subject);
 }
 
 
-exports.getLocation = function(eventId) {
+export function getLocationForEvent(eventId: string) {
   return getObject(eventId, LOCATION);
 }
 
+export function getLocationNameForEvent(eventId: string) {
+  return dbpediaToName(getLocationForEvent(eventId));
+}
 
-exports.getWeather = function(eventId) {
+
+export function getWeather(eventId) {
   let weather = getObject(eventId, WEATHER);
   let windDirection = getObject(weather, WIND_DIRECTION);
   let condition = getObject(weather, WEATHER_CONDITION);
@@ -159,29 +154,33 @@ exports.getWeather = function(eventId) {
   };
 }
 
-exports.getVenue = function(eventId) {
+export function getVenueForEvent(eventId: string) {
   return getObject(eventId, VENUE);
 }
 
-exports.getRecordings = function(eventId) {
+export function getVenueNameForEvent(eventId: string) {
+  return dbpediaToName(getVenueForEvent(eventId));
+}
+
+export function getRecordings(eventId) {
   return store.getObjects(getObject(eventId, SUBEVENT), PERFORMANCE)
     .map(p => p.replace(ETREE_PERFORMANCE, ''));
 }
 
-exports.getEventId = function(recording) {
+export function getEventId(recording) {
   const subevent = getSubject(PERFORMANCE, ETREE_PERFORMANCE+recording);
   return getSubject(SUBEVENT, subevent);
 }
 
-exports.getPosters = function(eventId) {
+export function getPosters(eventId) {
   return getArtefacts(eventId, POSTER);
 }
 
-exports.getTickets = function(eventId) {
+export function getTickets(eventId) {
   return getArtefacts(eventId, TICKET);
 }
 
-exports.getPasses = function(eventId) {
+export function getPasses(eventId) {
   return getArtefacts(eventId, PASS);
 }
 
@@ -193,19 +192,19 @@ function getArtefacts(eventId, type) {
     .map(t => getObject(t, IMAGE));
 }
 
-exports.getSongEvents = function(songId) {
+export function getSongEvents(songId) {
   return store.getTriples(songId, PLAYED_AT).map(t => t.object);
 }
 
-exports.getSongLabel = function(songId) {
+export function getSongLabel(songId) {
   return getObject(songId, LABEL)
 }
 
-exports.getSetlist = function(eventId) {
+export function getSetlist(eventId) {
   return getList(getObject(getObject(eventId, SUBEVENT), SETLIST));
 }
 
-exports.getPerformers = function(eventId) {
+export function getPerformers(eventId) {
   let performers = store.getObjects(getObject(eventId, SUBEVENT), SUBEVENT);
   performers = performers.map(p => {
     let singer = getObject(p, SINGER);
@@ -227,11 +226,11 @@ exports.getPerformers = function(eventId) {
   return _.values(performers).filter(p => p.name != 'undefined');
 }
 
-exports.getLabel = function(id) {
+export function getLabel(id) {
   return getObject(id, LABEL);
 }
 
-exports.getSameAs = function(id) {
+export function getSameAs(id) {
   return getObject(id, SAMEAS);
 }
 
@@ -287,5 +286,10 @@ function getList(seq) {
   }
 
   return elements;
+}
+
+export function dbpediaToName(resource: string) {
+  if (resource) return resource
+    .replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ');
 }
 
