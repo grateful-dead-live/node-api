@@ -40,12 +40,7 @@ app.get('/details', async (req, res) => {
   store.getTickets(req.query.event).forEach(t => artifacts.push({type: 'ticket', image: t}));
   store.getPosters(req.query.event).forEach(p => artifacts.push({type: 'poster', image: p}));
   store.getPasses(req.query.event).forEach(p => artifacts.push({type: 'pass', image: p}));
-  try {
-    store.getEnvelopes(req.query.event).forEach(p => artifacts.push({type: 'envelope', image: p}));
-    }
-  catch(err){
-    console.log(err.message);
-  }
+  store.getEnvelopes(req.query.event).forEach(p => artifacts.push({type: 'envelope', image: p}));
   const info: DeadEventDetails = {
     id: req.query.event,
     date: store.getTime(req.query.event),
