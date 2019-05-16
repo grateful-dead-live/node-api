@@ -80,9 +80,10 @@ app.get('/location', async (req, res) =>
 
 async function getLocation(locationId: string): Promise<Location> {
   if (locationId) {
+    let state = store.getStateOrCountry(locationId).replace('http://dbpedia.org/resource/', '');
     return {
       id: locationId,
-      name: store.dbpediaToName(locationId),
+      name: store.dbpediaToName(locationId).split(',')[0] + ', ' + state,
       events: store.getLocationEvents(locationId).map(q => store.getEventInfo(q))
         .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
       image: await dbpedia.getImage(locationId),
