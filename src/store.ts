@@ -114,8 +114,8 @@ export function getSubeventInfo(performanceId: string) {
 }
 
 export function getEventInfo(eventId: string) {
-  let locationId = exports.getLocation(eventId);
-  const state = exports.getStateOrCountry(locationId).replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ');
+  const locationId = getLocationForEvent(eventId);
+  const state = getStateOrCountry(locationId).replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ');
   return {
     id: eventId,
     date: getTime(eventId),
