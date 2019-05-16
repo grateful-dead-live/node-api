@@ -35,6 +35,7 @@ interface Artifact {
 export interface Location {
   id: string,
   name: string,
+  state: string,
   events: DeadEventInfo[],
   image?: string,
   thumbnail?: string,
