@@ -35,6 +35,7 @@ const ARTEFACT = GD+"artefact";
 const POSTER = GD+"Poster";
 const TICKET = GD+"Ticket";
 const PASS = GD+"BackstagePass";
+const ENVELOPE = GD+"Envelope";
 const DEPICTS = GD+"depicts";
 const IMAGE = GD+"image_file";
 const PERFORMANCE = GD+"etree_performance";
@@ -42,6 +43,7 @@ const PLAYED_AT = GD+"played_at";
 const ETREE_PERFORMANCE = 'http://etree.linkedmusic.org/performance/';
 const COUNTRY = 'http://dbpedia.org/ontology/country';
 const STATE = 'http://dbpedia.org/ontology/isPartOf';
+const THUMBNAIL = GD+"image_thumbnail" 
 
 const weatherDict = {
   'clear': 'wi-day-sunny',
@@ -91,7 +93,8 @@ export async function isReady() {
   await readRdfIntoStore('rdf-data/lineup_artists.ttl');
   await readRdfIntoStore('rdf-data/lineup_file_resources.ttl');
   await readRdfIntoStore('rdf-data/tickets.ttl');
-  await readRdfIntoStore('rdf-data/posters.ttl');
+  await readRdfIntoStore('rdf-data/posters.ttl')//;
+  await readRdfIntoStore('rdf-data/gdao.ttl')
 }
 
 export function getEventIds() {
@@ -191,6 +194,10 @@ export function getPosters(eventId) {
   return getArtefacts(eventId, POSTER);
 }
 
+export function getEnvelopes(eventId) {
+  return getArtefacts(eventId, ENVELOPE);
+}
+
 export function getTickets(eventId) {
   return getArtefacts(eventId, TICKET);
 }
@@ -204,7 +211,7 @@ function getArtefacts(eventId, type) {
     .filter(a => getObject(a, TYPE) === type)
     .map(p => store.getTriples(null, DEPICTS, p)[0])
     .map(t => t.subject)
-    .map(t => getObject(t, IMAGE));
+    .map(t => getObject(t, THUMBNAIL) || getObject(t, IMAGE));
 }
 
 export function getSongEvents(songId) {
