@@ -20,14 +20,7 @@ app.use((_, res, next) => {
 });
 
 app.get('/events', (_, res) => {
-  const ids: string[] = store.getEventIds();
-  const events: DeadEventInfo[] = ids.map(e => ({
-    id: e,
-    date: store.getTime(e),
-    locationName: store.getLocationNameForEvent(e),
-    venueName: store.getVenueNameForEvent(e)
-  }));
-  res.send(events);
+  res.send(store.getEventIds().map(store.getEventInfo));
 });
 
 app.get('/details', async (req, res) => {
@@ -41,7 +34,7 @@ app.get('/details', async (req, res) => {
   store.getPosters(req.query.event).forEach(p => artifacts.push({type: 'poster', image: p}));
   store.getPasses(req.query.event).forEach(p => artifacts.push({type: 'pass', image: p}));
   store.getEnvelopes(req.query.event).forEach(p => artifacts.push({type: 'envelope', image: p}));
-  const info: DeadEventDetails = {
+  const details: DeadEventDetails = {
     id: req.query.event,
     date: store.getTime(req.query.event),
     location: loc,
@@ -52,49 +45,16 @@ app.get('/details', async (req, res) => {
     performers: per,
     artifacts: artifacts
   };
-  res.send(info);
+  res.send(details);
 });
 
 app.get('/venue', async (req, res) =>
   res.send(await getVenue(req.query.id))
 );
 
-async function getVenue(venueId: string): Promise<Venue> {
-  if (venueId) {
-    const label = store.getLabel(venueId);
-    return {
-      id: venueId,
-      name: label ? label : store.dbpediaToName(venueId),
-      events: store.getVenueEvents(venueId).map(q => store.getEventInfo(q))
-        .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
-      image: await dbpedia.getImage(venueId),
-      thumbnail: await dbpedia.getThumbnail(venueId),
-      comment: await dbpedia.getComment(venueId),
-      geoloc: await dbpedia.getGeolocation(venueId),
-    }
-  }
-}
-
 app.get('/location', async (req, res) =>
   res.send(await getLocation(req.query.id))
 );
-
-async function getLocation(locationId: string): Promise<Location> {
-  if (locationId) {
-    let state = store.getStateOrCountry(locationId).replace('http://dbpedia.org/resource/', '');
-    return {
-      id: locationId,
-      name: store.dbpediaToName(locationId).split(',')[0],
-      state: state,
-      events: store.getLocationEvents(locationId).map(q => store.getEventInfo(q))
-        .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
-      image: await dbpedia.getImage(locationId),
-      thumbnail: await dbpedia.getThumbnail(locationId),
-      comment: await dbpedia.getComment(locationId),
-      geoloc: await dbpedia.getGeolocation(locationId)
-    }
-  }
-}
 
 app.get('/weather', (req, res) => {
   res.send(store.getWeather(req.query.event));
@@ -136,14 +96,6 @@ app.get('/setlist', (req, res) => {
   res.send(getSetlist(req.query.event));
 });
 
-function getSetlist(event) {
-  return store.getSetlist(event).map(r => ({
-    song_id: r,
-    name: store.getSongLabel(r),//, "http://www.w3.org/2000/01/rdf-schema#label"),
-    events: store.getSongEvents(r).map(q => store.getSubeventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date))
-  }));
-}
-
 app.get('/recordings', (req, res) => {
   res.send(store.getRecordings(req.query.event));
 });
@@ -151,15 +103,6 @@ app.get('/recordings', (req, res) => {
 app.get('/performers', async (req, res) => {
   res.send(await getPerformers(req.query.event));
 });
-
-async function getPerformers(eventId: string) {
-  const performers = store.getPerformers(eventId);
-  return Promise.all(performers.map(async p => {
-    p["image"] = await dbpedia.getImage(p.sameAs);
-    p["thumbnail"] = await dbpedia.getThumbnail(p.sameAs);
-    return p
-  }));
-}
 
 app.get('/etreeinfo', async (req, res) => {
   //console.log(req.query.recording)
@@ -184,15 +127,6 @@ app.get('/eventinfo', async (req, res) => {
     res.send({});
   }
 });
-
-async function getDbpediaImages(eventId, storeFunc) {
-  const storeResult = store[storeFunc](eventId);
-  if (storeResult) {
-    const images = await dbpedia.getThumbnail(storeResult);
-    if (images) return images;
-  }
-  return [];
-}
 
 
 app.get('/feature', async (req, res) => {
@@ -232,6 +166,66 @@ app.get('/diachronic', async (req, res, next) => {
   const skip = req.query.skip ? req.query.skip : 0;
   res.send(await features.getDiachronicVersionsAudio(req.query.songname, count, skip));
 });
+
+async function getVenue(venueId: string): Promise<Venue> {
+  if (venueId) {
+    const label = store.getLabel(venueId);
+    return {
+      id: venueId,
+      name: label ? label : store.dbpediaToName(venueId),
+      events: store.getVenueEvents(venueId).map(q => store.getEventInfo(q))
+        .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
+      image: await dbpedia.getImage(venueId),
+      thumbnail: await dbpedia.getThumbnail(venueId),
+      comment: await dbpedia.getComment(venueId),
+      geoloc: await dbpedia.getGeolocation(venueId),
+    }
+  }
+}
+
+async function getLocation(locationId: string): Promise<Location> {
+  if (locationId) {
+    let state = store.getStateOrCountry(locationId).replace('http://dbpedia.org/resource/', '');
+    return {
+      id: locationId,
+      name: store.dbpediaToName(locationId).split(',')[0],
+      state: state,
+      events: store.getLocationEvents(locationId).map(q => store.getEventInfo(q))
+        .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
+      image: await dbpedia.getImage(locationId),
+      thumbnail: await dbpedia.getThumbnail(locationId),
+      comment: await dbpedia.getComment(locationId),
+      geoloc: await dbpedia.getGeolocation(locationId)
+    }
+  }
+}
+
+function getSetlist(eventId: string) {
+  return store.getSetlist(eventId).map(r => ({
+    song_id: r,
+    name: store.getSongLabel(r),//, "http://www.w3.org/2000/01/rdf-schema#label"),
+    events: store.getSongEvents(r).map(q => 
+      store.getSubeventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date))
+  }));
+}
+
+async function getPerformers(eventId: string) {
+  const performers = store.getPerformers(eventId);
+  return Promise.all(performers.map(async p => {
+    p["image"] = await dbpedia.getImage(p.sameAs);
+    p["thumbnail"] = await dbpedia.getThumbnail(p.sameAs);
+    return p
+  }));
+}
+
+async function getDbpediaImages(eventId, storeFunc) {
+  const storeResult = store[storeFunc](eventId);
+  if (storeResult) {
+    const images = await dbpedia.getThumbnail(storeResult);
+    if (images) return images;
+  }
+  return [];
+}
 
 
 app.listen(PORT, async () => {

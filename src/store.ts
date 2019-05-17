@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as _ from 'lodash';
 import * as N3 from 'n3';
+import { DeadEventInfo } from './types';
 
 const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 const TYPE = RDF+"type";
@@ -116,15 +117,14 @@ export function getSubeventInfo(performanceId: string) {
   };
 }
 
-export function getEventInfo(eventId: string) {
-  const locationId = getLocationForEvent(eventId);
-  const state = getStateOrCountry(locationId).replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ');
+export function getEventInfo(eventId: string): DeadEventInfo {
   return {
     id: eventId,
     date: getTime(eventId),
-    location: getLocationNameForEvent(eventId),
-    state: state,
-    venue: getVenueNameForEvent(eventId)
+    locationName: getLocationNameForEvent(eventId),
+    state: dbpediaToName(getStateOrCountry(getLocationForEvent(eventId))),
+    venueName: getVenueNameForEvent(eventId),
+    tickets: getTickets(eventId)
   };
 }
 
