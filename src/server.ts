@@ -34,6 +34,7 @@ app.get('/details', async (req, res) => {
   store.getPosters(req.query.event).forEach(p => artifacts.push({type: 'poster', image: p}));
   store.getPasses(req.query.event).forEach(p => artifacts.push({type: 'pass', image: p}));
   store.getEnvelopes(req.query.event).forEach(p => artifacts.push({type: 'envelope', image: p}));
+  store.getPhotos(req.query.event).forEach(p => artifacts.push({type: 'photo', image: p}));
   const details: DeadEventDetails = {
     id: req.query.event,
     date: store.getTime(req.query.event),
@@ -85,6 +86,10 @@ app.get('/passes', (req, res) =>
 );
 
 app.get('/envelopes', (req, res) =>
+  res.send(store.getEnvelopes(req.query.event))
+);
+
+app.get('/photos', (req, res) =>
   res.send(store.getEnvelopes(req.query.event))
 );
 

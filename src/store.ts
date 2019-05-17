@@ -34,6 +34,7 @@ const VENUE = GD+"venue";
 const SETLIST = GD+"set_list";
 const ARTEFACT = GD+"artefact";
 const POSTER = GD+"Poster";
+const PHOTO = GD+"Photo";
 const TICKET = GD+"Ticket";
 const PASS = GD+"BackstagePass";
 const ENVELOPE = GD+"Envelope";
@@ -187,6 +188,10 @@ export function getEventId(recording) {
 
 export function getPosters(eventId) {
   return getArtefacts(eventId, POSTER);
+}
+
+export function getPhotos(eventId) {
+  return getArtefacts(eventId, PHOTO);
 }
 
 export function getEnvelopes(eventId) {
