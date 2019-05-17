@@ -7,7 +7,7 @@ import * as features from './features';
 import * as chunker from './chunker';
 import * as news from './news';
 //import * as news2 from './news2';
-import { DeadEventInfo, DeadEventDetails, Venue, Location } from './types';
+import { DeadEventDetails, Venue, Location, Song } from './types';
 
 const PORT = process.env.PORT || 8060;
 const ADDRESS = "http://localhost:8060/"//"https://grateful-dead-api.herokuapp.com/";//"http://localhost:8060/";
@@ -100,6 +100,10 @@ app.get('/recordings', (req, res) => {
   res.send(store.getRecordings(req.query.event));
 });
 
+app.get('/song', (req, res) => {
+  res.send(getSong(req.query.id));
+});
+
 app.get('/performers', async (req, res) => {
   res.send(await getPerformers(req.query.event));
 });
@@ -185,11 +189,10 @@ async function getVenue(venueId: string): Promise<Venue> {
 
 async function getLocation(locationId: string): Promise<Location> {
   if (locationId) {
-    let state = store.getStateOrCountry(locationId).replace('http://dbpedia.org/resource/', '');
     return {
       id: locationId,
       name: store.dbpediaToName(locationId).split(',')[0],
-      state: state,
+      state: store.dbpediaToName(store.getStateOrCountry(locationId)),
       events: store.getLocationEvents(locationId).map(q => store.getEventInfo(q))
         .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
       image: await dbpedia.getImage(locationId),
@@ -200,13 +203,17 @@ async function getLocation(locationId: string): Promise<Location> {
   }
 }
 
-function getSetlist(eventId: string) {
-  return store.getSetlist(eventId).map(r => ({
-    song_id: r,
-    name: store.getSongLabel(r),//, "http://www.w3.org/2000/01/rdf-schema#label"),
-    events: store.getSongEvents(r).map(q => 
+function getSetlist(eventId: string): Song[] {
+  return store.getSetlist(eventId).map(getSong);
+}
+
+function getSong(songId: string): Song {
+  return {
+    id: songId,
+    name: store.getSongLabel(songId),//, "http://www.w3.org/2000/01/rdf-schema#label"),
+    events: store.getSongEvents(songId).map(q => 
       store.getSubeventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date))
-  }));
+  }
 }
 
 async function getPerformers(eventId: string) {

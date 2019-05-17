@@ -108,22 +108,17 @@ export function getTime(eventId) {
 }
 
 
-export function getSubeventInfo(performanceId: string) {
-  const event_id = getSubject(SUBEVENT, performanceId);
-  return {
-    id: event_id,
-    date: getTime(event_id),
-    location: getLocationNameForEvent(event_id)
-  };
+export function getSubeventInfo(performanceId: string): DeadEventInfo {
+  return getEventInfo(getSubject(SUBEVENT, performanceId));
 }
 
 export function getEventInfo(eventId: string): DeadEventInfo {
   return {
     id: eventId,
     date: getTime(eventId),
-    locationName: getLocationNameForEvent(eventId),
+    location: getLocationNameForEvent(eventId),
     state: dbpediaToName(getStateOrCountry(getLocationForEvent(eventId))),
-    venueName: getVenueNameForEvent(eventId),
+    venue: getVenueNameForEvent(eventId),
     tickets: getTickets(eventId)
   };
 }
