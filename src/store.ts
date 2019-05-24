@@ -83,7 +83,7 @@ const windDict = {
   'WSW': 'wi-direction-up-right'
 };
 
-const SONGMAP = require('json-data/app_song_map.json');
+const SONGMAP = require('../json-data/app_song_map.json');
 const store = N3.Store();
 
 export async function isReady() {
