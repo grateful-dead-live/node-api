@@ -7,6 +7,7 @@ import * as features from './features';
 import * as chunker from './chunker';
 import * as news from './news';
 //import * as news2 from './news2';
+
 import { DeadEventDetails, Venue, Location, Song } from './types';
 
 const PORT = process.env.PORT || 8060;
@@ -137,7 +138,6 @@ app.get('/eventinfo', async (req, res) => {
   }
 });
 
-
 app.get('/feature', async (req, res) => {
   const beats = await features.loadFeature(req.query.songid, req.query.feature);
   res.send(beats);
@@ -213,11 +213,15 @@ function getSetlist(eventId: string): Song[] {
 }
 
 function getSong(songId: string): Song {
+  let songname = store.getSongLabel(songId);
+  let tracks = store.getTracks(songname);
   return {
     id: songId,
-    name: store.getSongLabel(songId),//, "http://www.w3.org/2000/01/rdf-schema#label"),
+    //name: store.getSongLabel(songId),//, "http://www.w3.org/2000/01/rdf-schema#label"),
+    name: songname,
     events: store.getSongEvents(songId).map(q => 
-      store.getSubeventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date))
+      store.getSubeventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
+    audio: tracks
   }
 }
 

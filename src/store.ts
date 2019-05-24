@@ -83,7 +83,7 @@ const windDict = {
   'WSW': 'wi-direction-up-right'
 };
 
-
+const SONGMAP = require('json-data/app_song_map.json');
 const store = N3.Store();
 
 export async function isReady() {
@@ -97,6 +97,10 @@ export async function isReady() {
   await readRdfIntoStore('rdf-data/tickets.ttl');
   await readRdfIntoStore('rdf-data/posters.ttl')//;
   await readRdfIntoStore('rdf-data/gdao.ttl')
+}
+
+export function getTracks(songName){
+  return SONGMAP[songName.toLocaleLowerCase()] || null
 }
 
 export function getEventIds() {
@@ -117,6 +121,7 @@ export function getEventInfo(eventId: string): DeadEventInfo {
   return {
     id: eventId,
     date: getTime(eventId),
+    date2: getTime(eventId),
     location: getLocationNameForEvent(eventId),
     state: dbpediaToName(getStateOrCountry(getLocationForEvent(eventId))),
     venue: getVenueNameForEvent(eventId),
@@ -215,6 +220,11 @@ function getArtefacts(eventId, type) {
 }
 
 export function getSongEvents(songId) {
+  let events = store.getTriples(songId, PLAYED_AT).map(t => t.object);
+  //for (let e of events){
+  //  console.log(e);
+  //}
+
   return store.getTriples(songId, PLAYED_AT).map(t => t.object);
 }
 
