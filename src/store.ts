@@ -118,8 +118,6 @@ export function getSubeventInfo(performanceId: string): DeadEventInfo {
 }
 
 export function getEventInfo(eventId: string): DeadEventInfo {
-  let recordings = getRecordings(eventId);
-  console.log(recordings);
   return {
     id: eventId,
     date: getTime(eventId),
