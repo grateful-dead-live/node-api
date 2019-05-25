@@ -118,6 +118,8 @@ export function getSubeventInfo(performanceId: string): DeadEventInfo {
 }
 
 export function getEventInfo(eventId: string): DeadEventInfo {
+  let recordings = getRecordings(eventId);
+  console.log(recordings);
   return {
     id: eventId,
     date: getTime(eventId),
@@ -125,7 +127,8 @@ export function getEventInfo(eventId: string): DeadEventInfo {
     location: getLocationNameForEvent(eventId),
     state: dbpediaToName(getStateOrCountry(getLocationForEvent(eventId))),
     venue: getVenueNameForEvent(eventId),
-    tickets: getTickets(eventId)
+    tickets: getTickets(eventId),
+    recordings: getRecordings(eventId)
   };
 }
 
