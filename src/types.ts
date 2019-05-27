@@ -1,7 +1,6 @@
 export interface DeadEventInfo {
   id: string,
   date: string,
-  date2: string,
   location: string,
   state: string,
   venue: string,

@@ -20,6 +20,9 @@ app.use((_, res, next) => {
   next();
 });
 
+
+const songmap = require('../json-data/app_song_map.json');
+
 app.get('/events', (_, res) => {
   res.send(store.getEventIds().map(store.getEventInfo));
 });
@@ -213,17 +216,18 @@ function getSetlist(eventId: string): Song[] {
 }
 
 function getSong(songId: string): Song {
-  let songname = store.getSongLabel(songId);
-  let tracks = store.getTracks(songname);
+  let name = store.getSongLabel(songId);
+  console.log(songmap[name.toLowerCase()]);
   return {
     id: songId,
     //name: store.getSongLabel(songId),//, "http://www.w3.org/2000/01/rdf-schema#label"),
-    name: songname,
+    name: name,
     events: store.getSongEvents(songId).map(q => 
-      store.getSubeventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
-    audio: tracks
+    store.getSubeventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
+    audio: songmap[name.toLowerCase()]
   }
 }
+
 
 async function getPerformers(eventId: string) {
   const performers = store.getPerformers(eventId);
