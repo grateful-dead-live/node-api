@@ -217,7 +217,6 @@ function getSetlist(eventId: string): Song[] {
 
 function getSong(songId: string): Song {
   let name = store.getSongLabel(songId);
-  console.log(songmap[name.toLowerCase()]);
   return {
     id: songId,
     //name: store.getSongLabel(songId),//, "http://www.w3.org/2000/01/rdf-schema#label"),
