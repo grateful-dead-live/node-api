@@ -24,7 +24,15 @@ export interface Song {
   id: string,
   name: string,
   events: DeadEventInfo[],
-  audio: any
+  audio?: Audio[]
+}
+
+export interface Audio {
+  date: string,
+  filename: string,
+  format: string,
+  recording: string,
+  track: string
 }
 
 export interface Venue {
