@@ -24,14 +24,17 @@ export interface Song {
   id: string,
   name: string,
   events: DeadEventInfo[],
-  audio?: Audio[]
+  audio?: SongAudio
 }
 
-export interface Audio {
-  date: string,
+export interface SongAudio {
+  [recordingId: string]: AudioTrack[]
+}
+
+export interface AudioTrack {
   filename: string,
   format: string,
-  recording: string,
+  title: string,
   track: string
 }
 
