@@ -118,7 +118,6 @@ app.get('/performers', async (req, res) => {
 });
 
 app.get('/etreeinfo', async (req, res) => {
-  //console.log(req.query.recording)
   let e = await etree.getInfoFromEtree(req.query.recording)
   .then(e => res.send(e));
 });
@@ -180,6 +179,8 @@ app.get('/diachronic', async (req, res, next) => {
 });
 
 async function getVenue(venueId: string): Promise<Venue> {
+  const LMO_DBPEDIA = "https://w3id.org/lmo/vocabulary/dbpedia";
+  const venueDbpedia = store.getObject(venueId, LMO_DBPEDIA);
   if (venueId) {
     const label = store.getLabel(venueId);
     return {
@@ -187,10 +188,10 @@ async function getVenue(venueId: string): Promise<Venue> {
       name: label ? label : store.dbpediaToName(venueId),
       events: store.getVenueEvents(venueId).map(q => store.getEventInfo(q))
         .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
-      image: await dbpedia.getImage(venueId),
-      thumbnail: await dbpedia.getThumbnail(venueId),
-      comment: await dbpedia.getComment(venueId),
-      geoloc: await dbpedia.getGeolocation(venueId),
+      image: await dbpedia.getImage(venueDbpedia),
+      thumbnail: await dbpedia.getThumbnail(venueDbpedia),
+      comment: await dbpedia.getComment(venueDbpedia),
+      geoloc: await dbpedia.getGeolocation(venueDbpedia),
     }
   }
 }

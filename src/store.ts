@@ -3,51 +3,61 @@ import * as _ from 'lodash';
 import * as N3 from 'n3';
 import { DeadEventInfo } from './types';
 
-const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
-const TYPE = RDF+"type";
-//const FIRST = RDF+"first";
-//const REST = RDF+"rest";
-//const NIL = RDF+"nil";
-const LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
-const SAMEAS = "http://www.w3.org/2002/07/owl#sameAs";
-const EVENT = "http://purl.org/NET/c4dm/event.owl#";
-const TIME = EVENT+"time";
-const SUBEVENT = EVENT+"sub_event";
-const DATE = "http://purl.org/NET/c4dm/timeline.owl#atDate";
-const MO = "http://purl.org/ontology/mo/";
-const SINGER = MO+"singer";
-const PERFORMER = MO+"performer";
-const INSTRUMENT = MO+"instrument";
-const MIT = "http://purl.org/ontology/mo/mit#";
-const QUDT = "http://qudt.org/schema/qudt#";
-const NUMVAL = QUDT+"numericValue";
-const GD = "http://example.com/grateful_dead/vocabulary/";
-const LOCATION = GD+"location";
-const WEATHER = GD+"weather";
-const MAX_TEMP = GD+"maximum_temperature";
-const MIN_TEMP = GD+"minimum_temperature";
-const PRECIPITATION = GD+"precipitation";
-const WIND = GD+"wind";
-const WIND_DIRECTION = GD+"wind_direction";
-const WEATHER_CONDITION = GD+"weather_condition";
-const VENUE = GD+"venue";
-const SETLIST = GD+"set_list";
-const ARTEFACT = GD+"artefact";
-const POSTER = GD+"Poster";
-const PHOTO = GD+"Photo";
-const TICKET = GD+"Ticket";
-const PASS = GD+"BackstagePass";
-const ENVELOPE = GD+"Envelope";
-const DEPICTS = GD+"depicts";
-const IMAGE = GD+"image_file";
-const PERFORMANCE = GD+"etree_performance";
-const PLAYED_AT = GD+"played_at";
-const ETREE_PERFORMANCE = 'http://etree.linkedmusic.org/performance/';
-const COUNTRY = 'http://dbpedia.org/ontology/country';
-const STATE = 'http://dbpedia.org/ontology/isPartOf';
-const THUMBNAIL = GD+"image_thumbnail" 
+const LMO = "https://w3id.org/lmo/vocabulary/";
+const LMO_LOCATION = LMO+"location";
+const LMO_SHOW = LMO+"LiveMusicShow";
+const LMO_VENUE = LMO+"venue";
+const LMO_VENUE_NAME = LMO+"venue_name";
+const LMO_RECORDING_OF = LMO+"recording_of";
+const LMO_ETREE_ID = LMO+"etree_id";
+const LMO_ARTEFACT = LMO+"artefact";
+const LMO_DEPICTS = LMO+"depicts";
+const LMO_THUMBNAIL = LMO+"image_thumbnail";
+const LMO_IMAGE = LMO+"image_file";
+const LMO_PLAYED_AT = LMO+"played_at";
+const LMO_DBPEDIA = LMO+"dbpedia";
+const LMO_SONG_NAME = LMO+"song_name";
+const LMO_TIME = LMO+"time";
+const LMO_MAX_TEMP = LMO+"maximum_temperature";
+const LMO_MIN_TEMP = LMO+"minimum_temperature";
+const LMO_PRECIPITATION = LMO+"precipitation";
+const LMO_WIND = LMO+"wind";
+const LMO_WIND_DIRECTION = LMO+"wind_direction";
+const LMO_WEATHER_CONDITION = LMO+"weather_condition";
+const LMO_SETLIST = LMO+"set_list";
+const LMO_POSTER = LMO+"Poster";
+const LMO_PHOTO = LMO+"Photo";
+const LMO_TICKET = LMO+"Ticket";
+const LMO_BACKSTAGEPASS = LMO+"BackstagePass";
+const LMO_ENVELOPE = LMO+"Envelope";
 
-const weatherDict = {
+const TIME = "http://www.w3.org/2006/time#"
+const TIME_HAS_DATE_TIME_DESCRIPTION = TIME+"hasDateTimeDescription"
+const TIME_YEAR = TIME+"year";
+const TIME_MONTH = TIME+"month";
+const TIME_DAY = TIME+"day";
+
+const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+const RDF_TYPE = RDF+"type";
+const RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label"
+const FOAF_NAME = "http://xmlns.com/foaf/0.1/name"
+
+const EVENT = "http://purl.org/NET/c4dm/event.owl#";
+const EVENT_TIME = EVENT+"time";
+const EVENT_SUBEVENT = EVENT+"sub_event";
+const TL_AT_DATE = "http://purl.org/NET/c4dm/timeline.owl#atDate";
+const MO = "http://purl.org/ontology/mo/";
+const MO_PERFORMER = MO+"performer";
+const MO_INSTRUMENT = MO+"instrument";
+const MO_SINGER = MO+"singer";
+const MIT = "http://purl.org/ontology/mo/mit#";
+
+const QUDT_NUMERIC_VALUE = "http://qudt.org/schema/qudt#numericValue";
+const DBO = "http://dbpedia.org/ontology/";
+const DBO_ISPARTOF = DBO+"isPartOf";
+const DBO_COUNTRY = DBO+"country";
+
+const WEATHER_DICT = {
   'clear': 'wi-day-sunny',
   'drizzle': 'wi-sprinkle',
   'fog': 'wi-fog',
@@ -68,7 +78,7 @@ const weatherDict = {
   'thunderstorms and rain': 'wi-thunderstorm'
 };
 
-const windDict = { 
+const WIND_DICT = { 
   'ENE': 'wi-direction-down-left',
   'ESE': 'wi-direction-up-left',
   'NE': 'wi-direction-down-left',
@@ -86,30 +96,39 @@ const windDict = {
 const store = N3.Store();
 
 export async function isReady() {
-  await readRdfIntoStore('rdf-data/event_main.ttl');
-  await readRdfIntoStore('rdf-data/states_countries.ttl');
-  await readRdfIntoStore('rdf-data/dbpedia_venues.ttl');
+  await readRdfIntoStore('rdf-data/artists.ttl');
+  await readRdfIntoStore('rdf-data/deadlists.ttl');
+  await readRdfIntoStore('rdf-data/events_shows_dates.ttl');
+  await readRdfIntoStore('rdf-data/gdao.ttl');
+  await readRdfIntoStore('rdf-data/lineups.ttl');
+  await readRdfIntoStore('rdf-data/psilo.ttl');
+  await readRdfIntoStore('rdf-data/recordings.ttl');
+  await readRdfIntoStore('rdf-data/recording_sources.ttl');
+  await readRdfIntoStore('rdf-data/setlists.ttl');
+  await readRdfIntoStore('rdf-data/events_deadlists.ttl');
+  await readRdfIntoStore('rdf-data/events_gdao.ttl');
+  await readRdfIntoStore('rdf-data/events_psilo.ttl');
+  await readRdfIntoStore('rdf-data/shows_venue.ttl');
   await readRdfIntoStore('rdf-data/songs.ttl');
-  await readRdfIntoStore('rdf-data/songs_inverse.ttl');
-  await readRdfIntoStore('rdf-data/lineup_artists.ttl');
-  await readRdfIntoStore('rdf-data/lineup_file_resources.ttl');
-  await readRdfIntoStore('rdf-data/tickets.ttl');
-  await readRdfIntoStore('rdf-data/posters.ttl')//;
-  await readRdfIntoStore('rdf-data/gdao.ttl')
+  await readRdfIntoStore('rdf-data/songs_played_at.ttl');
+  await readRdfIntoStore('rdf-data/states_countries.ttl');
+  await readRdfIntoStore('rdf-data/venues.ttl');
+  await readRdfIntoStore('rdf-data/weather.ttl');
+  await readRdfIntoStore('rdf-data/datetimeobjects.ttl');
 }
 
 export function getEventIds() {
-  return store.getTriples(null, LOCATION).map(t => t.subject);//getSubjects doesnt seem to work :(
+  return getSubjects(RDF_TYPE, LMO_SHOW);
 }
 
 export function getTime(eventId) {
   //console.log(eventId);
-  return getObject(getObject(eventId, TIME), DATE);
+  return getObject(getObject(eventId, EVENT_TIME), TL_AT_DATE);
 }
 
 
 export function getSubeventInfo(performanceId: string): DeadEventInfo {
-  return getEventInfo(getSubject(SUBEVENT, performanceId));
+  return getEventInfo(performanceId);
 }
 
 export function getEventInfo(eventId: string): DeadEventInfo {
@@ -126,16 +145,20 @@ export function getEventInfo(eventId: string): DeadEventInfo {
 
 
 export function getLocationEvents(locationId: string) {
-  return store.getTriples(null, LOCATION, locationId).map(t => t.subject);
+  let shows = [];
+  store.forSubjects(function(venue) {
+    shows = shows.concat(getSubjects(LMO_VENUE, venue));
+  }, LMO_LOCATION, locationId);
+  return shows;
 }
 
 export function getVenueEvents(venueId: string) {
-  return store.getTriples(null, VENUE, venueId).map(t => t.subject);
+  return getSubjects(LMO_VENUE, venueId);
 }
 
 export function getStateOrCountry(locationId) {
-  let countryId = getObject(locationId, COUNTRY);
-  let stateId = getObject(locationId, STATE);
+  let countryId = getObject(locationId, DBO_COUNTRY);
+  let stateId = getObject(locationId, DBO_ISPARTOF);
   if (countryId != null){
     return countryId;
   } else if (stateId != null) {
@@ -144,7 +167,7 @@ export function getStateOrCountry(locationId) {
 }
 
 export function getLocationForEvent(eventId: string) {
-  return getObject(eventId, LOCATION);
+  return getObject(getObject(eventId, LMO_VENUE), LMO_LOCATION);
 }
 
 export function getLocationNameForEvent(eventId: string) {
@@ -153,94 +176,95 @@ export function getLocationNameForEvent(eventId: string) {
 
 
 export function getWeather(eventId) {
-  let weather = getObject(eventId, WEATHER);
-  let windDirection = getObject(weather, WIND_DIRECTION);
-  let condition = getObject(weather, WEATHER_CONDITION);
+  const weather = getSubject(LMO_TIME, getDateTimeInterval(eventId));
+  const windDirection = getObject(weather, LMO_WIND_DIRECTION);
+  const condition = getObject(weather, LMO_WEATHER_CONDITION);
+  const precipitation = (parseFloat(getObject(getObject(weather, LMO_PRECIPITATION), QUDT_NUMERIC_VALUE)) / 25.4).toFixed(2) || "n/a";
   return {
-    maxTemperature: Math.round(parseFloat(getObject(getObject(weather, MAX_TEMP), NUMVAL)) * 9/5 + 32),
-    minTemperature: parseFloat(getObject(getObject(weather, MIN_TEMP), NUMVAL)),
-    precipitation: (parseFloat(getObject(getObject(weather, PRECIPITATION), NUMVAL)) / 25.4).toFixed(2),
-    wind: Math.round(parseFloat(getObject(getObject(weather, WIND), NUMVAL)) * 1.609),
+    maxTemperature: Math.round(parseFloat(getObject(getObject(weather, LMO_MAX_TEMP), QUDT_NUMERIC_VALUE)) * 9/5 + 32),
+    minTemperature: parseFloat(getObject(getObject(weather, LMO_MIN_TEMP), QUDT_NUMERIC_VALUE)),
+    precipitation: precipitation,
+    wind: Math.round(parseFloat(getObject(getObject(weather, LMO_WIND), QUDT_NUMERIC_VALUE)) * 1.609),
     windDirection: windDirection,
-    windDirectionIcon: windDict[windDirection],
+    windDirectionIcon: WIND_DICT[windDirection],
     condition: condition,
-    conditionIcon: weatherDict[condition] || "wi-na"
+    conditionIcon: WEATHER_DICT[condition] || "wi-na"
   };
 }
 
 export function getVenueForEvent(eventId: string) {
-  return getObject(eventId, VENUE);
+  return getObject(eventId, LMO_VENUE);
 }
 
 export function getVenueNameForEvent(eventId: string) {
-  return dbpediaToName(getVenueForEvent(eventId));
+  return getObject(getObject(eventId, LMO_VENUE), LMO_VENUE_NAME) ;
 }
 
 export function getRecordings(eventId) {
-  return store.getObjects(getObject(eventId, SUBEVENT), PERFORMANCE)
-    .map(p => p.replace(ETREE_PERFORMANCE, ''));
+  let recordings = [];
+  store.forSubjects(function(recording) {
+    recordings = recordings.concat(store.getObjects(recording, LMO_ETREE_ID));
+  }, LMO_RECORDING_OF, eventId);
+  recordings.forEach(function (recording, i) {
+    recordings[i] = recording.replace(/"/g, '');    // why?
+  });
+  return recordings;
 }
 
 export function getEventId(recording) {
-  const subevent = getSubject(PERFORMANCE, ETREE_PERFORMANCE+recording);
-  return getSubject(SUBEVENT, subevent);
+  return getObject(recording, LMO_RECORDING_OF);
 }
 
 export function getPosters(eventId) {
-  return getArtefacts(eventId, POSTER);
+  return getArtefacts(eventId, LMO_POSTER);
 }
 
 export function getPhotos(eventId) {
-  return getArtefacts(eventId, PHOTO);
+  return getArtefacts(eventId, LMO_PHOTO);
 }
 
 export function getEnvelopes(eventId) {
-  return getArtefacts(eventId, ENVELOPE);
+  return getArtefacts(eventId, LMO_ENVELOPE);
 }
 
 export function getTickets(eventId) {
-  return getArtefacts(eventId, TICKET);
+  return getArtefacts(eventId, LMO_TICKET);
 }
 
 export function getPasses(eventId) {
-  return getArtefacts(eventId, PASS);
+  return getArtefacts(eventId, LMO_BACKSTAGEPASS);
 }
 
 function getArtefacts(eventId, type) {
-  return store.getObjects(eventId, ARTEFACT)
-    .filter(a => getObject(a, TYPE) === type)
-    .map(p => store.getTriples(null, DEPICTS, p)[0])
+  return store.getObjects(getSubject(EVENT_SUBEVENT, eventId), LMO_ARTEFACT)
+    .filter(a => getObject(a, RDF_TYPE) === type)
+    .map(p => store.getTriples(null, LMO_DEPICTS, p)[0])
     .map(t => t.subject)
-    .map(t => getObject(t, THUMBNAIL) || getObject(t, IMAGE));
+    .map(t => getObject(t, LMO_THUMBNAIL) || getObject(t, LMO_IMAGE));
 }
 
 export function getSongEvents(songId) {
-  let events = store.getTriples(songId, PLAYED_AT).map(t => t.object);
-  //for (let e of events){
-  //  console.log(e);
-  //}
-
-  return store.getTriples(songId, PLAYED_AT).map(t => t.object);
+  return store.getObjects(songId, LMO_PLAYED_AT);
 }
 
 export function getSongLabel(songId) {
-  return getObject(songId, LABEL)
+  return getObject(songId, LMO_SONG_NAME);
 }
 
 export function getSetlist(eventId) {
-  return getList(getObject(getObject(eventId, SUBEVENT), SETLIST));
+  return getList(getObject(eventId, LMO_SETLIST));
 }
 
 export function getPerformers(eventId) {
-  let performers = store.getObjects(getObject(eventId, SUBEVENT), SUBEVENT);
+  let performers = store.getObjects(eventId, EVENT_SUBEVENT);
   performers = performers.map(p => {
-    let singer = getObject(p, SINGER);
-    let musician = singer ? singer : getObject(p, PERFORMER);
-    let instrument = singer ? MIT+"Voice" : getObject(p, INSTRUMENT);
+    let singer = getObject(p, MO_SINGER);
+    let musician = singer ? singer : getObject(p, MO_PERFORMER);
+    let instrument = singer ? MIT+"Voice" : getObject(p, MO_INSTRUMENT);
     return {
-      name: getObject(musician, LABEL),
+      name: getObject(musician, FOAF_NAME),
       instrument: instrument.replace(MIT, ''),
-      sameAs: getObject(musician, SAMEAS)
+      sameAs: getObject(musician, LMO_DBPEDIA)
     }
   });
   //join same performers
@@ -254,11 +278,11 @@ export function getPerformers(eventId) {
 }
 
 export function getLabel(id) {
-  return getObject(id, LABEL);
+  return getObject(id, RDFS_LABEL);
 }
 
 export function getSameAs(id) {
-  return getObject(id, SAMEAS);
+  return getObject(id, LMO_DBPEDIA);
 }
 
 function readRdfIntoStore(path) {
@@ -277,12 +301,14 @@ function readRdfIntoStore(path) {
   });
 }
 
-function getObject(subject, predicate) {
-  let object = store.getObjects(subject, predicate)[0];
-  if (N3.Util.isLiteral(object)) {
-    return N3.Util.getLiteralValue(object);
-  }
-  return object;
+export function getObject(subject, predicate) {
+  if (subject && predicate) {
+    let object = store.getObjects(subject, predicate)[0];
+    if (N3.Util.isLiteral(object)) {
+      return N3.Util.getLiteralValue(object);
+    }
+    return object;
+  };
 }
 
 function getSubject(predicate, object) {
@@ -311,7 +337,6 @@ function getList(seq) {
     }
     else { break; }
   }
-
   return elements;
 }
 
@@ -320,3 +345,22 @@ export function dbpediaToName(resource: string) {
     .replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ');
 }
 
+function getSubjects(predicate, object) { 
+  //store.getSubjects doesnt seem to work :(
+  return store.getTriples(null, predicate, object).map(t => t.subject);
+}
+
+function getDateTimeInterval(eventId) {
+  const showDate = getTime(eventId).split("-");
+  let triples = store.getTriples(null, TIME_HAS_DATE_TIME_DESCRIPTION, null);
+  triples = triples.filter(function(triple){
+    return getObject(triple.object, TIME_YEAR) == showDate[0];
+  }); 
+  triples = triples.filter(function(triple){
+    return getObject(triple.object, TIME_MONTH) == "--" + showDate[1];
+  });  
+  triples = triples.filter(function(triple){
+    return getObject(triple.object, TIME_DAY) == "---" + showDate[2]; 
+  }); 
+  return triples[0].subject
+}
