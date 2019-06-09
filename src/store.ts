@@ -127,10 +127,6 @@ export function getTime(eventId) {
 }
 
 
-export function getSubeventInfo(performanceId: string): DeadEventInfo {
-  return getEventInfo(performanceId);
-}
-
 export function getEventInfo(eventId: string): DeadEventInfo {
   return {
     id: eventId,

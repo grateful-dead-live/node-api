@@ -223,7 +223,7 @@ function getSong(songId: string): Song {
     //name: store.getSongLabel(songId),//, "http://www.w3.org/2000/01/rdf-schema#label"),
     name: name,
     events: store.getSongEvents(songId).map(q => 
-    store.getSubeventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
+    store.getEventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
     audio: songmap[name.toLowerCase()]
   }
 }
