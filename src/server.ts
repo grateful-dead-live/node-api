@@ -118,7 +118,6 @@ app.get('/performers', async (req, res) => {
 });
 
 app.get('/etreeinfo', async (req, res) => {
-  //console.log(req.query.recording)
   let e = await etree.getInfoFromEtree(req.query.recording)
   .then(e => res.send(e));
 });
@@ -129,12 +128,15 @@ app.get('/eventinfo', async (req, res) => {
   if (recording != null) {
     const eventId = store.getEventId(recording);
     const eventInfo = store.getEventInfo(eventId);
-    let images = [];
-    images = images.concat(store.getPosters(eventId));
-    images = images.concat(store.getTickets(eventId));
-    images = images.concat(await getDbpediaImages(eventId, 'getVenue'));
-    images = images.concat(await getDbpediaImages(eventId, 'getLocation'));
-    eventInfo['images'] = images;
+    const dbpImg = await Promise.all([
+      getDbpediaThumbs(eventId, 'getVenue'),
+      getDbpediaThumbs(eventId, 'getLocation')]);
+    eventInfo['images'] = [
+      store.getPosters(eventId),
+      store.getTickets(eventId),
+      dbpImg[0],
+      dbpImg[1]
+    ];
     res.send(eventInfo);
   } else {
     res.send({});
@@ -142,8 +144,7 @@ app.get('/eventinfo', async (req, res) => {
 });
 
 app.get('/feature', async (req, res) => {
-  const beats = await features.loadFeature(req.query.songid, req.query.feature);
-  res.send(beats);
+  res.send(await features.loadFeature(req.query.songid, req.query.feature));
 });
 
 app.get('/featuresummary', async (req, res) => {
@@ -180,35 +181,48 @@ app.get('/diachronic', async (req, res, next) => {
 });
 
 async function getVenue(venueId: string): Promise<Venue> {
+  const LMO_DBPEDIA = "https://w3id.org/lmo/vocabulary/dbpedia";
   if (venueId) {
+    const venueDbpedia = store.getObject(venueId, LMO_DBPEDIA);
+    const dbpObjects = await getDbpediaInfo(venueDbpedia);
     const label = store.getLabel(venueId);
     return {
       id: venueId,
       name: label ? label : store.dbpediaToName(venueId),
       events: store.getVenueEvents(venueId).map(q => store.getEventInfo(q))
         .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
-      image: await dbpedia.getImage(venueId),
-      thumbnail: await dbpedia.getThumbnail(venueId),
-      comment: await dbpedia.getComment(venueId),
-      geoloc: await dbpedia.getGeolocation(venueId),
+      image: dbpObjects[0],
+      thumbnail: dbpObjects[1],
+      comment: dbpObjects[2],
+      geoloc: dbpObjects[3]
     }
   }
 }
 
 async function getLocation(locationId: string): Promise<Location> {
   if (locationId) {
+    const dbpInfo = await getDbpediaInfo(locationId);
     return {
       id: locationId,
       name: store.dbpediaToName(locationId).split(',')[0],
       state: store.dbpediaToName(store.getStateOrCountry(locationId)),
       events: store.getLocationEvents(locationId).map(q => store.getEventInfo(q))
         .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
-      image: await dbpedia.getImage(locationId),
-      thumbnail: await dbpedia.getThumbnail(locationId),
-      comment: await dbpedia.getComment(locationId),
-      geoloc: await dbpedia.getGeolocation(locationId)
+      image: dbpInfo[0],
+      thumbnail: dbpInfo[1],
+      comment: dbpInfo[2],
+      geoloc: dbpInfo[3]
     }
   }
+}
+
+async function getDbpediaInfo(id: string): Promise<any[]> {
+  return Promise.all([
+    dbpedia.getImage(id),
+    dbpedia.getThumbnail(id),
+    dbpedia.getComment(id),
+    dbpedia.getGeolocation(id)
+  ])
 }
 
 function getSetlist(eventId: string): Song[] {
@@ -231,13 +245,15 @@ function getSong(songId: string): Song {
 async function getPerformers(eventId: string) {
   const performers = store.getPerformers(eventId);
   return Promise.all(performers.map(async p => {
-    p["image"] = await dbpedia.getImage(p.sameAs);
-    p["thumbnail"] = await dbpedia.getThumbnail(p.sameAs);
+    const imgs = await Promise.all([
+      dbpedia.getImage(p.sameAs), dbpedia.getThumbnail(p.sameAs)]);
+    p["image"] = imgs[0];
+    p["thumbnail"] = imgs[1];
     return p
   }));
 }
 
-async function getDbpediaImages(eventId, storeFunc) {
+async function getDbpediaThumbs(eventId, storeFunc) {
   const storeResult = store[storeFunc](eventId);
   if (storeResult) {
     const images = await dbpedia.getThumbnail(storeResult);
