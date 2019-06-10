@@ -33,7 +33,7 @@ export interface Location extends GdObject {
 
 export type SongInfo = GdObject;
 
-export interface SongWithAudio extends GdObject {
+export interface SongWithAudio extends SongInfo {
   audio?: AudioTrackMap
 }
 

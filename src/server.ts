@@ -8,7 +8,7 @@ import * as chunker from './chunker';
 import * as news from './news';
 //import * as news2 from './news2';
 
-import { DeadEventDetails, Venue, Location, SongInfo, SongWithAudio, DbpediaObject } from './types';
+import { DeadEventDetails, Venue, Location, SongInfo, SongWithAudio, DbpediaObject, Performer } from './types';
 
 const PORT = process.env.PORT || 8060;
 const ADDRESS = "http://localhost:8060/"//"https://grateful-dead-api.herokuapp.com/";//"http://localhost:8060/";
@@ -28,21 +28,17 @@ app.get('/events', (_, res) => {
 });
 
 app.get('/details', async (req, res) => {
-  const start = Date.now();
-  console.log("INFO", 0)
   const [loc, ven, per] = await Promise.all([
     getLocation(store.getLocationForEvent(req.query.event)),
     getVenue(store.getVenueForEvent(req.query.event)),
     getPerformers(req.query.event)
   ]);
-  console.log("ARTIFACTS", Date.now()-start)
   const artifacts = [];
   store.getTickets(req.query.event).forEach(t => artifacts.push({type: 'ticket', image: t}));
   store.getPosters(req.query.event).forEach(p => artifacts.push({type: 'poster', image: p}));
   store.getPasses(req.query.event).forEach(p => artifacts.push({type: 'pass', image: p}));
   store.getEnvelopes(req.query.event).forEach(p => artifacts.push({type: 'envelope', image: p}));
   store.getPhotos(req.query.event).forEach(p => artifacts.push({type: 'photo', image: p}));
-  console.log("SET", Date.now()-start)
   const details: DeadEventDetails = {
     id: req.query.event,
     date: store.getTime(req.query.event),
@@ -54,7 +50,6 @@ app.get('/details', async (req, res) => {
     performers: per,
     artifacts: artifacts
   };
-  console.log("DONE", Date.now()-start)
   res.send(details);
 });
 
