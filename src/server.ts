@@ -21,7 +21,7 @@ app.use((_, res, next) => {
 });
 
 
-const songmap = require('../json-data/app_song_map.json');
+const SONGMAP = JSON.parse(fs.readFileSync('json-data/app_song_map.json', 'utf8'));
 
 app.get('/events', (_, res) => {
   res.send(store.getEventIds().map(store.getEventInfo));
@@ -118,8 +118,7 @@ app.get('/performers', async (req, res) => {
 });
 
 app.get('/etreeinfo', async (req, res) => {
-  let e = await etree.getInfoFromEtree(req.query.recording)
-  .then(e => res.send(e));
+  res.send(await etree.getInfoFromEtree(req.query.recording));
 });
 
 app.get('/eventinfo', async (req, res) => {
@@ -159,7 +158,7 @@ app.get('/featuresummary', async (req, res) => {
   res.send(await features.loadSummarizedFeatures(audio));
 });
 
-app.get('/audiochunk', async (req, res, next) => {
+app.get('/audiochunk', async (req, res) => {
   //http://localhost:8060/audiochunk?filename=http://archive.org/download/gd1985-03-13.sbd.miller.77347.flac16/gd85-03-13d1t03.mp3&fromsecond=4&tosecond=6
   const filename = req.query.filename;
   const fromSecond = req.query.fromsecond ? parseFloat(req.query.fromsecond) : 0;
@@ -174,7 +173,7 @@ app.get('/audiochunk', async (req, res, next) => {
   }
 });
 
-app.get('/diachronic', async (req, res, next) => {
+app.get('/diachronic', async (req, res) => {
   const count = req.query.count ? req.query.count : 30;
   const skip = req.query.skip ? req.query.skip : 0;
   res.send(await features.getDiachronicVersionsAudio(req.query.songname, count, skip));
@@ -189,8 +188,7 @@ async function getVenue(venueId: string): Promise<Venue> {
     return {
       id: venueId,
       name: label ? label : store.dbpediaToName(venueId),
-      events: store.getVenueEvents(venueId).map(q => store.getEventInfo(q))
-        .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
+      eventIds: store.getVenueEvents(venueId),
       image: dbpObjects[0],
       thumbnail: dbpObjects[1],
       comment: dbpObjects[2],
@@ -206,8 +204,7 @@ async function getLocation(locationId: string): Promise<Location> {
       id: locationId,
       name: store.dbpediaToName(locationId).split(',')[0],
       state: store.dbpediaToName(store.getStateOrCountry(locationId)),
-      events: store.getLocationEvents(locationId).map(q => store.getEventInfo(q))
-        .sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
+      eventIds: store.getLocationEvents(locationId),
       image: dbpInfo[0],
       thumbnail: dbpInfo[1],
       comment: dbpInfo[2],
@@ -235,9 +232,8 @@ function getSong(songId: string): Song {
     id: songId,
     //name: store.getSongLabel(songId),//, "http://www.w3.org/2000/01/rdf-schema#label"),
     name: name,
-    events: store.getSongEvents(songId).map(q => 
-    store.getEventInfo(q)).sort((a, b) => parseFloat(a.date) - parseFloat(b.date)),
-    audio: songmap[name.toLowerCase()]
+    eventIds: store.getSongEvents(songId),
+    audio: SONGMAP[name.toLowerCase()]
   }
 }
 

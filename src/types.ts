@@ -20,10 +20,18 @@ export interface DeadEventDetails {
   artifacts: Artifact[]
 }
 
-export interface Song {
-  id: string,
-  name: string,
-  events: DeadEventInfo[],
+interface Artifact {
+  type: string,
+  image: string
+}
+
+export type Venue = GdObject;
+
+export interface Location extends GdObject {
+  state: string
+}
+
+export interface Song extends GdObject {
   audio?: SongAudio
 }
 
@@ -38,35 +46,39 @@ export interface AudioTrack {
   track: string
 }
 
-export interface Venue {
+export interface GdObject extends DbpediaObject {
   id: string,
   name: string,
-  events: DeadEventInfo[],
+  eventIds: string[]
+}
+
+export interface DbpediaObject {
   image?: string,
   thumbnail?: string,
   comment?: string,
   geoloc?: Geolocation
 }
 
-interface Artifact {
-  type: string,
-  image: string
-}
-
-export interface Location {
-  id: string,
+export interface Performer {
   name: string,
-  state: string,
-  events: DeadEventInfo[],
-  image?: string,
-  thumbnail?: string,
-  comment?: string,
-  geoloc?: Geolocation
+  instrument: string,
+  sameAs: string
 }
 
 export interface Geolocation {
   lat: number,
   long: number
+}
+
+export interface Weather {
+  maxTemperature: number,
+  minTemperature: number,
+  precipitation: string,
+  wind: number,
+  windDirection: string,
+  windDirectionIcon: string,
+  condition: string,
+  conditionIcon: string
 }
 
 export interface EtreeInfo {

@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as _ from 'lodash';
 import * as N3 from 'n3';
-import { DeadEventInfo } from './types';
+import { DeadEventInfo, Weather, Performer } from './types';
 
 const LMO = "https://w3id.org/lmo/vocabulary/";
 const LMO_LOCATION = LMO+"location";
@@ -121,7 +121,7 @@ export function getEventIds() {
   return getSubjects(RDF_TYPE, LMO_SHOW);
 }
 
-export function getTime(eventId) {
+export function getTime(eventId: string): string {
   //console.log(eventId);
   return getObject(getObject(eventId, EVENT_TIME), TL_AT_DATE);
 }
@@ -140,19 +140,19 @@ export function getEventInfo(eventId: string): DeadEventInfo {
 }
 
 
-export function getLocationEvents(locationId: string) {
+export function getLocationEvents(locationId: string): string[] {
   let shows = [];
-  store.forSubjects(function(venue) {
+  store.forSubjects((venue: string) => {
     shows = shows.concat(getSubjects(LMO_VENUE, venue));
   }, LMO_LOCATION, locationId);
   return shows;
 }
 
-export function getVenueEvents(venueId: string) {
+export function getVenueEvents(venueId: string): string[] {
   return getSubjects(LMO_VENUE, venueId);
 }
 
-export function getStateOrCountry(locationId) {
+export function getStateOrCountry(locationId: string): string {
   let countryId = getObject(locationId, DBO_COUNTRY);
   let stateId = getObject(locationId, DBO_ISPARTOF);
   if (countryId != null){
@@ -162,17 +162,17 @@ export function getStateOrCountry(locationId) {
   }
 }
 
-export function getLocationForEvent(eventId: string) {
+export function getLocationForEvent(eventId: string): string {
   return getObject(getObject(eventId, LMO_VENUE), LMO_LOCATION);
 }
 
-export function getLocationNameForEvent(eventId: string) {
+export function getLocationNameForEvent(eventId: string): string {
   const name = dbpediaToName(getLocationForEvent(eventId));
   if (name) return name.split(",")[0];
 }
 
 
-export function getWeather(eventId) {
+export function getWeather(eventId: string): Weather {
   const weather = getSubject(LMO_TIME, getDateTimeInterval(eventId));
   const windDirection = getObject(weather, LMO_WIND_DIRECTION);
   const condition = getObject(weather, LMO_WEATHER_CONDITION);
@@ -197,9 +197,9 @@ export function getVenueNameForEvent(eventId: string) {
   return getObject(getObject(eventId, LMO_VENUE), LMO_VENUE_NAME) ;
 }
 
-export function getRecordings(eventId) {
+export function getRecordings(eventId: string): string[] {
   let recordings = [];
-  store.forSubjects(function(recording) {
+  store.forSubjects((recording: string) => {
     recordings = recordings.concat(store.getObjects(recording, LMO_ETREE_ID));
   }, LMO_RECORDING_OF, eventId);
   recordings.forEach(function (recording, i) {
@@ -208,31 +208,31 @@ export function getRecordings(eventId) {
   return recordings;
 }
 
-export function getEventId(recording) {
+export function getEventId(recording: string): string {
   return getObject(recording, LMO_RECORDING_OF);
 }
 
-export function getPosters(eventId) {
+export function getPosters(eventId: string): string[] {
   return getArtefacts(eventId, LMO_POSTER);
 }
 
-export function getPhotos(eventId) {
+export function getPhotos(eventId: string): string[] {
   return getArtefacts(eventId, LMO_PHOTO);
 }
 
-export function getEnvelopes(eventId) {
+export function getEnvelopes(eventId: string): string[] {
   return getArtefacts(eventId, LMO_ENVELOPE);
 }
 
-export function getTickets(eventId) {
+export function getTickets(eventId: string): string[] {
   return getArtefacts(eventId, LMO_TICKET);
 }
 
-export function getPasses(eventId) {
+export function getPasses(eventId: string): string[] {
   return getArtefacts(eventId, LMO_BACKSTAGEPASS);
 }
 
-function getArtefacts(eventId, type) {
+function getArtefacts(eventId: string, type: string): string[] {
   return store.getObjects(getSubject(EVENT_SUBEVENT, eventId), LMO_ARTEFACT)
     .filter(a => getObject(a, RDF_TYPE) === type)
     .map(p => store.getTriples(null, LMO_DEPICTS, p)[0])
@@ -240,19 +240,19 @@ function getArtefacts(eventId, type) {
     .map(t => getObject(t, LMO_THUMBNAIL) || getObject(t, LMO_IMAGE));
 }
 
-export function getSongEvents(songId) {
+export function getSongEvents(songId: string): string[] {
   return store.getObjects(songId, LMO_PLAYED_AT);
 }
 
-export function getSongLabel(songId) {
+export function getSongLabel(songId: string): string {
   return getObject(songId, LMO_SONG_NAME);
 }
 
-export function getSetlist(eventId) {
+export function getSetlist(eventId: string): string[] {
   return getList(getObject(eventId, LMO_SETLIST));
 }
 
-export function getPerformers(eventId) {
+export function getPerformers(eventId: string): Performer[] {
   let performers = store.getObjects(eventId, EVENT_SUBEVENT);
   performers = performers.map(p => {
     let singer = getObject(p, MO_SINGER);
@@ -274,15 +274,15 @@ export function getPerformers(eventId) {
   return _.values(performers).filter(p => p.name != 'undefined');
 }
 
-export function getLabel(id) {
+export function getLabel(id: string): string {
   return getObject(id, RDFS_LABEL);
 }
 
-export function getSameAs(id) {
+export function getSameAs(id: string): string {
   return getObject(id, LMO_DBPEDIA);
 }
 
-function readRdfIntoStore(path) {
+function readRdfIntoStore(path: string) {
   return new Promise((resolve, reject) => {
     fs.readFile(path, 'utf8', (err, data) => {
       N3.Parser().parse(data, (error, triple, prefixes) => {
@@ -298,7 +298,7 @@ function readRdfIntoStore(path) {
   });
 }
 
-export function getObject(subject, predicate) {
+export function getObject(subject: string, predicate: string) {
   if (subject && predicate) {
     let object = store.getObjects(subject, predicate)[0];
     if (N3.Util.isLiteral(object)) {
@@ -308,7 +308,7 @@ export function getObject(subject, predicate) {
   };
 }
 
-function getSubject(predicate, object) {
+function getSubject(predicate: string, object: string) {
   return store.getSubjects(predicate, object)[0];
 }
 
@@ -337,17 +337,17 @@ function getList(seq) {
   return elements;
 }
 
-export function dbpediaToName(resource: string) {
+export function dbpediaToName(resource: string): string {
   if (resource) return resource
     .replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ');
 }
 
-function getSubjects(predicate, object) { 
+function getSubjects(predicate: string, object: string): string[] { 
   //store.getSubjects doesnt seem to work :(
   return store.getTriples(null, predicate, object).map(t => t.subject);
 }
 
-function getDateTimeInterval(eventId) {
+function getDateTimeInterval(eventId: string) {
   const showDate = getTime(eventId).split("-");
   let triples = store.getTriples(null, TIME_HAS_DATE_TIME_DESCRIPTION, null);
   triples = triples.filter(function(triple){
