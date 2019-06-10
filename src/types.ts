@@ -13,7 +13,7 @@ export interface DeadEventDetails {
   date: string,
   location: Location,
   venue: Venue,
-  setlist: Song[],
+  setlist: SongInfo[],
   weather: any,
   recordings: string[],
   performers: any,
@@ -31,11 +31,13 @@ export interface Location extends GdObject {
   state: string
 }
 
-export interface Song extends GdObject {
-  audio?: SongAudio
+export type SongInfo = GdObject;
+
+export interface SongWithAudio extends GdObject {
+  audio?: AudioTrackMap
 }
 
-export interface SongAudio {
+export interface AudioTrackMap {
   [recordingId: string]: AudioTrack[]
 }
 

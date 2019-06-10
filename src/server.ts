@@ -8,7 +8,7 @@ import * as chunker from './chunker';
 import * as news from './news';
 //import * as news2 from './news2';
 
-import { DeadEventDetails, Venue, Location, Song } from './types';
+import { DeadEventDetails, Venue, Location, SongInfo, SongWithAudio, DbpediaObject } from './types';
 
 const PORT = process.env.PORT || 8060;
 const ADDRESS = "http://localhost:8060/"//"https://grateful-dead-api.herokuapp.com/";//"http://localhost:8060/";
@@ -28,17 +28,21 @@ app.get('/events', (_, res) => {
 });
 
 app.get('/details', async (req, res) => {
+  const start = Date.now();
+  console.log("INFO", 0)
   const [loc, ven, per] = await Promise.all([
     getLocation(store.getLocationForEvent(req.query.event)),
     getVenue(store.getVenueForEvent(req.query.event)),
     getPerformers(req.query.event)
   ]);
+  console.log("ARTIFACTS", Date.now()-start)
   const artifacts = [];
   store.getTickets(req.query.event).forEach(t => artifacts.push({type: 'ticket', image: t}));
   store.getPosters(req.query.event).forEach(p => artifacts.push({type: 'poster', image: p}));
   store.getPasses(req.query.event).forEach(p => artifacts.push({type: 'pass', image: p}));
   store.getEnvelopes(req.query.event).forEach(p => artifacts.push({type: 'envelope', image: p}));
   store.getPhotos(req.query.event).forEach(p => artifacts.push({type: 'photo', image: p}));
+  console.log("SET", Date.now()-start)
   const details: DeadEventDetails = {
     id: req.query.event,
     date: store.getTime(req.query.event),
@@ -50,6 +54,7 @@ app.get('/details', async (req, res) => {
     performers: per,
     artifacts: artifacts
   };
+  console.log("DONE", Date.now()-start)
   res.send(details);
 });
 
@@ -97,10 +102,6 @@ app.get('/photos', (req, res) =>
   res.send(store.getEnvelopes(req.query.event))
 );
 
-//app.get('/setlist', (req, res) => {
-//  res.send(store.getSetlist(req.query.event));
-//});
-
 app.get('/setlist', (req, res) => {
   res.send(getSetlist(req.query.event));
 });
@@ -110,7 +111,7 @@ app.get('/recordings', (req, res) => {
 });
 
 app.get('/song', (req, res) => {
-  res.send(getSong(req.query.id));
+  res.send(getSongWithAudio(req.query.id));
 });
 
 app.get('/performers', async (req, res) => {
@@ -183,60 +184,57 @@ async function getVenue(venueId: string): Promise<Venue> {
   const LMO_DBPEDIA = "https://w3id.org/lmo/vocabulary/dbpedia";
   if (venueId) {
     const venueDbpedia = store.getObject(venueId, LMO_DBPEDIA);
-    const dbpObjects = await getDbpediaInfo(venueDbpedia);
     const label = store.getLabel(venueId);
-    return {
+    return Object.assign({
       id: venueId,
       name: label ? label : store.dbpediaToName(venueId),
-      eventIds: store.getVenueEvents(venueId),
-      image: dbpObjects[0],
-      thumbnail: dbpObjects[1],
-      comment: dbpObjects[2],
-      geoloc: dbpObjects[3]
-    }
+      eventIds: store.getVenueEvents(venueId)
+    }, await getDbpediaInfo(venueDbpedia));
   }
 }
 
 async function getLocation(locationId: string): Promise<Location> {
   if (locationId) {
-    const dbpInfo = await getDbpediaInfo(locationId);
-    return {
+    return Object.assign({
       id: locationId,
       name: store.dbpediaToName(locationId).split(',')[0],
       state: store.dbpediaToName(store.getStateOrCountry(locationId)),
-      eventIds: store.getLocationEvents(locationId),
-      image: dbpInfo[0],
-      thumbnail: dbpInfo[1],
-      comment: dbpInfo[2],
-      geoloc: dbpInfo[3]
-    }
+      eventIds: store.getLocationEvents(locationId)
+    }, await getDbpediaInfo(locationId));
   }
 }
 
-async function getDbpediaInfo(id: string): Promise<any[]> {
-  return Promise.all([
+async function getDbpediaInfo(id: string): Promise<DbpediaObject> {
+  const info = await Promise.all([
     dbpedia.getImage(id),
     dbpedia.getThumbnail(id),
     dbpedia.getComment(id),
     dbpedia.getGeolocation(id)
-  ])
-}
-
-function getSetlist(eventId: string): Song[] {
-  return store.getSetlist(eventId).map(getSong);
-}
-
-function getSong(songId: string): Song {
-  let name = store.getSongLabel(songId);
+  ]);
   return {
-    id: songId,
-    //name: store.getSongLabel(songId),//, "http://www.w3.org/2000/01/rdf-schema#label"),
-    name: name,
-    eventIds: store.getSongEvents(songId),
-    audio: SONGMAP[name.toLowerCase()]
+    image: info[0],
+    thumbnail: info[1],
+    comment: info[2],
+    geoloc: info[3]
   }
 }
 
+function getSetlist(eventId: string): SongInfo[] {
+  return store.getSetlist(eventId).map(getSongInfo);
+}
+
+function getSongWithAudio(songId: string): SongWithAudio {
+  const info = getSongInfo(songId);
+  return Object.assign(info, {audio: SONGMAP[info.name.toLowerCase()]});
+}
+
+function getSongInfo(songId: string): SongInfo {
+  return {
+    id: songId,
+    name: store.getSongLabel(songId),
+    eventIds: store.getSongEvents(songId)
+  }
+}
 
 async function getPerformers(eventId: string) {
   const performers = store.getPerformers(eventId);
