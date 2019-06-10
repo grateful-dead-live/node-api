@@ -167,7 +167,8 @@ export function getLocationForEvent(eventId: string) {
 }
 
 export function getLocationNameForEvent(eventId: string) {
-  return dbpediaToName(getLocationForEvent(eventId)).split(",")[0];
+  const name = dbpediaToName(getLocationForEvent(eventId));
+  if (name) return name.split(",")[0];
 }
 
 
