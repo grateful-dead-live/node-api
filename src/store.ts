@@ -96,25 +96,25 @@ const WIND_DICT = {
 const store = N3.Store();
 
 export async function isReady() {
-  await readRdfIntoStore('rdf-data_new/artists.ttl');
-  await readRdfIntoStore('rdf-data_new/deadlists.ttl');
-  await readRdfIntoStore('rdf-data_new/events_shows_dates.ttl');
-  await readRdfIntoStore('rdf-data_new/gdao.ttl');
-  await readRdfIntoStore('rdf-data_new/lineups.ttl');
-  await readRdfIntoStore('rdf-data_new/psilo.ttl');
-  await readRdfIntoStore('rdf-data_new/recordings.ttl');
-  await readRdfIntoStore('rdf-data_new/recording_sources.ttl');
-  await readRdfIntoStore('rdf-data_new/setlists.ttl');
-  await readRdfIntoStore('rdf-data_new/events_deadlists.ttl');
-  await readRdfIntoStore('rdf-data_new/events_gdao.ttl');
-  await readRdfIntoStore('rdf-data_new/events_psilo.ttl');
-  await readRdfIntoStore('rdf-data_new/shows_venue.ttl');
-  await readRdfIntoStore('rdf-data_new/songs.ttl');
-  await readRdfIntoStore('rdf-data_new/songs_played_at.ttl');
-  await readRdfIntoStore('rdf-data_new/states_countries.ttl');
-  await readRdfIntoStore('rdf-data_new/venues.ttl');
-  await readRdfIntoStore('rdf-data_new/weather.ttl');
-  await readRdfIntoStore('rdf-data_new/datetimeobjects.ttl');
+  await readRdfIntoStore('rdf-data/artists.ttl');
+  await readRdfIntoStore('rdf-data/deadlists.ttl');
+  await readRdfIntoStore('rdf-data/events_shows_dates.ttl');
+  await readRdfIntoStore('rdf-data/gdao.ttl');
+  await readRdfIntoStore('rdf-data/lineups.ttl');
+  await readRdfIntoStore('rdf-data/psilo.ttl');
+  await readRdfIntoStore('rdf-data/recordings.ttl');
+  await readRdfIntoStore('rdf-data/recording_sources.ttl');
+  await readRdfIntoStore('rdf-data/setlists.ttl');
+  await readRdfIntoStore('rdf-data/events_deadlists.ttl');
+  await readRdfIntoStore('rdf-data/events_gdao.ttl');
+  await readRdfIntoStore('rdf-data/events_psilo.ttl');
+  await readRdfIntoStore('rdf-data/shows_venue.ttl');
+  await readRdfIntoStore('rdf-data/songs.ttl');
+  await readRdfIntoStore('rdf-data/songs_played_at.ttl');
+  await readRdfIntoStore('rdf-data/states_countries.ttl');
+  await readRdfIntoStore('rdf-data/venues.ttl');
+  await readRdfIntoStore('rdf-data/weather.ttl');
+  await readRdfIntoStore('rdf-data/datetimeobjects.ttl');
 }
 
 export function getEventIds() {
@@ -126,10 +126,6 @@ export function getTime(eventId) {
   return getObject(getObject(eventId, EVENT_TIME), TL_AT_DATE);
 }
 
-
-export function getSubeventInfo(performanceId: string): DeadEventInfo {
-  return getEventInfo(performanceId);
-}
 
 export function getEventInfo(eventId: string): DeadEventInfo {
   return {
@@ -179,11 +175,7 @@ export function getWeather(eventId) {
   const weather = getSubject(LMO_TIME, getDateTimeInterval(eventId));
   const windDirection = getObject(weather, LMO_WIND_DIRECTION);
   const condition = getObject(weather, LMO_WEATHER_CONDITION);
-  let p = getObject(weather, LMO_PRECIPITATION);
-  let precipitation = "n/a";
-  if (p) { 
-    precipitation = (parseFloat(getObject(p, QUDT_NUMERIC_VALUE)) / 25.4).toFixed(2)
-  }; 
+  const precipitation = (parseFloat(getObject(getObject(weather, LMO_PRECIPITATION), QUDT_NUMERIC_VALUE)) / 25.4).toFixed(2) || "n/a";
   return {
     maxTemperature: Math.round(parseFloat(getObject(getObject(weather, LMO_MAX_TEMP), QUDT_NUMERIC_VALUE)) * 9/5 + 32),
     minTemperature: parseFloat(getObject(getObject(weather, LMO_MIN_TEMP), QUDT_NUMERIC_VALUE)),
@@ -306,11 +298,13 @@ function readRdfIntoStore(path) {
 }
 
 export function getObject(subject, predicate) {
-  let object = store.getObjects(subject, predicate)[0];
-  if (N3.Util.isLiteral(object)) {
-    return N3.Util.getLiteralValue(object);
-  }
-  return object;
+  if (subject && predicate) {
+    let object = store.getObjects(subject, predicate)[0];
+    if (N3.Util.isLiteral(object)) {
+      return N3.Util.getLiteralValue(object);
+    }
+    return object;
+  };
 }
 
 function getSubject(predicate, object) {
