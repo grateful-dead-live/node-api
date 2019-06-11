@@ -28,17 +28,19 @@ export async function getGeolocation(resource: string) {
 }
 
 async function getObjectFromDbpedia(resource: string, predicate: string, language?: string) {
-  if (resource.indexOf('<') < 0) {
-    resource = '<'+resource+'>';
+  if (resource) {
+    if (resource.indexOf('<') < 0) {
+      resource = '<'+resource+'>';
+    }
+    let result = getBuffered(resource, predicate);
+    if (result) return result;
+    return fetch(createObjectQuery(resource, predicate, language))
+      .then(r => r.text())
+      .then(t => JSON.parse(t))
+      .then(j => j.results.bindings[0].object.value)
+      .then(j => setBuffered(resource, predicate, j))
+      .catch(() => console.log("no "+predicate+" found for "+resource));
   }
-  let result = getBuffered(resource, predicate);
-  if (result) return result;
-  return fetch(createObjectQuery(resource, predicate, language))
-    .then(r => r.text())
-    .then(t => JSON.parse(t))
-    .then(j => j.results.bindings[0].object.value)
-    .then(j => setBuffered(resource, predicate, j))
-    .catch(() => console.log("no "+predicate+" found for "+resource));
 }
 
 function getBuffered(resource: string, predicate: string) {

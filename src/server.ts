@@ -8,7 +8,7 @@ import * as chunker from './chunker';
 import * as news from './news';
 //import * as news2 from './news2';
 
-import { DeadEventDetails, Venue, Location, SongInfo, SongWithAudio, DbpediaObject, Performer } from './types';
+import { DeadEventDetails, Venue, Location, SongInfo, SongWithAudio, DbpediaObject } from './types';
 
 const PORT = process.env.PORT || 8060;
 const ADDRESS = "http://localhost:8060/"//"https://grateful-dead-api.herokuapp.com/";//"http://localhost:8060/";
