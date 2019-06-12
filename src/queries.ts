@@ -63,7 +63,7 @@ export async function getVenue(venueId: string): Promise<Venue> {
       id: toShortId(venueId),
       name: label ? label : store.dbpediaToName(venueId),
       eventIds: store.getVenueEvents(venueId)
-    }, await getDbpediaInfo(venueDbpedia));
+    }, await getDbpediaInfo(venueDbpedia, true));
   }
 }
 
@@ -75,7 +75,7 @@ export async function getLocation(locationId: string): Promise<Location> {
       name: store.dbpediaToName(locationId).split(',')[0],
       state: store.dbpediaToName(store.getStateOrCountry(locationId)),
       eventIds: store.getLocationEvents(locationId)
-    }, await getDbpediaInfo(locationId));
+    }, await getDbpediaInfo(locationId, true));
   }
 }
 
@@ -99,14 +99,17 @@ function getSongInfo(songId: string): SongInfo {
 }
 
 async function getPerformers(eventId: string): Promise<Performer[]> {
-  const performers = store.getPerformers(eventId);
-  return Promise.all(performers.map(async p => {
-    const imgs = await Promise.all([
-      dbpedia.getImage(p.sameAs), dbpedia.getThumbnail(p.sameAs)]);
-    p["image"] = imgs[0];
-    p["thumbnail"] = imgs[1];
-    return p
-  }));
+  return Promise.all(store.getPerformers(eventId).map(addDbpediaInfo));
+}
+
+export async function getPerformer(sameAs: string): Promise<Performer> {
+  return addDbpediaInfo(store.getPerformer(toDbpediaId(sameAs)));
+}
+
+async function addDbpediaInfo(performer: Performer) {
+  performer = Object.assign(performer, await getDbpediaInfo(performer.sameAs));
+  performer.sameAs = toShortId(performer.sameAs);
+  return performer;
 }
 
 function getNews(eventId: string) {
@@ -118,12 +121,12 @@ function getNews2(eventId: string) {
 }
 
 
-async function getDbpediaInfo(id: string): Promise<DbpediaObject> {
+async function getDbpediaInfo(id: string, includeGeoloc?: boolean): Promise<DbpediaObject> {
   const info = await Promise.all([
     dbpedia.getImage(id),
     dbpedia.getThumbnail(id),
     dbpedia.getComment(id),
-    dbpedia.getGeolocation(id)
+    includeGeoloc ? dbpedia.getGeolocation(id) : undefined
   ]);
   return {
     image: info[0],
@@ -132,7 +135,6 @@ async function getDbpediaInfo(id: string): Promise<DbpediaObject> {
     geoloc: info[3]
   }
 }
-
 
 function toShortId(id: string) {
   return id.slice(_.lastIndexOf(id, '/')+1);

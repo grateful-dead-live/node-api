@@ -41,6 +41,10 @@ app.get('/song', (req, res) => {
   res.send(queries.getSongWithAudio(req.query.id));
 });
 
+app.get('/performer', async (req, res) => {
+  res.send(await queries.getPerformer(req.query.sameAs));
+});
+
 app.get('/etreeinfo', async (req, res) => {
   res.send(await etree.getInfoFromEtree(req.query.recording));
 });

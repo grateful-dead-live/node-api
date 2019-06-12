@@ -240,25 +240,36 @@ export function getSetlist(eventId: string): string[] {
 }
 
 export function getPerformers(eventId: string): Performer[] {
-  let performers = store.getObjects(eventId, EVENT_SUBEVENT);
-  performers = performers.map(p => {
-    let singer = getObject(p, MO_SINGER);
-    let musician = singer ? singer : getObject(p, MO_PERFORMER);
-    let instrument = singer ? MIT+"Voice" : getObject(p, MO_INSTRUMENT);
-    return {
-      name: getObject(musician, FOAF_NAME),
-      instrument: instrument.replace(MIT, ''),
-      sameAs: getObject(musician, LMO_DBPEDIA)
-    }
-  });
-  //join same performers
-  performers = _.chain(performers).groupBy('name')
+  return getMergedPerformances(store.getObjects(eventId, EVENT_SUBEVENT));
+}
+
+export function getPerformer(sameAs: string): Performer {
+  const musicians = getSubjects(LMO_DBPEDIA, sameAs);
+  const perfs = _.flatten(musicians.map(m =>
+    getSubjects(MO_SINGER, m).concat(getSubjects(MO_PERFORMER, m))))
+    .filter(m => m);
+  return getMergedPerformances(perfs);
+}
+
+function getMergedPerformances(ids: string[]) {
+  const perfs = _.chain(ids.map(getPerformance)).groupBy('name')
     .mapValues((v,k) => ({
       name: k,
-      instruments: v.map(p => p.instrument),
+      instruments: _.uniq(v.map(p => p.instrument)),
       sameAs: v[0].sameAs
     })).value();
-  return _.values(performers).filter(p => p.name != 'undefined');
+    return _.values(perfs).filter(p => p.name != 'undefined')[0];
+}
+
+function getPerformance(id: string): Performer {
+  let singer = getObject(id, MO_SINGER);
+  let musician = singer ? singer : getObject(id, MO_PERFORMER);
+  let instrument = singer ? MIT+"Voice" : getObject(id, MO_INSTRUMENT);
+  return {
+    name: getObject(musician, FOAF_NAME),
+    instrument: instrument.replace(MIT, ''),
+    sameAs: getObject(musician, LMO_DBPEDIA)
+  }
 }
 
 export function getLabel(id: string): string {
