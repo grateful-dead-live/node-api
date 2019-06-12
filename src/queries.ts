@@ -62,7 +62,7 @@ export async function getVenue(venueId: string): Promise<Venue> {
     return Object.assign({
       id: toShortId(venueId),
       name: label ? label : store.dbpediaToName(venueId),
-      eventIds: store.getVenueEvents(venueId)
+      eventIds: store.getVenueEvents(venueId).map(toShortId),
     }, await getDbpediaInfo(venueDbpedia, true));
   }
 }
@@ -74,7 +74,7 @@ export async function getLocation(locationId: string): Promise<Location> {
       id: toShortId(locationId),
       name: store.dbpediaToName(locationId).split(',')[0],
       state: store.dbpediaToName(store.getStateOrCountry(locationId)),
-      eventIds: store.getLocationEvents(locationId)
+      eventIds: store.getLocationEvents(locationId).map(toShortId)
     }, await getDbpediaInfo(locationId, true));
   }
 }
@@ -94,7 +94,7 @@ function getSongInfo(songId: string): SongInfo {
   return {
     id: toShortId(songId),
     name: store.getSongLabel(songId),
-    eventIds: store.getSongEvents(songId)
+    eventIds: store.getSongEvents(songId).map(toShortId)
   }
 }
 

@@ -248,7 +248,7 @@ export function getPerformer(sameAs: string): Performer {
   const perfs = _.flatten(musicians.map(m =>
     getSubjects(MO_SINGER, m).concat(getSubjects(MO_PERFORMER, m))))
     .filter(m => m);
-  return getMergedPerformances(perfs);
+  return getMergedPerformances(perfs)[0];
 }
 
 function getMergedPerformances(ids: string[]) {
@@ -258,7 +258,7 @@ function getMergedPerformances(ids: string[]) {
       instruments: _.uniq(v.map(p => p.instrument)),
       sameAs: v[0].sameAs
     })).value();
-    return _.values(perfs).filter(p => p.name != 'undefined')[0];
+    return _.values(perfs).filter(p => p.name != 'undefined');
 }
 
 function getPerformance(id: string): Performer {
