@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as _ from 'lodash';
 import * as N3 from 'n3';
-import { DeadEventInfo, Weather, Performer } from './types';
+import { Weather, Performer } from './types';
 
 const LMO = "https://w3id.org/lmo/vocabulary/";
 const LMO_LOCATION = LMO+"location";
@@ -124,19 +124,6 @@ export function getEventIds() {
 export function getTime(eventId: string): string {
   //console.log(eventId);
   return getObject(getObject(eventId, EVENT_TIME), TL_AT_DATE);
-}
-
-
-export function getEventInfo(eventId: string): DeadEventInfo {
-  return {
-    id: eventId,
-    date: getTime(eventId),
-    location: getLocationNameForEvent(eventId),
-    state: dbpediaToName(getStateOrCountry(getLocationForEvent(eventId))),
-    venue: getVenueNameForEvent(eventId),
-    tickets: getTickets(eventId),
-    recordings: getRecordings(eventId)
-  };
 }
 
 
