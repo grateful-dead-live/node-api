@@ -22,7 +22,10 @@ function getEventInfo(eventId: string): DeadEventInfo {
     location: store.getLocationNameForEvent(eventId),
     state: store.dbpediaToName(store.getStateOrCountry(store.getLocationForEvent(eventId))),
     venue: store.getVenueNameForEvent(eventId),
-    tickets: store.getTickets(eventId),
+    ticket: store.getTickets(eventId)[0],
+    pass: store.getPasses(eventId)[0],
+    poster: store.getPosters(eventId)[0],
+    photo: store.getPhotos(eventId)[0],
     recordings: store.getRecordings(eventId)
   };
 }

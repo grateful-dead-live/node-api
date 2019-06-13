@@ -4,7 +4,10 @@ export interface DeadEventInfo {
   location: string,
   state: string,
   venue: string,
-  tickets: string[],
+  ticket: string,
+  pass: string,
+  poster: string,
+  photo: string,
   recordings: string[]
 }
 
