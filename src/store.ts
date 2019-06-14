@@ -24,7 +24,8 @@ const LMO_PRECIPITATION = LMO+"precipitation";
 const LMO_WIND = LMO+"wind";
 const LMO_WIND_DIRECTION = LMO+"wind_direction";
 const LMO_WEATHER_CONDITION = LMO+"weather_condition";
-const LMO_SETLIST = LMO+"set_list";
+const LMO_SETLIST = LMO+"setlist";
+const LMO_SETNAME = LMO+"set_name";
 const LMO_POSTER = LMO+"Poster";
 const LMO_PHOTO = LMO+"Photo";
 const LMO_TICKET = LMO+"Ticket";
@@ -56,6 +57,11 @@ const QUDT_NUMERIC_VALUE = "http://qudt.org/schema/qudt#numericValue";
 const DBO = "http://dbpedia.org/ontology/";
 const DBO_ISPARTOF = DBO+"isPartOf";
 const DBO_COUNTRY = DBO+"country";
+
+const OLO = "http://purl.org/ontology/olo/core#";
+const OLO_SLOT = OLO+"slot";
+const OLO_INDEX = OLO+"index";
+const OLO_ITEM = OLO+"item";
 
 const WEATHER_DICT = {
   'clear': 'wi-day-sunny',
@@ -235,8 +241,12 @@ export function getSongLabel(songId: string): string {
   return getObject(songId, LMO_SONG_NAME);
 }
 
-export function getSetlist(eventId: string): string[] {
-  return getList(getObject(eventId, LMO_SETLIST));
+export function getSetlist(eventId: string): {name: string, songIds: string[]}[] {
+  const sets = getOloList(getObject(eventId, LMO_SETLIST));
+  return sets.map(s => ({
+    name: getObject(s, LMO_SETNAME),
+    songIds: getOloList(s)
+  }))
 }
 
 export function getPerformers(eventId: string): Performer[] {
@@ -261,7 +271,7 @@ function getMergedPerformances(ids: string[]) {
     return _.values(perfs).filter(p => p.name != 'undefined');
 }
 
-function getPerformance(id: string): Performer {
+function getPerformance(id: string) {
   let singer = getObject(id, MO_SINGER);
   let musician = singer ? singer : getObject(id, MO_PERFORMER);
   let instrument = singer ? MIT+"Voice" : getObject(id, MO_INSTRUMENT);
@@ -297,13 +307,17 @@ function readRdfIntoStore(path: string) {
 }
 
 export function getObject(subject: string, predicate: string) {
+  return subject && predicate ? getObjects(subject, predicate, 1)[0] : null;
+}
+
+function getObjects(subject: string, predicate: string, count?: number) {
   if (subject && predicate) {
-    let object = store.getObjects(subject, predicate)[0];
-    if (N3.Util.isLiteral(object)) {
-      return N3.Util.getLiteralValue(object);
-    }
-    return object;
-  };
+    return store.getObjects(subject, predicate).slice(0, count).map(toLiteral);
+  }
+}
+
+function toLiteral(object: string) {
+  return N3.Util.isLiteral(object) ? N3.Util.getLiteralValue(object) : object;
 }
 
 function getSubject(predicate: string, object: string) {
@@ -320,6 +334,13 @@ function _getList(list) {
   return elements;
 }
 */
+
+function getOloList(uri: string) {
+  const result = [];
+  getObjects(uri, OLO_SLOT).forEach((o: string) =>
+    result[getObject(o, OLO_INDEX)-1] = getObject(o, OLO_ITEM));
+  return result;
+}
 
 function getList(seq) {
   let elements = [];

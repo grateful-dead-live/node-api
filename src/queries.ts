@@ -4,7 +4,7 @@ import * as store from './store';
 import * as dbpedia from './dbpedia';
 import * as news from './news';
 import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
-  SongInfo, SongWithAudio, Performer } from './types';
+  SongInfo, SongWithAudio, Performer, Set } from './types';
 
 const LMO_PREFIX = 'https://w3id.org/lmo/resource/';
 const DBP_PREFIX = 'http://dbpedia.org/resource/';
@@ -82,14 +82,19 @@ export async function getLocation(locationId: string): Promise<Location> {
   }
 }
 
-export function getSetlist(eventId: string): SongInfo[] {
-  eventId = toLmoId(eventId);
-  return store.getSetlist(eventId).map(getSongInfo);
+export function getSetlist(eventId: string): Set[] {
+  const sets = store.getSetlist(toLmoId(eventId))
+  return sets.map(s => ({
+    name: s.name,
+    songs: s.songIds.map(getSongInfo)
+  }));
 }
 
 export function getSongWithAudio(songId: string): SongWithAudio {
   const info = getSongInfo(songId);
-  return Object.assign(info, {audio: SONGMAP[info.name.toLowerCase()]});
+  if (info) {
+    return Object.assign(info, {audio: SONGMAP[info.name.toLowerCase()]});
+  }
 }
 
 function getSongInfo(songId: string): SongInfo {

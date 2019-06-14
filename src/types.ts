@@ -16,7 +16,7 @@ export interface DeadEventDetails {
   date: string,
   location: Location,
   venue: Venue,
-  setlist: SongInfo[],
+  setlist: Set[],
   weather: any,
   recordings: string[],
   performers: any,
@@ -32,6 +32,11 @@ export type Venue = GdObject;
 
 export interface Location extends GdObject {
   state: string
+}
+
+export interface Set {
+  name: string,
+  songs: SongInfo[]
 }
 
 export type SongInfo = GdObject;
@@ -66,7 +71,7 @@ export interface DbpediaObject {
 
 export interface Performer {
   name: string,
-  instrument: string,
+  instruments: string[],
   sameAs: string
 }
 
