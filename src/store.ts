@@ -17,6 +17,9 @@ const LMO_IMAGE = LMO+"image_file";
 const LMO_PLAYED_AT = LMO+"played_at";
 const LMO_DBPEDIA = LMO+"dbpedia";
 const LMO_SONG_NAME = LMO+"song_name";
+const LMO_LINEUP = LMO+"lineup";
+const LMO_VOCALS = LMO+"Vocals";
+const LMO_PERFORMANCE = LMO+"lineup_performance";
 const LMO_TIME = LMO+"time";
 const LMO_MAX_TEMP = LMO+"maximum_temperature";
 const LMO_MIN_TEMP = LMO+"minimum_temperature";
@@ -250,7 +253,8 @@ export function getSetlist(eventId: string): {name: string, songIds: string[]}[]
 }
 
 export function getPerformers(eventId: string): Performer[] {
-  return getMergedPerformances(store.getObjects(eventId, EVENT_SUBEVENT));
+  const perfIds = getObjects(getObject(eventId, LMO_LINEUP), LMO_PERFORMANCE);
+  return getMergedPerformances(perfIds);
 }
 
 export function getPerformer(sameAs: string): Performer {
@@ -261,8 +265,8 @@ export function getPerformer(sameAs: string): Performer {
   return getMergedPerformances(perfs)[0];
 }
 
-function getMergedPerformances(ids: string[]) {
-  const perfs = _.chain(ids.map(getPerformance)).groupBy('name')
+function getMergedPerformances(performanceIds: string[]) {
+  const perfs = _.chain(performanceIds.map(getPerformance)).groupBy('name')
     .mapValues((v,k) => ({
       name: k,
       instruments: _.uniq(v.map(p => p.instrument)),
@@ -271,13 +275,15 @@ function getMergedPerformances(ids: string[]) {
     return _.values(perfs).filter(p => p.name != 'undefined');
 }
 
-function getPerformance(id: string) {
-  let singer = getObject(id, MO_SINGER);
-  let musician = singer ? singer : getObject(id, MO_PERFORMER);
-  let instrument = singer ? MIT+"Voice" : getObject(id, MO_INSTRUMENT);
+function getPerformance(performanceId: string) {
+  //let musician = singer ? singer : getObject(performanceId, MO_PERFORMER);
+  const MO_PERFOMER = MO_PERFORMER.replace('performer', 'perfomer');
+  const musician = getObject(performanceId, MO_PERFOMER);
+  const instruments = getObjects(performanceId, MO_INSTRUMENT);
+  console.log(performanceId, instruments, getObject(musician, FOAF_NAME))
   return {
     name: getObject(musician, FOAF_NAME),
-    instrument: instrument.replace(MIT, ''),
+    instrument: instruments.map((i: string) => i.replace(MIT, '')),
     sameAs: getObject(musician, LMO_DBPEDIA)
   }
 }

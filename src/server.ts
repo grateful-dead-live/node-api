@@ -38,7 +38,7 @@ app.get('/setlist', (req, res) => {
 });
 
 app.get('/song', (req, res) => {
-  res.send(queries.getSongWithAudio(req.query.id));
+  res.send(queries.getSongDetails(req.query.id));
 });
 
 app.get('/performer', async (req, res) => {
@@ -85,7 +85,6 @@ app.get('/diachronic', async (req, res) => {
   const skip = req.query.skip ? req.query.skip : 0;
   res.send(await features.getDiachronicVersionsAudio(req.query.songname, count, skip));
 });
-
 
 app.listen(PORT, async () => {
   await store.isReady();

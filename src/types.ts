@@ -28,9 +28,9 @@ interface Artifact {
   image: string
 }
 
-export type Venue = GdObject;
+export type Venue = GdEventsObject;
 
-export interface Location extends GdObject {
+export interface Location extends GdEventsObject {
   state: string
 }
 
@@ -41,7 +41,7 @@ export interface Set {
 
 export type SongInfo = GdObject;
 
-export interface SongWithAudio extends SongInfo {
+export interface SongDetails extends SongInfo, GdEventsObject {
   audio?: AudioTrackMap
 }
 
@@ -56,10 +56,13 @@ export interface AudioTrack {
   track: string
 }
 
+export interface GdEventsObject extends GdObject {
+  eventIds: string[]
+}
+
 export interface GdObject extends DbpediaObject {
   id: string,
-  name: string,
-  eventIds: string[]
+  name: string
 }
 
 export interface DbpediaObject {

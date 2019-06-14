@@ -4,7 +4,7 @@ import * as store from './store';
 import * as dbpedia from './dbpedia';
 import * as news from './news';
 import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
-  SongInfo, SongWithAudio, Performer, Set } from './types';
+  SongInfo, SongDetails, Performer, Set } from './types';
 
 const LMO_PREFIX = 'https://w3id.org/lmo/resource/';
 const DBP_PREFIX = 'http://dbpedia.org/resource/';
@@ -90,10 +90,13 @@ export function getSetlist(eventId: string): Set[] {
   }));
 }
 
-export function getSongWithAudio(songId: string): SongWithAudio {
+export function getSongDetails(songId: string): SongDetails {
   const info = getSongInfo(songId);
   if (info) {
-    return Object.assign(info, {audio: SONGMAP[info.name.toLowerCase()]});
+    return Object.assign(info, {
+      audio: SONGMAP[info.name.toLowerCase()],
+      eventIds: store.getSongEvents(toLmoId(songId)).map(toShortId)
+    });
   }
 }
 
@@ -101,8 +104,7 @@ function getSongInfo(songId: string): SongInfo {
   songId = toLmoId(songId);
   return {
     id: toShortId(songId),
-    name: store.getSongLabel(songId),
-    eventIds: store.getSongEvents(songId).map(toShortId)
+    name: store.getSongLabel(songId)
   }
 }
 
@@ -136,12 +138,10 @@ async function getDbpediaInfo(id: string, includeGeoloc?: boolean): Promise<Dbpe
     dbpedia.getComment(id),
     includeGeoloc ? dbpedia.getGeolocation(id) : undefined
   ]);
-  return {
-    image: info[0],
-    thumbnail: info[1],
-    comment: info[2],
-    geoloc: info[3]
-  }
+  const object: DbpediaObject =
+    { image: info[0], thumbnail: info[1], comment: info[2] };
+  if (includeGeoloc) object.geoloc = info[3];
+  return object;
 }
 
 function toShortId(id: string) {
