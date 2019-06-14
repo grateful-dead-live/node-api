@@ -102,10 +102,12 @@ export function getSongDetails(songId: string): SongDetails {
 
 function getSongInfo(songId: string): SongInfo {
   songId = toLmoId(songId);
+  const artist = store.getOriginalArtist(songId);
+  artist.id = toShortId(artist.id);
   return {
     id: toShortId(songId),
     name: store.getSongLabel(songId),
-    originalArtist: store.getOriginalArtist(songId)
+    originalArtist: artist
   }
 }
 
@@ -118,7 +120,7 @@ export async function getPerformer(performerId: string): Promise<Performer> {
 }
 
 async function addDbpediaInfo(performer: Performer) {
-  performer = Object.assign(performer, await getDbpediaInfo(performer.id));
+  performer = Object.assign(performer, await getDbpediaInfo(performer.dbpediaId));
   performer.id = toShortId(performer.id);
   return performer;
 }

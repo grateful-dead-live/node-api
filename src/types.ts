@@ -23,7 +23,7 @@ export interface DeadEventDetails {
   artifacts: Artifact[]
 }
 
-interface Artifact {
+export interface Artifact {
   type: string,
   image: string
 }
