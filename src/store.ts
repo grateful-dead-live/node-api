@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as _ from 'lodash';
 import * as N3 from 'n3';
-import { Weather, Performer } from './types';
+import { Weather, Performer, Artist } from './types';
 
 const LMO = "https://w3id.org/lmo/vocabulary/";
 const LMO_LOCATION = LMO+"location";
@@ -17,8 +17,8 @@ const LMO_IMAGE = LMO+"image_file";
 const LMO_PLAYED_AT = LMO+"played_at";
 const LMO_DBPEDIA = LMO+"dbpedia";
 const LMO_SONG_NAME = LMO+"song_name";
+const LMO_ORIGINAL_ARTIST = LMO+"original_artist";
 const LMO_LINEUP = LMO+"lineup";
-const LMO_VOCALS = LMO+"Vocals";
 const LMO_PERFORMANCE = LMO+"lineup_performance";
 const LMO_TIME = LMO+"time";
 const LMO_MAX_TEMP = LMO+"maximum_temperature";
@@ -54,6 +54,7 @@ const MO = "http://purl.org/ontology/mo/";
 const MO_PERFORMER = MO+"performer";
 const MO_INSTRUMENT = MO+"instrument";
 const MO_SINGER = MO+"singer";
+const MO_BRAINZ = MO+"musicbrainz_guid";
 const MIT = "http://purl.org/ontology/mo/mit#";
 
 const QUDT_NUMERIC_VALUE = "http://qudt.org/schema/qudt#numericValue";
@@ -131,7 +132,6 @@ export function getEventIds() {
 }
 
 export function getTime(eventId: string): string {
-  //console.log(eventId);
   return getObject(getObject(eventId, EVENT_TIME), TL_AT_DATE);
 }
 
@@ -244,6 +244,19 @@ export function getSongLabel(songId: string): string {
   return getObject(songId, LMO_SONG_NAME);
 }
 
+export function getOriginalArtist(songId: string): Artist {
+  return getArtist(getObject(songId, LMO_ORIGINAL_ARTIST));
+}
+
+function getArtist(artistId: string): Artist {
+  return {
+    id: artistId,
+    name: getObject(artistId, FOAF_NAME),
+    dbpediaId: getObject(artistId, LMO_DBPEDIA),
+    musicbrainzId: getObject(artistId, MO_BRAINZ)
+  }
+}
+
 export function getSetlist(eventId: string): {name: string, songIds: string[]}[] {
   const sets = getOloList(getObject(eventId, LMO_SETLIST));
   return sets.map(s => ({
@@ -254,38 +267,32 @@ export function getSetlist(eventId: string): {name: string, songIds: string[]}[]
 
 export function getPerformers(eventId: string): Performer[] {
   const perfIds = getObjects(getObject(eventId, LMO_LINEUP), LMO_PERFORMANCE);
-  return getMergedPerformances(perfIds);
+  return perfIds.map(getPerformance);
 }
 
-export function getPerformer(sameAs: string): Performer {
-  const musicians = getSubjects(LMO_DBPEDIA, sameAs);
-  const perfs = _.flatten(musicians.map(m =>
-    getSubjects(MO_SINGER, m).concat(getSubjects(MO_PERFORMER, m))))
-    .filter(m => m);
-  return getMergedPerformances(perfs)[0];
+export function getPerformer(id: string): Performer {
+  return getMergedPerformances(getSubjects(MO_PERFORMER, id))[0];
 }
 
 function getMergedPerformances(performanceIds: string[]) {
   const perfs = _.chain(performanceIds.map(getPerformance)).groupBy('name')
     .mapValues((v,k) => ({
+      id: v[0].id,
       name: k,
-      instruments: _.uniq(v.map(p => p.instrument)),
-      sameAs: v[0].sameAs
+      instruments: _.uniq(_.union(...v.map(p => p.instruments))),
+      dbpediaId: v[0].dbpediaId,
+      musicbrainzId: v[0].musicbrainzId
     })).value();
     return _.values(perfs).filter(p => p.name != 'undefined');
 }
 
-function getPerformance(performanceId: string) {
+function getPerformance(performanceId: string): Performer {
   //let musician = singer ? singer : getObject(performanceId, MO_PERFORMER);
   const MO_PERFOMER = MO_PERFORMER.replace('performer', 'perfomer');
-  const musician = getObject(performanceId, MO_PERFOMER);
+  const musicianId = getObject(performanceId, MO_PERFOMER);
   const instruments = getObjects(performanceId, MO_INSTRUMENT);
-  console.log(performanceId, instruments, getObject(musician, FOAF_NAME))
-  return {
-    name: getObject(musician, FOAF_NAME),
-    instrument: instruments.map((i: string) => i.replace(MIT, '')),
-    sameAs: getObject(musician, LMO_DBPEDIA)
-  }
+  return Object.assign(getArtist(musicianId),
+    { instruments: instruments.map((i: string) => i.replace(MIT, '')) })
 }
 
 export function getLabel(id: string): string {

@@ -39,7 +39,9 @@ export interface Set {
   songs: SongInfo[]
 }
 
-export type SongInfo = GdObject;
+export interface SongInfo extends GdObject {
+  originalArtist: Artist
+};
 
 export interface SongDetails extends SongInfo, GdEventsObject {
   audio?: AudioTrackMap
@@ -60,6 +62,15 @@ export interface GdEventsObject extends GdObject {
   eventIds: string[]
 }
 
+export interface Performer extends Artist {
+  instruments: string[]
+}
+
+export interface Artist extends GdObject {
+  musicbrainzId: string,
+  dbpediaId?: string
+}
+
 export interface GdObject extends DbpediaObject {
   id: string,
   name: string
@@ -70,12 +81,6 @@ export interface DbpediaObject {
   thumbnail?: string,
   comment?: string,
   geoloc?: Geolocation
-}
-
-export interface Performer {
-  name: string,
-  instruments: string[],
-  sameAs: string
 }
 
 export interface Geolocation {

@@ -42,7 +42,7 @@ app.get('/song', (req, res) => {
 });
 
 app.get('/performer', async (req, res) => {
-  res.send(await queries.getPerformer(req.query.sameAs));
+  res.send(await queries.getPerformer(req.query.id));
 });
 
 app.get('/etreeinfo', async (req, res) => {

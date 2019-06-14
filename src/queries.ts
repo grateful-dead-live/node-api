@@ -104,7 +104,8 @@ function getSongInfo(songId: string): SongInfo {
   songId = toLmoId(songId);
   return {
     id: toShortId(songId),
-    name: store.getSongLabel(songId)
+    name: store.getSongLabel(songId),
+    originalArtist: store.getOriginalArtist(songId)
   }
 }
 
@@ -112,13 +113,13 @@ async function getPerformers(eventId: string): Promise<Performer[]> {
   return Promise.all(store.getPerformers(eventId).map(addDbpediaInfo));
 }
 
-export async function getPerformer(sameAs: string): Promise<Performer> {
-  return addDbpediaInfo(store.getPerformer(toDbpediaId(sameAs)));
+export async function getPerformer(performerId: string): Promise<Performer> {
+  return addDbpediaInfo(store.getPerformer(toDbpediaId(performerId)));
 }
 
 async function addDbpediaInfo(performer: Performer) {
-  performer = Object.assign(performer, await getDbpediaInfo(performer.sameAs));
-  performer.sameAs = toShortId(performer.sameAs);
+  performer = Object.assign(performer, await getDbpediaInfo(performer.id));
+  performer.id = toShortId(performer.id);
   return performer;
 }
 
