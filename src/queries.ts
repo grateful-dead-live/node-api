@@ -20,7 +20,7 @@ function getEventInfo(eventId: string): DeadEventInfo {
     id: toShortId(eventId),
     date: store.getTime(eventId),
     location: store.getLocationNameForEvent(eventId),
-    state: store.dbpediaToName(store.getStateOrCountry(store.getLocationForEvent(eventId))),
+    state: store.toName(store.getStateOrCountry(store.getLocationForEvent(eventId))),
     venue: store.getVenueNameForEvent(eventId),
     ticket: store.getTickets(eventId)[0],
     pass: store.getPasses(eventId)[0],
@@ -64,7 +64,7 @@ export async function getVenue(venueId: string): Promise<Venue> {
     const label = store.getLabel(venueId);
     return Object.assign({
       id: toShortId(venueId),
-      name: label ? label : store.dbpediaToName(venueId),
+      name: label ? label : store.toName(venueId),
       eventIds: store.getVenueEvents(venueId).map(toShortId),
     }, await getDbpediaInfo(venueDbpedia, true));
   }
@@ -75,8 +75,8 @@ export async function getLocation(locationId: string): Promise<Location> {
   if (locationId) {
     return Object.assign({
       id: toShortId(locationId),
-      name: store.dbpediaToName(locationId).split(',')[0],
-      state: store.dbpediaToName(store.getStateOrCountry(locationId)),
+      name: store.toName(locationId).split(',')[0],
+      state: store.toName(store.getStateOrCountry(locationId)),
       eventIds: store.getLocationEvents(locationId).map(toShortId)
     }, await getDbpediaInfo(locationId, true));
   }
@@ -101,14 +101,9 @@ export function getSongDetails(songId: string): SongDetails {
 }
 
 function getSongInfo(songId: string): SongInfo {
-  songId = toLmoId(songId);
-  const artist = store.getOriginalArtist(songId);
-  artist.id = toShortId(artist.id);
-  return {
-    id: toShortId(songId),
-    name: store.getSongLabel(songId),
-    originalArtist: artist
-  }
+  const songInfo = store.getSongInfo(toLmoId(songId));
+  songInfo.id = toShortId(songInfo.id);
+  return songInfo;
 }
 
 async function getPerformers(eventId: string): Promise<Performer[]> {

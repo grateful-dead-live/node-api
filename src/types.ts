@@ -40,7 +40,8 @@ export interface Set {
 }
 
 export interface SongInfo extends GdObject {
-  originalArtist: Artist
+  composedBy: Artist[],
+  lyricsBy: Artist[]
 };
 
 export interface SongDetails extends SongInfo, GdEventsObject {

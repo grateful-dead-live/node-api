@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as _ from 'lodash';
 import * as N3 from 'n3';
-import { Weather, Performer, Artist } from './types';
+import { Weather, Performer, Artist, SongInfo } from './types';
 
 const LMO = "https://w3id.org/lmo/vocabulary/";
 const LMO_LOCATION = LMO+"location";
@@ -16,8 +16,9 @@ const LMO_THUMBNAIL = LMO+"image_thumbnail";
 const LMO_IMAGE = LMO+"image_file";
 const LMO_PLAYED_AT = LMO+"played_at";
 const LMO_DBPEDIA = LMO+"dbpedia";
-const LMO_SONG_NAME = LMO+"song_name";
-const LMO_ORIGINAL_ARTIST = LMO+"original_artist";
+const LMO_SONG_NAME = LMO+"songname";
+const LMO_COMPOSED_BY = LMO+"music_composed_by";
+const LMO_LYRICS_BY = LMO+"lyrics_written_by";
 const LMO_LINEUP = LMO+"lineup";
 const LMO_PERFORMANCE = LMO+"lineup_performance";
 const LMO_TIME = LMO+"time";
@@ -53,7 +54,6 @@ const TL_AT_DATE = "http://purl.org/NET/c4dm/timeline.owl#atDate";
 const MO = "http://purl.org/ontology/mo/";
 const MO_PERFORMER = MO+"performer";
 const MO_INSTRUMENT = MO+"instrument";
-const MO_SINGER = MO+"singer";
 const MO_BRAINZ = MO+"musicbrainz_guid";
 const MIT = "http://purl.org/ontology/mo/mit#";
 
@@ -61,6 +61,7 @@ const QUDT_NUMERIC_VALUE = "http://qudt.org/schema/qudt#numericValue";
 const DBO = "http://dbpedia.org/ontology/";
 const DBO_ISPARTOF = DBO+"isPartOf";
 const DBO_COUNTRY = DBO+"country";
+const DBR = "http://dbpedia.org/resource/";
 
 const OLO = "http://purl.org/ontology/olo/core#";
 const OLO_SLOT = OLO+"slot";
@@ -163,7 +164,7 @@ export function getLocationForEvent(eventId: string): string {
 }
 
 export function getLocationNameForEvent(eventId: string): string {
-  const name = dbpediaToName(getLocationForEvent(eventId));
+  const name = toName(getLocationForEvent(eventId));
   if (name) return name.split(",")[0];
 }
 
@@ -240,12 +241,13 @@ export function getSongEvents(songId: string): string[] {
   return store.getObjects(songId, LMO_PLAYED_AT);
 }
 
-export function getSongLabel(songId: string): string {
-  return getObject(songId, LMO_SONG_NAME);
-}
-
-export function getOriginalArtist(songId: string): Artist {
-  return getArtist(getObject(songId, LMO_ORIGINAL_ARTIST));
+export function getSongInfo(songId: string): SongInfo {
+  return {
+    id: songId,
+    name: getObject(songId, LMO_SONG_NAME),
+    composedBy: getObjects(songId, LMO_COMPOSED_BY).map(getArtist),
+    lyricsBy: getObjects(songId, LMO_LYRICS_BY).map(getArtist)
+  }
 }
 
 function getArtist(artistId: string): Artist {
@@ -292,7 +294,7 @@ function getPerformance(performanceId: string): Performer {
   const musicianId = getObject(performanceId, MO_PERFOMER);
   const instruments = getObjects(performanceId, MO_INSTRUMENT);
   return Object.assign(getArtist(musicianId),
-    { instruments: instruments.map((i: string) => i.replace(MIT, '')) })
+    { instruments: instruments.map(toName) })
 }
 
 export function getLabel(id: string): string {
@@ -369,9 +371,13 @@ function getList(seq) {
   return elements;
 }
 
-export function dbpediaToName(resource: string): string {
-  if (resource) return resource
-    .replace('http://dbpedia.org/resource/', '').replace(/_/g, ' ');
+export function toName(resource: string): string {
+  if (resource) {
+    if (resource.indexOf(DBR) >= 0) resource = resource.replace(DBR, '');
+    if (resource.indexOf(MIT) >= 0) resource = resource.replace(MIT, '');
+    if (resource.indexOf(LMO) >= 0) resource = resource.replace(LMO, '');
+    return resource.replace(/_/g, ' ');
+  }
 }
 
 function getSubjects(predicate: string, object: string): string[] { 
