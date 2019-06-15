@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as _ from 'lodash';
 import * as N3 from 'n3';
-import { Weather, Performer, Artist, SongInfo } from './types';
+import { Weather, Performer, Artist, SongInfo, Recording } from './types';
 
 const LMO = "https://w3id.org/lmo/vocabulary/";
 const LMO_LOCATION = LMO+"location";
@@ -9,6 +9,8 @@ const LMO_SHOW = LMO+"LiveMusicShow";
 const LMO_VENUE = LMO+"venue";
 const LMO_VENUE_NAME = LMO+"venue_name";
 const LMO_RECORDING_OF = LMO+"recording_of";
+const LMO_REC_SOURCE = LMO+"recording_source";
+const LMO_REC_SOURCE_TYPE = LMO+"recording_source_type";
 const LMO_ETREE_ID = LMO+"etree_id";
 const LMO_ARTEFACT = LMO+"artefact";
 const LMO_DEPICTS = LMO+"depicts";
@@ -194,15 +196,11 @@ export function getVenueNameForEvent(eventId: string) {
   return getObject(getObject(eventId, LMO_VENUE), LMO_VENUE_NAME) ;
 }
 
-export function getRecordings(eventId: string): string[] {
-  let recordings = [];
-  store.forSubjects((recording: string) => {
-    recordings = recordings.concat(store.getObjects(recording, LMO_ETREE_ID));
-  }, LMO_RECORDING_OF, eventId);
-  recordings.forEach(function (recording, i) {
-    recordings[i] = recording.replace(/"/g, '');    // why?
-  });
-  return recordings;
+export function getRecordings(eventId: string): Recording[] {
+  return getSubjects(LMO_RECORDING_OF, eventId).map(r => ({
+    etreeId: getObject(r, LMO_ETREE_ID),
+    isSoundboard: getObject(r, LMO_REC_SOURCE) != null
+  }));
 }
 
 export function getEventId(recording: string): string {
