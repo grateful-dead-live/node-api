@@ -287,9 +287,7 @@ function getMergedPerformances(performanceIds: string[]) {
 }
 
 function getPerformance(performanceId: string): Performer {
-  //let musician = singer ? singer : getObject(performanceId, MO_PERFORMER);
-  const MO_PERFOMER = MO_PERFORMER.replace('performer', 'perfomer');
-  const musicianId = getObject(performanceId, MO_PERFOMER);
+  const musicianId = getObject(performanceId, MO_PERFORMER);
   const instruments = getObjects(performanceId, MO_INSTRUMENT);
   return Object.assign(getArtist(musicianId),
     { instruments: instruments.map(toName) })
