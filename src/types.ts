@@ -17,9 +17,9 @@ export interface DeadEventDetails {
   location: Location,
   venue: Venue,
   setlist: Set[],
-  weather: any,
+  weather: Weather,
   recordings: Recording[],
-  performers: any,
+  performers: Artist[],
   artifacts: Artifact[]
 }
 
@@ -64,17 +64,18 @@ export interface AudioTrack {
   track: string
 }
 
-export interface GdEventsObject extends GdObject {
-  eventIds: string[]
-}
-
-export interface Performer extends Artist {
-  instruments: string[]
+export interface ArtistDetails extends Artist, GdEventsObject {
+  compositions: SongInfo[]
 }
 
 export interface Artist extends GdObject {
   musicbrainzId: string,
-  dbpediaId?: string
+  dbpediaId?: string,
+  instruments?: string[]
+}
+
+export interface GdEventsObject extends GdObject {
+  eventIds: string[]
 }
 
 export interface GdObject extends DbpediaObject {

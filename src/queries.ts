@@ -4,7 +4,7 @@ import * as store from './store';
 import * as dbpedia from './dbpedia';
 import * as news from './news';
 import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
-  SongInfo, SongDetails, Performer, Set } from './types';
+  SongInfo, SongDetails, Artist, ArtistDetails, Set } from './types';
 
 const LMO_PREFIX = 'https://w3id.org/lmo/resource/';
 const DBP_PREFIX = 'http://dbpedia.org/resource/';
@@ -106,18 +106,24 @@ function getSongInfo(songId: string): SongInfo {
   return songInfo;
 }
 
-async function getPerformers(eventId: string): Promise<Performer[]> {
+async function getPerformers(eventId: string): Promise<Artist[]> {
   return Promise.all(store.getPerformers(eventId).map(addDbpediaInfo));
 }
 
-export async function getPerformer(performerId: string): Promise<Performer> {
-  return addDbpediaInfo(store.getPerformer(toDbpediaId(performerId)));
+export async function getArtistDetails(performerId: string): Promise<ArtistDetails> {
+  const artistDetails = store.getArtistDetails(toLmoId(performerId));
+  artistDetails.eventIds = artistDetails.eventIds.map(toShortId);
+  artistDetails.compositions.forEach(c => {
+    c.composedBy.forEach(a => a.id = toShortId(a.id));
+    c.lyricsBy.forEach(a => a.id = toShortId(a.id));
+  });
+  return <Promise<ArtistDetails>>addDbpediaInfo(artistDetails);
 }
 
-async function addDbpediaInfo(performer: Performer) {
-  performer = Object.assign(performer, await getDbpediaInfo(performer.dbpediaId));
-  performer.id = toShortId(performer.id);
-  return performer;
+async function addDbpediaInfo(artist: (Artist | ArtistDetails)) {
+  artist = Object.assign(artist, await getDbpediaInfo(artist.dbpediaId));
+  artist.id = toShortId(artist.id);
+  return artist;
 }
 
 function getNews(eventId: string) {

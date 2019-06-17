@@ -41,8 +41,8 @@ app.get('/song', (req, res) => {
   res.send(queries.getSongDetails(req.query.id));
 });
 
-app.get('/performer', async (req, res) => {
-  res.send(await queries.getPerformer(req.query.id));
+app.get('/artist', async (req, res) => {
+  res.send(await queries.getArtistDetails(req.query.id));
 });
 
 app.get('/etreeinfo', async (req, res) => {
