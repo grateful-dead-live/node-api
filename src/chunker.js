@@ -70,8 +70,9 @@ function getEncodedMp3ChunkStream(filepath, fromSecond, toSecond) {
         decoder.end();
       }
     });
-    decoder.on('error', function() {
+    decoder.on('error', e => {
       console.log("error loading", filepath);
+      console.log(e);
       encoder.end();
     })
     decoder.on('end', function() {

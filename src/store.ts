@@ -255,6 +255,10 @@ export function getSetlist(eventId: string): {name: string, songIds: string[]}[]
   }))
 }
 
+export function getSongId(songname: string): string {
+  return getSubjectForLiteral(LMO_SONG_NAME, songname);
+}
+
 export function getPerformers(eventId: string): Artist[] {
   const performanceIds: string[] =
     getObjects(getObject(eventId, LMO_LINEUP), LMO_PERFORMANCE);
@@ -332,8 +336,17 @@ function toLiteral(object: string) {
   return N3.Util.isLiteral(object) ? N3.Util.getLiteralValue(object) : object;
 }
 
+function getSubjectForLiteral(predicate: string, object: string) {
+  return getSubject(predicate, N3.Util.createLiteral(object));
+}
+
 function getSubject(predicate: string, object: string) {
-  return store.getSubjects(predicate, object)[0];
+  return getSubjects(predicate, object)[0];
+}
+
+function getSubjects(predicate: string, object: string): string[] { 
+  //store.getSubjects doesnt seem to work :(
+  return store.getTriples(null, predicate, object).map(t => t.subject);
 }
 
 /*
@@ -375,11 +388,6 @@ export function toName(resource: string): string {
     if (resource.indexOf(LMO) >= 0) resource = resource.replace(LMO, '');
     return resource.replace(/_/g, ' ');
   }
-}
-
-function getSubjects(predicate: string, object: string): string[] { 
-  //store.getSubjects doesnt seem to work :(
-  return store.getTriples(null, predicate, object).map(t => t.subject);
 }
 
 function getDateTimeInterval(eventId: string) {

@@ -15,19 +15,25 @@ exports.loadFeature = function(songid, feature) {
 
 exports.loadSummarizedFeatures = function(audioUri) {
   const songname = audioToSongname[audioUri];
-  const path = FOLDER+songname+'/'+getLocalPath(audioUri);
-  return JSON.parse(fs.readFileSync(path, 'utf8'));
+  if (songname) {
+    const path = FOLDER+songname+'/'+getLocalPath(audioUri);
+    return JSON.parse(fs.readFileSync(path, 'utf8'));
+  }
+  return {};
 }
 
 //TODO DO VIA TRIPLE STORE
 exports.getDiachronicVersionsAudio = function(songname, count, skip) {
-  if (skip >= 0) count *= (skip+1);
-  let versions = fs.readdirSync(FOLDER+songname+'/').filter(v => v[0] != '.');
-  versions = versions.slice(0, count).filter((v,i) => i % (skip+1) == 0);
-  return versions.map(v => {
-    const localPath = FOLDER+songname+'/'+v+'/';
-    return ARCHIVE+v+'/'+fs.readdirSync(localPath)[0].replace('json', 'mp3');
-  });
+  if (fs.existsSync(FOLDER+songname+'/')) {
+    if (skip >= 0) count *= (skip+1);
+    let versions = fs.readdirSync(FOLDER+songname+'/')
+      .filter(v => v[0] != '.')
+      .slice(0, count).filter((v,i) => i % (skip+1) == 0);
+    return versions.map(v => {
+      const localPath = FOLDER+songname+'/'+v+'/';
+      return ARCHIVE+v+'/'+fs.readdirSync(localPath)[0].replace('json', 'mp3');
+    });
+  }
 }
 
 function getFile(songid, feature) {

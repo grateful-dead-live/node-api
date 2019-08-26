@@ -81,14 +81,16 @@ app.get('/audiochunk', async (req, res) => {
 });
 
 app.get('/diachronic', async (req, res) => {
+  const songname = req.query.songname ? req.query.songname : 'Me And My Uncle';
   const count = req.query.count ? req.query.count : 30;
   const skip = req.query.skip ? req.query.skip : 0;
-  res.send(await features.getDiachronicVersionsAudio(req.query.songname, count, skip));
+  res.send(await queries.getDiachronicSongDetails(songname, count, skip));
 });
 
 app.listen(PORT, async () => {
   await store.isReady();
   console.log('grateful dead server started on port ' + PORT);
+  //console.log(queries.getDiachronicSongDetails('Looks Like Rain'));
   //const AUDIO_URI = 'http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3';
   /*console.log(await store.getEventId('gd1969-11-08.sbd.wise.17433.shnf'))
   console.log(await store.getEventId('gd1969-11-02.sbd.miller.32273.flac16'))

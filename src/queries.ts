@@ -4,7 +4,7 @@ import * as store from './store';
 import * as dbpedia from './dbpedia';
 import * as news from './news';
 import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
-  SongInfo, SongDetails, Artist, ArtistDetails, Set } from './types';
+  SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording } from './types';
 
 const LMO_PREFIX = 'https://w3id.org/lmo/resource/';
 const DBP_PREFIX = 'http://dbpedia.org/resource/';
@@ -104,6 +104,20 @@ function getSongInfo(songId: string): SongInfo {
   const songInfo = store.getSongInfo(toLmoId(songId));
   songInfo.id = toShortId(songInfo.id);
   return songInfo;
+}
+
+export function getDiachronicSongDetails(songname: string, count = 10, skip = 0): SongDetails {
+  const songId = store.getSongId(songname);
+  console.log(songname, songId);
+  const songDetails = getSongDetails(songId);
+  let selectedEvents: [string, Recording][] = songDetails.eventIds.map(e =>
+    [e, store.getRecordings(toLmoId(e)).filter(r => r.isSoundboard)[0]]);
+  selectedEvents = selectedEvents.filter(([_,r]) => r != null)
+    .filter((_,i) => i % (skip+1) == 0).slice(0, count);
+  const soundboardIds = selectedEvents.map(([_,r]) => r.etreeId);
+  songDetails.audio = _.pick(songDetails.audio, soundboardIds);
+  songDetails.eventIds = selectedEvents.map(([e,_]) => toShortId(e));
+  return songDetails;
 }
 
 async function getPerformers(eventId: string): Promise<Artist[]> {
