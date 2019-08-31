@@ -17,6 +17,11 @@ app.use((_, res, next) => {
 });
 
 
+
+app.get('/coordinates', (_, res) =>
+res.send(queries.getAllCoordinates())
+);
+
 app.get('/events', (_, res) =>
   res.send(queries.getAllEventInfos())
 );

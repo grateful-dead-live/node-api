@@ -4,7 +4,7 @@ import * as store from './store';
 import * as dbpedia from './dbpedia';
 import * as news from './news';
 import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
-  SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording } from './types';
+  SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording, VenueDetails } from './types';
 
 const LMO_PREFIX = 'https://w3id.org/lmo/resource/';
 const DBP_PREFIX = 'http://dbpedia.org/resource/';
@@ -13,6 +13,11 @@ const SONGMAP = JSON.parse(fs.readFileSync('json-data/app_song_map.json', 'utf8'
 export function getAllEventInfos(): DeadEventInfo[] {
   return store.getEventIds().map(getEventInfo);
 }
+
+export function getAllCoordinates() {
+  return store.getVenueDetails();
+}
+
 
 function getEventInfo(eventId: string): DeadEventInfo {
   eventId = toLmoId(eventId);

@@ -1,12 +1,13 @@
 import * as fs from 'fs';
 import * as _ from 'lodash';
 import * as N3 from 'n3';
-import { Weather, Artist, ArtistDetails, SongInfo, Recording } from './types';
+import { Weather, Artist, ArtistDetails, SongInfo, Recording, VenueDetails } from './types';
 
 const LMO = "https://w3id.org/lmo/vocabulary/";
 const LMO_LOCATION = LMO+"location";
 const LMO_SHOW = LMO+"LiveMusicShow";
 const LMO_VENUE = LMO+"venue";
+const LMO_VENUE_CLASS = LMO+"Venue";
 const LMO_VENUE_NAME = LMO+"venue_name";
 const LMO_RECORDING_OF = LMO+"recording_of";
 const LMO_REC_SOURCE = LMO+"recording_source";
@@ -68,6 +69,8 @@ const OLO = "http://purl.org/ontology/olo/core#";
 const OLO_SLOT = OLO+"slot";
 const OLO_INDEX = OLO+"index";
 const OLO_ITEM = OLO+"item";
+
+const GEORSS_POINT = "http://www.georss.org/georss/point";
 
 const WEATHER_DICT = {
   'clear': 'wi-day-sunny',
@@ -402,5 +405,27 @@ function getDateTimeInterval(eventId: string) {
   triples = triples.filter(function(triple){
     return getObject(triple.object, TIME_DAY) == "---" + showDate[2]; 
   }); 
-  return triples[0].subject
+  return triples[0].subject;
+}
+
+export function getVenueDetails(): VenueDetails[] {
+  let venueDetailsList = [];
+  getSubjects(RDF_TYPE, LMO_VENUE_CLASS).forEach((s: string) => {
+    const c = getObject(s, GEORSS_POINT);
+    let lat = null;
+    let long = null;
+    if (c != undefined) {
+      this.long = c.split(" ")[0];
+      this.lat = c.split(" ")[1];
+    }
+    venueDetailsList.push({
+      id: s.slice(_.lastIndexOf(s, '/')+1),
+      name: getObject(s, RDFS_LABEL),
+      long: this.long,
+      lat: this.lat
+    });
+  })
+  return venueDetailsList;
+  //return 'hello';
+
 }

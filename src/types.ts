@@ -109,3 +109,10 @@ export interface Weather {
 export interface EtreeInfo {
   tracks: string[]
 }
+
+export interface VenueDetails {
+  name: string,
+  id: string,
+  long: number,
+  lat: number
+}
