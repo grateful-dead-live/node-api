@@ -114,5 +114,6 @@ export interface VenueDetails {
   name: string,
   id: string,
   long: number,
-  lat: number
+  lat: number,
+  shows: []
 }

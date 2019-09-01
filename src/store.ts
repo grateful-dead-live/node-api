@@ -411,6 +411,10 @@ function getDateTimeInterval(eventId: string) {
 export function getVenueDetails(): VenueDetails[] {
   let venueDetailsList = [];
   getSubjects(RDF_TYPE, LMO_VENUE_CLASS).forEach((s: string) => {
+    var shows = [];
+    getVenueEvents(s).forEach((v: string) => {
+      shows.push({ date: getTime(v), id: v.slice(_.lastIndexOf(v, '/')+1)});
+    })        
     const c = getObject(s, GEORSS_POINT);
     if (c != undefined) {
       var long = c.split(" ")[0];
@@ -419,7 +423,8 @@ export function getVenueDetails(): VenueDetails[] {
         id: s.slice(_.lastIndexOf(s, '/')+1),
         name: getObject(s, RDFS_LABEL),
         long: long,
-        lat: lat
+        lat: lat,
+        shows: shows
       });
     }
   })
