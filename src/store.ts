@@ -412,20 +412,17 @@ export function getVenueDetails(): VenueDetails[] {
   let venueDetailsList = [];
   getSubjects(RDF_TYPE, LMO_VENUE_CLASS).forEach((s: string) => {
     const c = getObject(s, GEORSS_POINT);
-    let lat = null;
-    let long = null;
     if (c != undefined) {
-      this.long = c.split(" ")[0];
-      this.lat = c.split(" ")[1];
+      var long = c.split(" ")[0];
+      var lat = c.split(" ")[1];
+      venueDetailsList.push({
+        id: s.slice(_.lastIndexOf(s, '/')+1),
+        name: getObject(s, RDFS_LABEL),
+        long: long,
+        lat: lat
+      });
     }
-    venueDetailsList.push({
-      id: s.slice(_.lastIndexOf(s, '/')+1),
-      name: getObject(s, RDFS_LABEL),
-      long: this.long,
-      lat: this.lat
-    });
   })
   return venueDetailsList;
-  //return 'hello';
 
 }
