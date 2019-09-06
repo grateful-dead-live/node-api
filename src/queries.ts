@@ -37,10 +37,13 @@ function getEventInfo(eventId: string): DeadEventInfo {
 
 export async function getEventDetails(eventId: string): Promise<DeadEventDetails> {
   eventId = toLmoId(eventId);
-  const [loc, ven, per] = await Promise.all([
+  const date = store.getTime(eventId);
+  const [loc, ven, per, nw1, nw2] = await Promise.all([
     getLocation(store.getLocationForEvent(eventId)),
     getVenue(store.getVenueForEvent(eventId)),
-    getPerformers(eventId)
+    getPerformers(eventId),
+    news.getNewsFromNytimes(date),
+    news.getNewsFromGuardian(date)
   ]);
   const artifacts = [];
   store.getTickets(eventId).forEach(t => artifacts.push({type: 'ticket', image: t}));
@@ -50,11 +53,12 @@ export async function getEventDetails(eventId: string): Promise<DeadEventDetails
   store.getPhotos(eventId).forEach(p => artifacts.push({type: 'photo', image: p}));
   return {
     id: toShortId(eventId),
-    date: store.getTime(eventId),
+    date: date,
     location: loc,
     venue: ven,
     setlist: getSetlist(eventId),
     weather: store.getWeather(eventId),
+    news: nw1.concat(nw2),
     recordings: store.getRecordings(eventId),
     performers: per,
     artifacts: artifacts
@@ -146,14 +150,6 @@ async function addDbpediaInfo(artist: (Artist | ArtistDetails)) {
   artist = Object.assign(artist, await getDbpediaInfo(artist.dbpediaId));
   artist.id = toShortId(artist.id);
   return artist;
-}
-
-function getNews(eventId: string) {
-  return news.getObjectFromNytimes(store.getTime(eventId));
-}
-
-function getNews2(eventId: string) {
-  return news.getObjectFromGuardian(store.getTime(eventId));
 }
 
 

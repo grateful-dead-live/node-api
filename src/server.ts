@@ -1,5 +1,6 @@
 import * as express from 'express';
 import * as fs from 'fs';
+import * as _ from 'lodash';
 import * as store from './store';
 import * as etree from './etree';
 import * as features from './features';
@@ -95,6 +96,8 @@ app.get('/diachronic', async (req, res) => {
 app.listen(PORT, async () => {
   await store.isReady();
   console.log('grateful dead server started on port ' + PORT);
+  //console.log(await queries.getEventDetails(_.sample(queries.getAllEventInfos()).id));
+  //console.log(await queries.getNews2(id))
   //console.log(queries.getDiachronicSongDetails('Looks Like Rain'));
   //const AUDIO_URI = 'http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3';
   /*console.log(await store.getEventId('gd1969-11-08.sbd.wise.17433.shnf'))

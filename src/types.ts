@@ -18,6 +18,7 @@ export interface DeadEventDetails {
   venue: Venue,
   setlist: Set[],
   weather: Weather,
+  news: News[],
   recordings: Recording[],
   performers: Artist[],
   artifacts: Artifact[]
@@ -104,6 +105,13 @@ export interface Weather {
   windDirectionIcon: string,
   condition: string,
   conditionIcon: string
+}
+
+export interface News {
+  source: string,
+  title: string,
+  date: string,
+  url: string
 }
 
 export interface EtreeInfo {

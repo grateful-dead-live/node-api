@@ -8,3 +8,5 @@ features.zip
 temp-audio/*
 
 lib/
+
+src/config.ts
