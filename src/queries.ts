@@ -2,9 +2,11 @@ import * as _ from 'lodash';
 import * as fs from 'fs';
 import * as store from './store';
 import * as dbpedia from './dbpedia';
+import * as etree from './etree';
 import * as news from './news';
 import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
-  SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording, VenueDetails } from './types';
+  SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording, EtreeInfo,
+  RecordingDetails } from './types';
 
 const LMO_PREFIX = 'https://w3id.org/lmo/resource/';
 const DBP_PREFIX = 'http://dbpedia.org/resource/';
@@ -51,6 +53,11 @@ export async function getEventDetails(eventId: string): Promise<DeadEventDetails
   store.getPasses(eventId).forEach(p => artifacts.push({type: 'pass', image: p}));
   store.getEnvelopes(eventId).forEach(p => artifacts.push({type: 'envelope', image: p}));
   store.getPhotos(eventId).forEach(p => artifacts.push({type: 'photo', image: p}));
+  const recs = store.getRecordings(eventId);
+  /*const recInfos: EtreeInfo[] = await Promise.all(
+    store.getRecordings(eventId).map(r => etree.getInfoFromEtree(r.etreeId)));
+  const recDetails: RecordingDetails[] =
+    _.zipWith(recs, recInfos, (r, i) => Object.assign(r, {info: i}));*/
   return {
     id: toShortId(eventId),
     date: date,
@@ -59,7 +66,7 @@ export async function getEventDetails(eventId: string): Promise<DeadEventDetails
     setlist: getSetlist(eventId),
     weather: store.getWeather(eventId),
     news: nw1.concat(nw2),
-    recordings: store.getRecordings(eventId),
+    recordings: recs,
     performers: per,
     artifacts: artifacts
   };

@@ -53,6 +53,10 @@ export interface AudioTrackMap {
   [recordingId: string]: AudioTrack[]
 }
 
+export interface RecordingDetails extends Recording {
+  info: EtreeInfo
+}
+
 export interface Recording {
   etreeId: string,
   isSoundboard: boolean
@@ -115,7 +119,12 @@ export interface News {
 }
 
 export interface EtreeInfo {
-  tracks: string[]
+  tracks: string[],
+  id: string,
+  notes: string,
+  source: string,
+  lineage: string,
+  keywords: string[],
 }
 
 export interface VenueDetails {
