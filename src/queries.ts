@@ -2,11 +2,9 @@ import * as _ from 'lodash';
 import * as fs from 'fs';
 import * as store from './store';
 import * as dbpedia from './dbpedia';
-import * as etree from './etree';
 import * as news from './news';
 import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
-  SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording, EtreeInfo,
-  RecordingDetails } from './types';
+  SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording } from './types';
 
 const LMO_PREFIX = 'https://w3id.org/lmo/resource/';
 const DBP_PREFIX = 'http://dbpedia.org/resource/';
@@ -29,10 +27,7 @@ function getEventInfo(eventId: string): DeadEventInfo {
     location: store.getLocationNameForEvent(eventId),
     state: store.toName(store.getStateOrCountry(store.getLocationForEvent(eventId))),
     venue: store.getVenueNameForEvent(eventId),
-    ticket: store.getTickets(eventId)[0],
-    pass: store.getPasses(eventId)[0],
-    poster: store.getPosters(eventId)[0],
-    photo: store.getPhotos(eventId)[0],
+    artifacts: store.getArtefacts(eventId),
     recordings: store.getRecordings(eventId)
   };
 }
@@ -47,12 +42,7 @@ export async function getEventDetails(eventId: string): Promise<DeadEventDetails
     news.getNewsFromNytimes(date),
     news.getNewsFromGuardian(date)
   ]);
-  const artifacts = [];
-  store.getTickets(eventId).forEach(t => artifacts.push({type: 'ticket', image: t}));
-  store.getPosters(eventId).forEach(p => artifacts.push({type: 'poster', image: p}));
-  store.getPasses(eventId).forEach(p => artifacts.push({type: 'pass', image: p}));
-  store.getEnvelopes(eventId).forEach(p => artifacts.push({type: 'envelope', image: p}));
-  store.getPhotos(eventId).forEach(p => artifacts.push({type: 'photo', image: p}));
+  const artifacts = store.getArtefacts(eventId);
   const recs = store.getRecordings(eventId);
   /*const recInfos: EtreeInfo[] = await Promise.all(
     store.getRecordings(eventId).map(r => etree.getInfoFromEtree(r.etreeId)));

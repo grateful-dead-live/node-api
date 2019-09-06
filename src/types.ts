@@ -4,11 +4,8 @@ export interface DeadEventInfo {
   location: string,
   state: string,
   venue: string,
-  ticket: string,
-  pass: string,
-  poster: string,
-  photo: string,
-  recordings: Recording[]
+  recordings: Recording[],
+  artifacts: Artifact[]
 }
 
 export interface DeadEventDetails {
@@ -24,9 +21,21 @@ export interface DeadEventDetails {
   artifacts: Artifact[]
 }
 
+export enum ArtifactType {
+  Ticket = 'ticket',
+  Poster = 'poster',
+  Pass = 'backstage pass',
+  Photo = 'photo',
+  Envelope = 'envelope',
+  Tshirt = 'T-shirt',
+  Fanart = 'fan art'
+}
+
 export interface Artifact {
-  type: string,
-  image: string
+  type: ArtifactType,
+  thumbnail: string,
+  image: string,
+  description: string
 }
 
 export type Venue = GdEventsObject;

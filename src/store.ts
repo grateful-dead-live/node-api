@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as _ from 'lodash';
 import * as N3 from 'n3';
-import { Weather, Artist, ArtistDetails, SongInfo, Recording, VenueDetails } from './types';
+import { Weather, Artist, ArtistDetails, SongInfo, Recording, VenueDetails,
+  Artifact, ArtifactType } from './types';
 
 const LMO = "https://w3id.org/lmo/vocabulary/";
 const LMO_LOCATION = LMO+"location";
@@ -14,6 +15,7 @@ const LMO_REC_SOURCE = LMO+"recording_source";
 const LMO_ETREE_ID = LMO+"etree_id";
 const LMO_ARTEFACT = LMO+"artefact";
 const LMO_DEPICTS = LMO+"depicts";
+const LMO_DESCRIPTION = LMO+"description";
 const LMO_THUMBNAIL = LMO+"image_thumbnail";
 const LMO_IMAGE = LMO+"image_file";
 const LMO_PLAYED_AT = LMO+"played_at";
@@ -37,6 +39,9 @@ const LMO_PHOTO = LMO+"Photo";
 const LMO_TICKET = LMO+"Ticket";
 const LMO_BACKSTAGEPASS = LMO+"BackstagePass";
 const LMO_ENVELOPE = LMO+"Envelope";
+const LMO_TSHIRT = LMO+"TShirt";
+const LMO_FANART = LMO+"FanArt";
+const LMO_GDAO_ID = LMO+"gdao_id";
 
 const TIME = "http://www.w3.org/2006/time#"
 const TIME_HAS_DATE_TIME_DESCRIPTION = TIME+"hasDateTimeDescription"
@@ -69,6 +74,9 @@ const OLO = "http://purl.org/ontology/olo/core#";
 const OLO_SLOT = OLO+"slot";
 const OLO_INDEX = OLO+"index";
 const OLO_ITEM = OLO+"item";
+
+const DC = 'http://purl.org/dc/elements/1.1/';
+const DC_DESCRIPTION = DC+'description';
 
 const GEORSS_POINT = "http://www.georss.org/georss/point";
 
@@ -209,32 +217,27 @@ export function getEventId(recording: string): string {
   return getObject(recording, LMO_RECORDING_OF);
 }
 
-export function getPosters(eventId: string): string[] {
-  return getArtefacts(eventId, LMO_POSTER);
+export function getArtefacts(eventId: string, lmoType?: string): Artifact[] {
+  let ids: string[] = getObjects(getSubject(EVENT_SUBEVENT, eventId), LMO_ARTEFACT);
+  if (lmoType) ids = ids.filter(a => getObject(a, RDF_TYPE) === lmoType);
+  const images = ids.map(p => getSubject(LMO_DEPICTS, p));
+  return ids.map((id,i) => ({
+    type: LMO_TYPE_TO_ARTIFACT_TYPE[getObject(id, RDF_TYPE)],
+    thumbnail: getObject(images[i], LMO_THUMBNAIL),
+    image: getObject(images[i], LMO_IMAGE),
+    description: getObject(getObject(id, LMO_DESCRIPTION), DC_DESCRIPTION),
+    collection: getObject(id, LMO_GDAO_ID) ? "GDAO" : "Psilo"
+  }));
 }
 
-export function getPhotos(eventId: string): string[] {
-  return getArtefacts(eventId, LMO_PHOTO);
-}
-
-export function getEnvelopes(eventId: string): string[] {
-  return getArtefacts(eventId, LMO_ENVELOPE);
-}
-
-export function getTickets(eventId: string): string[] {
-  return getArtefacts(eventId, LMO_TICKET);
-}
-
-export function getPasses(eventId: string): string[] {
-  return getArtefacts(eventId, LMO_BACKSTAGEPASS);
-}
-
-function getArtefacts(eventId: string, type: string): string[] {
-  return store.getObjects(getSubject(EVENT_SUBEVENT, eventId), LMO_ARTEFACT)
-    .filter(a => getObject(a, RDF_TYPE) === type)
-    .map(p => store.getTriples(null, LMO_DEPICTS, p)[0])
-    .map(t => t.subject)
-    .map(t => getObject(t, LMO_THUMBNAIL) || getObject(t, LMO_IMAGE));
+const LMO_TYPE_TO_ARTIFACT_TYPE = {
+  [LMO_TICKET]: ArtifactType.Ticket,
+  [LMO_POSTER]: ArtifactType.Poster,
+  [LMO_PHOTO]: ArtifactType.Photo,
+  [LMO_BACKSTAGEPASS]: ArtifactType.Pass,
+  [LMO_ENVELOPE]: ArtifactType.Envelope,
+  [LMO_TSHIRT]: ArtifactType.Tshirt,
+  [LMO_FANART]: ArtifactType.Fanart
 }
 
 export function getSongEvents(songId: string): string[] {
