@@ -18,6 +18,9 @@ export function getAllCoordinates() {
   return store.getVenueDetails();
 }
 
+export function getTours() {
+  return store.getTourDetails();
+}
 
 function getEventInfo(eventId: string): DeadEventInfo {
   eventId = toLmoId(eventId);

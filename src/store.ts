@@ -42,6 +42,9 @@ const LMO_ENVELOPE = LMO+"Envelope";
 const LMO_TSHIRT = LMO+"TShirt";
 const LMO_FANART = LMO+"FanArt";
 const LMO_GDAO_ID = LMO+"gdao_id";
+const LMO_TOUR = LMO+"Tour";
+const LMO_TOUR_SHOW = LMO+"tour_show";
+const LMO_TOUR_NAME = LMO+"tour_name";
 
 const TIME = "http://www.w3.org/2006/time#"
 const TIME_HAS_DATE_TIME_DESCRIPTION = TIME+"hasDateTimeDescription"
@@ -138,6 +141,7 @@ export async function isReady() {
   await readRdfIntoStore('rdf-data/venues.ttl');
   await readRdfIntoStore('rdf-data/weather.ttl');
   await readRdfIntoStore('rdf-data/datetimeobjects.ttl');
+  await readRdfIntoStore('rdf-data/tours.ttl');
 }
 
 export function getEventIds() {
@@ -432,5 +436,35 @@ export function getVenueDetails(): VenueDetails[] {
     }
   })
   return venueDetailsList;
+
+}
+
+
+export function getTourDetails(): any {
+  var tourlist = {};
+  var tours = getSubjects(RDF_TYPE, LMO_TOUR);
+  tours.forEach(t => {
+    var tour = {}
+    var tour_name = getObject(t, LMO_TOUR_NAME);
+    getObjects(t, LMO_TOUR_SHOW).forEach(s => {
+      var t = getTime(s);
+      var show_id = s.slice(_.lastIndexOf(s, '/')+1);
+      var v = getObject(s, LMO_VENUE);
+      var venue_name = getObject(v, RDFS_LABEL);
+      const c = getObject(v, GEORSS_POINT);
+      if (c != undefined) {
+        var long = c.split(" ")[0];
+        var lat = c.split(" ")[1];
+        if (!(venue_name in tourlist)) {
+          tour[venue_name] = {"long": long, "lat": lat, "id": v, "shows": []};
+        }
+        var show = { "id": show_id, "date": t};
+        //console.log(show)
+        tour[venue_name]["shows"].push(show);
+      }
+    })
+    tourlist[tour_name] = tour; 
+  })
+  return tourlist;
 
 }

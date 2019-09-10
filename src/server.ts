@@ -23,6 +23,10 @@ app.get('/coordinates', (_, res) =>
 res.send(queries.getAllCoordinates())
 );
 
+app.get('/tours', (_, res) =>
+res.send(queries.getTours())
+);
+
 app.get('/events', (_, res) =>
   res.send(queries.getAllEventInfos())
 );
