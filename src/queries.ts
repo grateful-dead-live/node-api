@@ -58,7 +58,7 @@ export async function getEventDetails(eventId: string): Promise<DeadEventDetails
     venue: ven,
     setlist: getSetlist(eventId),
     weather: store.getWeather(eventId),
-    news: nw1.concat(nw2),
+    news: _.sortBy(nw1.concat(nw2), n => n.date),
     recordings: recs,
     performers: per,
     artifacts: artifacts
