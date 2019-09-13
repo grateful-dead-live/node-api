@@ -55,6 +55,7 @@ const TIME_DAY = TIME+"day";
 const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 const RDF_TYPE = RDF+"type";
 const RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label"
+const RDFS_COMMENT = "http://www.w3.org/2000/01/rdf-schema#comment"
 const FOAF_NAME = "http://xmlns.com/foaf/0.1/name"
 
 const EVENT = "http://purl.org/NET/c4dm/event.owl#";
@@ -423,6 +424,13 @@ export function getVenueDetails(): VenueDetails[] {
       shows.push({ date: getTime(v), id: v.slice(_.lastIndexOf(v, '/')+1)});
     })        
     const c = getObject(s, GEORSS_POINT);
+    var comment = getObject(s, RDFS_COMMENT);
+    if (comment == 'georss:point for city only.'){
+      comment = "city"; 
+    } else {
+      comment = "venue"
+      }
+
     if (c != undefined) {
       var long = c.split(" ")[0];
       var lat = c.split(" ")[1];
@@ -431,7 +439,8 @@ export function getVenueDetails(): VenueDetails[] {
         name: getObject(s, RDFS_LABEL),
         long: long,
         lat: lat,
-        shows: shows
+        shows: shows,
+        georss: comment
       });
     }
   })

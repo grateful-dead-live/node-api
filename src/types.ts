@@ -141,5 +141,6 @@ export interface VenueDetails {
   id: string,
   long: number,
   lat: number,
-  shows: []
+  shows: [],
+  georss: string
 }
