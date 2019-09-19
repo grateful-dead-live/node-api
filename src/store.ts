@@ -473,7 +473,5 @@ export function getTourDetails(): any {
     })
     tourlist[tour_name] = tour; 
   })
-  console.log(tourlist["Summer Tour 1989"]["Shoreline Amphitheatre in Mountain View, California"]["shows"])
   return tourlist;
-
 }
