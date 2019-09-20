@@ -55,8 +55,12 @@ app.get('/artist', async (req, res) => {
   res.send(await queries.getArtistDetails(req.query.id));
 });
 
-app.get('/etreeinfo', async (req, res) => {
-  res.send(await etree.getInfoFromEtree(req.query.recording));
+app.get('/recording', async (req, res) => {
+  res.send(await queries.getRecordingDetails(req.query.etreeid));
+});
+
+app.get('/tracks', async (req, res) => {
+  res.send(await queries.getTracksForRecording(req.query.etreeid));
 });
 
 app.get('/feature', async (req, res) => {
@@ -100,6 +104,7 @@ app.get('/diachronic', async (req, res) => {
 app.listen(PORT, async () => {
   await store.isReady();
   console.log('grateful dead server started on port ' + PORT);
+  //console.log(JSON.stringify(await queries.getTracksForRecording('gd95-05-21.nak.12102.wankleswurth.sbeok.shnf')))
   //console.log(JSON.stringify((await queries.getEventDetails(_.sample(queries.getAllEventInfos()).id)).recordings));
   //console.log(await queries.getNews2(id))
   //console.log(queries.getDiachronicSongDetails('Looks Like Rain'));

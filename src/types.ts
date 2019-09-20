@@ -64,6 +64,7 @@ export interface AudioTrackMap {
 
 export interface RecordingDetails extends Recording {
   info: EtreeInfo
+  tracks: AudioTrack[]
 }
 
 export interface Recording {

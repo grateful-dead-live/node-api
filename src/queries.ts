@@ -3,12 +3,29 @@ import * as fs from 'fs';
 import * as store from './store';
 import * as dbpedia from './dbpedia';
 import * as news from './news';
+import * as etree from './etree';
 import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
-  SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording } from './types';
+  SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording, RecordingDetails,
+  EtreeInfo, AudioTrack } from './types';
+
+interface SongMap {
+  [songName: string]: {
+    [recordingId: string]: AudioTrack[]
+  }
+}
+
+interface RecMap {
+  [recordingId: string]: AudioTrack[]
+}
 
 const LMO_PREFIX = 'https://w3id.org/lmo/resource/';
 const DBP_PREFIX = 'http://dbpedia.org/resource/';
-const SONGMAP = JSON.parse(fs.readFileSync('json-data/app_song_map.json', 'utf8'));
+const SONGMAP: SongMap = JSON.parse(fs.readFileSync('json-data/app_song_map.json', 'utf8'));
+const tracksByRecording: [string, AudioTrack[]][] =
+  _.flatten(_.values(SONGMAP).map(_.toPairs));
+const grouped = _.groupBy(tracksByRecording, p => p[0]);
+//tracks are not ordered! refer to etree for order...
+const RECMAP: RecMap = _.mapValues(grouped, v => _.flatten(v.map(ps => ps[1])));
 
 export function getAllEventInfos(): DeadEventInfo[] {
   return store.getEventIds().map(getEventInfo);
@@ -130,6 +147,26 @@ export function getDiachronicSongDetails(songname: string, count = 10, skip = 0)
   songDetails.audio = _.pick(songDetails.audio, soundboardIds);
   songDetails.eventIds = selectedEvents.map(([e,_]) => toShortId(e));
   return songDetails;
+}
+
+export async function getRecordingDetails(etreeId: string): Promise<RecordingDetails> {
+  return Object.assign(store.getRecordingFromEtreeId(etreeId), {
+    info: await etree.getInfoFromEtree(etreeId),
+    tracks: getTracksForRecording(etreeId)
+  });
+}
+
+export function getTracksForRecording(etreeId: string): AudioTrack[] {
+  //etree info seems unreliable for tracks!! but anyway it's sooo slow...
+  //const tracks = etreeInfo.tracks.map(n => getTrackFromRecMap(etreeId, n));
+  const eventId = store.getEventIdForRecording(etreeId);
+  const setlist = getSetlist(eventId);
+  const songs = _.flatten(setlist.map(l => l.songs.map(s => getSongDetails(s.id))));
+  return _.flatten(songs.map(s => s.audio[etreeId]))
+}
+
+function getTrackFromRecMap(etreeId: string, filename: string): AudioTrack {
+  return RECMAP[etreeId].filter(t => t.filename === filename)[0]
 }
 
 async function getPerformers(eventId: string): Promise<Artist[]> {
