@@ -68,6 +68,7 @@ export interface RecordingDetails extends Recording {
 }
 
 export interface Recording {
+  id: string,
   etreeId: string,
   isSoundboard: boolean
 }

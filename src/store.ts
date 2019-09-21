@@ -211,20 +211,17 @@ export function getVenueNameForEvent(eventId: string) {
   return getObject(getObject(eventId, LMO_VENUE), LMO_VENUE_NAME) ;
 }
 
-export function getEventIdForRecording(etreeId: string) {
-  return getObject(getSubjectForLiteral(LMO_ETREE_ID, etreeId), LMO_RECORDING_OF);
+export function getEventIdForRecording(recordingId: string) {
+  return getObject(recordingId, LMO_RECORDING_OF);
 }
 
 export function getRecordings(eventId: string): Recording[] {
   return getSubjects(LMO_RECORDING_OF, eventId).map(getRecording);
 }
 
-export function getRecordingFromEtreeId(etreeId: string): Recording {
-  return getRecording(getSubject(LMO_ETREE_ID, etreeId));
-}
-
-function getRecording(recordingId: string): Recording {
+export function getRecording(recordingId: string): Recording {
   return {
+    id: recordingId,
     etreeId: getObject(recordingId, LMO_ETREE_ID),
     isSoundboard: getObject(recordingId, LMO_REC_SOURCE) != null
   }
