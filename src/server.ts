@@ -2,7 +2,6 @@ import * as express from 'express';
 import * as fs from 'fs';
 import * as _ from 'lodash';
 import * as store from './store';
-import * as etree from './etree';
 import * as features from './features';
 import * as chunker from './chunker';
 import * as queries from './queries';
@@ -56,11 +55,11 @@ app.get('/artist', async (req, res) => {
 });
 
 app.get('/recording', async (req, res) => {
-  res.send(await queries.getRecordingDetails(req.query.etreeid));
+  res.send(await queries.getRecordingDetails(req.query.id));
 });
 
 app.get('/tracks', async (req, res) => {
-  res.send(await queries.getTracksForRecording(req.query.etreeid));
+  res.send(await queries.getTracksForRecording(req.query.id));
 });
 
 app.get('/feature', async (req, res) => {
@@ -104,7 +103,7 @@ app.get('/diachronic', async (req, res) => {
 app.listen(PORT, async () => {
   await store.isReady();
   console.log('grateful dead server started on port ' + PORT);
-  //console.log(JSON.stringify(await queries.getTracksForRecording('gd95-05-21.nak.12102.wankleswurth.sbeok.shnf')))
+  //console.log(JSON.stringify(await queries.getTracksForRecording('recording_aade498bc5ce490c98785a67f88cbfd9')))
   //console.log(JSON.stringify((await queries.getEventDetails(_.sample(queries.getAllEventInfos()).id)).recordings));
   //console.log(await queries.getNews2(id))
   //console.log(queries.getDiachronicSongDetails('Looks Like Rain'));

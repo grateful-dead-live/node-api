@@ -6,7 +6,7 @@ import * as news from './news';
 import * as etree from './etree';
 import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
   SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording, RecordingDetails,
-  EtreeInfo, AudioTrack } from './types';
+  AudioTrack } from './types';
 
 interface SongMap {
   [songName: string]: {
@@ -14,18 +14,18 @@ interface SongMap {
   }
 }
 
-interface RecMap {
+/*interface RecMap {
   [recordingId: string]: AudioTrack[]
-}
+}*/
 
 const LMO_PREFIX = 'https://w3id.org/lmo/resource/';
 const DBP_PREFIX = 'http://dbpedia.org/resource/';
 const SONGMAP: SongMap = JSON.parse(fs.readFileSync('json-data/app_song_map.json', 'utf8'));
-const tracksByRecording: [string, AudioTrack[]][] =
+/*const tracksByRecording: [string, AudioTrack[]][] =
   _.flatten(_.values(SONGMAP).map(_.toPairs));
 const grouped = _.groupBy(tracksByRecording, p => p[0]);
 //tracks are not ordered! refer to etree for order...
-const RECMAP: RecMap = _.mapValues(grouped, v => _.flatten(v.map(ps => ps[1])));
+const RECMAP: RecMap = _.mapValues(grouped, v => _.flatten(v.map(ps => ps[1])));*/
 
 export function getAllEventInfos(): DeadEventInfo[] {
   return store.getEventIds().map(getEventInfo);
@@ -64,10 +64,6 @@ export async function getEventDetails(eventId: string): Promise<DeadEventDetails
   ]);
   const artifacts = store.getArtefacts(eventId);
   const recs = store.getRecordings(eventId);
-  /*const recInfos: EtreeInfo[] = await Promise.all(
-    store.getRecordings(eventId).map(r => etree.getInfoFromEtree(r.etreeId)));
-  const recDetails: RecordingDetails[] =
-    _.zipWith(recs, recInfos, (r, i) => Object.assign(r, {info: i}));*/
   return {
     id: toShortId(eventId),
     date: date,
@@ -149,25 +145,30 @@ export function getDiachronicSongDetails(songname: string, count = 10, skip = 0)
   return songDetails;
 }
 
-export async function getRecordingDetails(etreeId: string): Promise<RecordingDetails> {
-  return Object.assign(store.getRecordingFromEtreeId(etreeId), {
-    info: await etree.getInfoFromEtree(etreeId),
-    tracks: getTracksForRecording(etreeId)
+export async function getRecordingDetails(recordingId: string): Promise<RecordingDetails> {
+  const recording = store.getRecording(toLmoId(recordingId));
+  recording.id = toShortId(recording.id);
+  return Object.assign(recording, {
+    info: await etree.getInfoFromEtree(recording.etreeId),
+    tracks: getTracksForRecording(recordingId)
   });
 }
 
-export function getTracksForRecording(etreeId: string): AudioTrack[] {
+export function getTracksForRecording(recordingId: string): AudioTrack[] {
+  recordingId = toLmoId(recordingId);
   //etree info seems unreliable for tracks!! but anyway it's sooo slow...
   //const tracks = etreeInfo.tracks.map(n => getTrackFromRecMap(etreeId, n));
-  const eventId = store.getEventIdForRecording(etreeId);
+  const etreeId = store.getRecording(recordingId).etreeId;
+  const eventId = store.getEventIdForRecording(recordingId);
   const setlist = getSetlist(eventId);
   const songs = _.flatten(setlist.map(l => l.songs.map(s => getSongDetails(s.id))));
-  return _.flatten(songs.map(s => s.audio[etreeId]))
+  //sometimes audio for recording not there!!
+  return _.flatten(songs.map(s => s.audio[etreeId]).filter(s => s));
 }
 
-function getTrackFromRecMap(etreeId: string, filename: string): AudioTrack {
+/*function getTrackFromRecMap(etreeId: string, filename: string): AudioTrack {
   return RECMAP[etreeId].filter(t => t.filename === filename)[0]
-}
+}*/
 
 async function getPerformers(eventId: string): Promise<Artist[]> {
   return Promise.all(store.getPerformers(eventId).map(addDbpediaInfo));
