@@ -6,11 +6,35 @@ import * as etree from './etree';
 import * as features from './features';
 import * as chunker from './chunker';
 import * as queries from './queries';
+import * as Fuse from 'fuse.js';
 
 const PORT = process.env.PORT || 8060;
 const ADDRESS = "http://localhost:8060/"//"https://grateful-dead-api.herokuapp.com/";//"http://localhost:8060/";
+const SEARCHJSON = JSON.parse(fs.readFileSync('json-data/search.json', 'utf8'));
+
+var options = {
+  shouldSort: true,
+  tokenize: true,
+  matchAllTokens: true,
+  threshold: 0.1,
+  location: 0,
+  distance: 100,
+  maxPatternLength: 32,
+  minMatchCharLength: 1,
+  keys: [
+    "songs",
+    "venue.location",
+    "venue.name",
+    "date",
+    "name",
+    "location"
+  ]
+};
+
+var fuse = new Fuse(SEARCHJSON, options);
 
 const app = express();
+
 app.use((_, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -119,4 +143,10 @@ app.listen(PORT, async () => {
   //console.log(await features.getDiachronicVersionsAudio('goodlovin', 10));
   //console.log(await features.loadSummarizedFeatures('http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3'))
   //console.log(await features.loadSummarizedFeatures('goodlovin', 'gd1969-11-21.set2.sbd.gmb.96580.flac16/gd1969-11-21t01.mp3'));
+});
+
+app.get('/search', function(req, res){
+  console.log(req.query.q)
+  var result = fuse.search(req.query.q);
+  res.send(result);
 });
