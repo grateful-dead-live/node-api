@@ -203,15 +203,15 @@ export function getWeather(eventId: string): Weather {
   };
 }
 
-export function getVenueForEvent(eventId: string) {
+export function getVenueForEvent(eventId: string): string {
   return getObject(eventId, LMO_VENUE);
 }
 
-export function getVenueNameForEvent(eventId: string) {
+export function getVenueNameForEvent(eventId: string): string {
   return getObject(getObject(eventId, LMO_VENUE), LMO_VENUE_NAME) ;
 }
 
-export function getEventIdForRecording(recordingId: string) {
+export function getEventIdForRecording(recordingId: string): string {
   return getObject(recordingId, LMO_RECORDING_OF);
 }
 

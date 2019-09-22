@@ -48,7 +48,7 @@ function getEventInfo(eventId: string): DeadEventInfo {
     state: store.toName(store.getStateOrCountry(store.getLocationForEvent(eventId))),
     venue: store.getVenueNameForEvent(eventId),
     artifacts: store.getArtefacts(eventId),
-    recordings: store.getRecordings(eventId)
+    recordings: makeIdsShort(store.getRecordings(eventId))
   };
 }
 
@@ -63,7 +63,7 @@ export async function getEventDetails(eventId: string): Promise<DeadEventDetails
     news.getNewsFromGuardian(date)
   ]);
   const artifacts = store.getArtefacts(eventId);
-  const recs = store.getRecordings(eventId);
+  const recs = makeIdsShort(store.getRecordings(eventId));
   return {
     id: toShortId(eventId),
     date: date,
@@ -123,9 +123,7 @@ export function getSongDetails(songId: string): SongDetails {
 }
 
 function getSongInfo(songId: string): SongInfo {
-  const songInfo = store.getSongInfo(toLmoId(songId));
-  songInfo.id = toShortId(songInfo.id);
-  return songInfo;
+  return makeIdShort(store.getSongInfo(toLmoId(songId)));
 }
 
 export function getDiachronicSongDetails(songname: string, count = 10, skip = 0): SongDetails {
@@ -146,8 +144,7 @@ export function getDiachronicSongDetails(songname: string, count = 10, skip = 0)
 }
 
 export async function getRecordingDetails(recordingId: string): Promise<RecordingDetails> {
-  const recording = store.getRecording(toLmoId(recordingId));
-  recording.id = toShortId(recording.id);
+  const recording = makeIdShort(store.getRecording(toLmoId(recordingId)));
   return Object.assign(recording, {
     info: await etree.getInfoFromEtree(recording.etreeId),
     tracks: getTracksForRecording(recordingId)
@@ -178,16 +175,14 @@ export async function getArtistDetails(performerId: string): Promise<ArtistDetai
   const artistDetails = store.getArtistDetails(toLmoId(performerId));
   artistDetails.eventIds = artistDetails.eventIds.map(toShortId);
   artistDetails.compositions.forEach(c => {
-    c.composedBy.forEach(a => a.id = toShortId(a.id));
-    c.lyricsBy.forEach(a => a.id = toShortId(a.id));
+    makeIdsShort(c.composedBy);
+    makeIdsShort(c.lyricsBy);
   });
   return <Promise<ArtistDetails>>addDbpediaInfo(artistDetails);
 }
 
 async function addDbpediaInfo(artist: (Artist | ArtistDetails)) {
-  artist = Object.assign(artist, await getDbpediaInfo(artist.dbpediaId));
-  artist.id = toShortId(artist.id);
-  return artist;
+  return makeIdShort(Object.assign(artist, await getDbpediaInfo(artist.dbpediaId)));
 }
 
 
@@ -201,6 +196,15 @@ async function getDbpediaInfo(id: string, includeGeoloc?: boolean): Promise<Dbpe
   const object: DbpediaObject =
     { image: info[0], thumbnail: info[1], comment: info[2] };
   if (includeGeoloc) object.geoloc = info[3];
+  return object;
+}
+
+function makeIdsShort<T extends {id: string}>(objects: T[]) {
+  return objects.map(makeIdShort);
+}
+
+function makeIdShort<T extends {id: string}>(object: T) {
+  object.id = toShortId(object.id);
   return object;
 }
 
