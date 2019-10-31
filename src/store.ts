@@ -235,12 +235,14 @@ export function getArtefacts(eventId: string, lmoType?: string): Artifact[] {
   let ids: string[] = getObjects(getSubject(EVENT_SUBEVENT, eventId), LMO_ARTEFACT);
   if (lmoType) ids = ids.filter(a => getObject(a, RDF_TYPE) === lmoType);
   const images = ids.map(p => getSubject(LMO_DEPICTS, p));
+  
   return ids.map((id,i) => ({
     type: LMO_TYPE_TO_ARTIFACT_TYPE[getObject(id, RDF_TYPE)],
     thumbnail: getObject(images[i], LMO_THUMBNAIL),
     image: getObject(images[i], LMO_IMAGE),
     description: getObject(getObject(id, LMO_DESCRIPTION), DC_DESCRIPTION),
-    collection: getObject(id, LMO_GDAO_ID) ? "GDAO" : "Psilo"
+    collection: getObject(id, LMO_GDAO_ID) ? "GDAO" : "Psilo",
+    source: getObject(id, LMO_GDAO_ID) ? "https://www.gdao.org/items/show/" + getObject(id, LMO_GDAO_ID) : undefined
   }));
 }
 

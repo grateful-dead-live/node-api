@@ -35,7 +35,9 @@ export interface Artifact {
   type: ArtifactType,
   thumbnail: string,
   image: string,
-  description: string
+  description: string,
+  collection: string,
+  source: string
 }
 
 export type Venue = GdEventsObject;
