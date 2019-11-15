@@ -476,7 +476,7 @@ export function getTourDetails(): any {
         var long = c.split(" ")[0];
         var lat = c.split(" ")[1];
         if (!(venue_name in tour)) {
-          tour[venue_name] = {"long": long, "lat": lat, "id": v, "shows": []};
+          tour[venue_name] = {"long": long, "lat": lat, "id": v.slice(_.lastIndexOf(v, '/')+1), "shows": []};
         }
         var show = { "id": show_id, "date": t};
         tour[venue_name]["shows"].push(show);
