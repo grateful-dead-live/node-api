@@ -133,7 +133,7 @@ export function getDiachronicSongDetails(songname: string, count = 10, skip = 0)
   const events = songDetails.eventIds.map(getEventInfo);
   events.sort((a, b) => parseFloat(a.date.replace(/-/g, ''))
     - parseFloat(b.date.replace(/-/g, '')));
-  let selectedEvents: [string, Recording][] = events.map(e =>
+  let selectedEvents: [string, Recording][] = <[string, Recording][]>events.map(e =>
     [e.id, store.getRecordings(toLmoId(e.id)).filter(r => r.isSoundboard)[0]]);
   selectedEvents = selectedEvents.filter(([_,r]) => r != null)
     .filter((_,i) => i % (skip+1) == 0).slice(0, count);
