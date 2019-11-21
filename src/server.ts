@@ -8,7 +8,8 @@ import * as queries from './queries';
 import * as Fuse from 'fuse.js';
 
 const PORT = process.env.PORT || 8060;
-const ADDRESS = "http://localhost:8060/"//"https://grateful-dead-api.herokuapp.com/";//"http://localhost:8060/";
+const ADDRESS = "http://localhost:8060/";
+//const ADDRESS = "https://grateful-dead-api.herokuapp.com/";
 const SEARCHJSON = JSON.parse(fs.readFileSync('json-data/search.json', 'utf8'));
 
 var options = {
