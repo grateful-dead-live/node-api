@@ -88,9 +88,9 @@ async function getTrackList(resource, res){
     elements.push(r);
   }
 
-  if (!(await spectrogramExists(resource, elements[0]))) {
-    return "n/a"
-  }
+  //if (!(await spectrogramExists(resource, elements[0]))) {
+  //  return "n/a"
+  //}
 
   return elements.sort()
 
