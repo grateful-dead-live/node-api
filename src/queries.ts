@@ -67,7 +67,7 @@ export async function getEventDetails(eventId: string): Promise<DeadEventDetails
   return {
     id: toShortId(eventId),
     date: date,
-    location: loc,
+    location: <Location> loc,
     venue: ven,
     setlist: getSetlist(eventId),
     weather: store.getWeather(eventId),

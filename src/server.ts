@@ -8,8 +8,8 @@ import * as queries from './queries';
 import * as Fuse from 'fuse.js';
 
 const PORT = process.env.PORT || 8060;
-const ADDRESS = "http://localhost:8060/";
-//const ADDRESS = "https://grateful-dead-api.herokuapp.com/";
+//const ADDRESS = "http://localhost:8060/";
+const ADDRESS = "https://grateful-dead-api.herokuapp.com/";
 const SEARCHJSON = JSON.parse(fs.readFileSync('json-data/search.json', 'utf8'));
 
 var options = {
@@ -56,43 +56,43 @@ app.get('/events', (_, res) =>
 );
 
 app.get('/details', async (req, res) =>
-  res.send(await queries.getEventDetails(req.query.event))
+  res.send(await queries.getEventDetails(<string> req.query.event))
 );
 
 app.get('/venue', async (req, res) =>
-  res.send(await queries.getVenue(req.query.id))
+  res.send(await queries.getVenue(<string> req.query.id))
 );
 
 app.get('/location', async (req, res) =>
-  res.send(await queries.getLocation(req.query.id))
+  res.send(await queries.getLocation(<string> req.query.id))
 );
 
 app.get('/setlist', (req, res) => {
-  res.send(queries.getSetlist(req.query.event));
+  res.send(queries.getSetlist(<string> req.query.event));
 });
 
 app.get('/song', (req, res) => {
-  res.send(queries.getSongDetails(req.query.id));
+  res.send(queries.getSongDetails(<string> req.query.id));
 });
 
 app.get('/artist', async (req, res) => {
-  res.send(await queries.getArtistDetails(req.query.id));
+  res.send(await queries.getArtistDetails(<string> req.query.id));
 });
 
 app.get('/recording', async (req, res) => {
-  res.send(await queries.getRecordingDetails(req.query.id));
+  res.send(await queries.getRecordingDetails(<string> req.query.id));
 });
 
 app.get('/tracks', async (req, res) => {
-  res.send(await queries.getTracksForRecording(req.query.id));
+  res.send(await queries.getTracksForRecording(<string> req.query.id));
 });
 
 app.get('/feature', async (req, res) => {
-  res.send(await features.loadFeature(req.query.songid, req.query.feature));
+  res.send(await features.loadFeature(<string> req.query.songid, <string> req.query.feature));
 });
 
 app.get('/featuresummary', async (req, res) => {
-  let audio = req.query.audiouri;
+  let audio = <string> req.query.audiouri;
   if (audio.indexOf('audiochunk')) {
     audio = audio.replace(ADDRESS+'audiochunk?filename=', '');
     const paramsIndex = audio.indexOf('&fromsecond');
@@ -106,8 +106,8 @@ app.get('/featuresummary', async (req, res) => {
 app.get('/audiochunk', async (req, res) => {
   //http://localhost:8060/audiochunk?filename=http://archive.org/download/gd1985-03-13.sbd.miller.77347.flac16/gd85-03-13d1t03.mp3&fromsecond=4&tosecond=6
   const filename = req.query.filename;
-  const fromSecond = req.query.fromsecond ? parseFloat(req.query.fromsecond) : 0;
-  const toSecond = req.query.tosecond ? parseFloat(req.query.tosecond) : 120;
+  const fromSecond = req.query.fromsecond ? parseFloat(<string> req.query.fromsecond) : 0;
+  const toSecond = req.query.tosecond ? parseFloat(<string> req.query.tosecond) : 120;
   if (filename && !isNaN(fromSecond) && !isNaN(toSecond)) {
     res.setHeader('Content-Type', 'audio/mp3');
     //curiously this is by far the fastest!
@@ -122,7 +122,7 @@ app.get('/diachronic', async (req, res) => {
   const songname = req.query.songname ? req.query.songname : 'Me And My Uncle';
   const count = req.query.count ? req.query.count : 30;
   const skip = req.query.skip ? req.query.skip : 0;
-  res.send(await queries.getDiachronicSongDetails(songname, count, skip));
+  res.send(await queries.getDiachronicSongDetails(<string> songname, <number> count, <number> skip));
 });
 
 app.listen(PORT, async () => {
@@ -147,6 +147,6 @@ app.listen(PORT, async () => {
 
 app.get('/search', function(req, res){
   console.log(req.query.q)
-  var result = fuse.search(req.query.q);
+  var result = fuse.search(<string> req.query.q);
   res.send(result);
 });
