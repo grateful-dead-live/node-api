@@ -35,6 +35,19 @@ var fuse = new Fuse(SEARCHJSON, options);
 
 const app = express();
 
+const mdbpath = "mongodb+srv://:@gdcluster-kup39.mongodb.net/test?retryWrites=true&w=majority"
+var mongoose = require('mongoose');
+mongoose.connect(mdbpath, {useNewUrlParser: true});
+var mdb = mongoose.connection;
+mdb.on('error', console.error.bind(console, 'connection error:'));
+mdb.once('open', function() {
+  console.log("connected!")
+});
+
+
+
+
+
 app.use((_, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
