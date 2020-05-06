@@ -6,6 +6,7 @@ import * as features from './features';
 import * as chunker from './chunker';
 import * as queries from './queries';
 import * as Fuse from 'fuse.js';
+import * as userDb from './userdb';
 
 const PORT = process.env.PORT || 8060;
 //const ADDRESS = "http://localhost:8060/";
@@ -34,19 +35,6 @@ var options = {
 var fuse = new Fuse(SEARCHJSON, options);
 
 const app = express();
-
-const mdbpath = "mongodb+srv://:@gdcluster-kup39.mongodb.net/test?retryWrites=true&w=majority"
-var mongoose = require('mongoose');
-mongoose.connect(mdbpath, {useNewUrlParser: true});
-var mdb = mongoose.connection;
-mdb.on('error', console.error.bind(console, 'connection error:'));
-mdb.once('open', function() {
-  console.log("connected!")
-});
-
-
-
-
 
 app.use((_, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -140,6 +128,7 @@ app.get('/diachronic', async (req, res) => {
 
 app.listen(PORT, async () => {
   await store.isReady();
+  await userDb.connect();
   console.log('grateful dead server started on port ' + PORT);
   //console.log(JSON.stringify(await queries.getTracksForRecording('recording_aade498bc5ce490c98785a67f88cbfd9')))
   //console.log(JSON.stringify((await queries.getEventDetails(_.sample(queries.getAllEventInfos()).id)).recordings));
