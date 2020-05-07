@@ -130,6 +130,7 @@ app.listen(PORT, async () => {
   await store.isReady();
   await userDb.connect();
   console.log('grateful dead server started on port ' + PORT);
+  //userDb.testpost("5eb1880a6636510be9f970c5");
   //console.log(JSON.stringify(await queries.getTracksForRecording('recording_aade498bc5ce490c98785a67f88cbfd9')))
   //console.log(JSON.stringify((await queries.getEventDetails(_.sample(queries.getAllEventInfos()).id)).recordings));
   //console.log(await queries.getNews2(id))
@@ -151,4 +152,17 @@ app.get('/search', function(req, res){
   console.log(req.query.q)
   var result = fuse.search(<string> req.query.q);
   res.send(result);
+});
+
+app.get('/postMongo', function(req, res){
+  console.log(req.query.userid);
+  console.log(req.query.data);
+  userDb.testpost(req.query.userid, req.query.data);
+  res.send('postMongo');
+});
+
+app.get('/delMongo', function(req, res){
+  console.log(req.query.userid);
+  userDb.testdel(req.query.userid);
+  res.send('delMongo');
 });
