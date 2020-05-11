@@ -9,10 +9,19 @@ export async function connect() {
     db = client.db(MONGODBNAME);
   }
 
-export async function testpost(userid, data) : Promise<ObjectID> {
-    db.collection('testcollection').insertOne( { _id : ObjectID(userid), data } )
+export async function addBookmark(userid, route) : Promise<ObjectID> {
+    var s = route.split('/');
+    db.collection('testcollection').updateOne( 
+        { _id : ObjectID(userid)},
+        { $addToSet: { ["bookmarks."+s[0]] : s[1] } } ,
+        { upsert: true }
+    )
 }
 
-export async function testdel(userid) : Promise<ObjectID> {
-    db.collection('testcollection').deleteOne( { _id : ObjectID(userid) } )
+export async function delBookmark(userid, route) : Promise<ObjectID> {
+    var s = route.split('/');
+    db.collection('testcollection').updateOne( 
+        { _id : ObjectID(userid)},
+        { $pull: { ["bookmarks."+s[0]] : s[1] } } 
+    )
 }

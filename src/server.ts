@@ -154,15 +154,16 @@ app.get('/search', function(req, res){
   res.send(result);
 });
 
-app.get('/postMongo', function(req, res){
+app.get('/addBookmark', function(req, res){
   console.log(req.query.userid);
-  console.log(req.query.data);
-  userDb.testpost(req.query.userid, req.query.data);
-  res.send('postMongo');
+  console.log(req.query.route);
+  userDb.addBookmark(req.query.userid, req.query.route);
+  res.send('addBookmark');
 });
 
-app.get('/delMongo', function(req, res){
+app.get('/delBookmark', function(req, res){
   console.log(req.query.userid);
-  userDb.testdel(req.query.userid);
-  res.send('delMongo');
+  console.log(req.query.route);
+  userDb.delBookmark(req.query.userid, req.query.route);
+  res.send('delBookmark');
 });
