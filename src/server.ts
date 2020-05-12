@@ -157,7 +157,7 @@ app.get('/search', function(req, res){
 app.get('/addBookmark', function(req, res){
   console.log(req.query.userid);
   console.log(req.query.route);
-  userDb.addBookmark(req.query.userid, req.query.route);
+  userDb.addBookmark(req.query.userid, req.query.route);res.send
   res.send('addBookmark');
 });
 
@@ -166,4 +166,12 @@ app.get('/delBookmark', function(req, res){
   console.log(req.query.route);
   userDb.delBookmark(req.query.userid, req.query.route);
   res.send('delBookmark');
+});
+
+app.get('/getBookmarks', function(req, res){
+  console.log(req.query.userid);
+  userDb.getBookmarks(req.query.userid).then(function (o) {
+    res.send(o);
+  });
+    
 });

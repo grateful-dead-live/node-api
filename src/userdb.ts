@@ -25,3 +25,10 @@ export async function delBookmark(userid, route) : Promise<ObjectID> {
         { $pull: { ["bookmarks."+s[1]] : s[2] } } 
     )
 }
+
+export async function getBookmarks(userid) : Promise<ObjectID> {
+    var x = db.collection('testcollection').find( 
+        { _id : ObjectID(userid) }
+    ).toArray()
+    return x;
+}
