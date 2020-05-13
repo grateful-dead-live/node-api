@@ -157,7 +157,7 @@ app.get('/search', function(req, res){
 app.get('/addBookmark', function(req, res){
   console.log(req.query.userid);
   console.log(req.query.route);
-  userDb.addBookmark(req.query.userid, req.query.route);res.send
+  userDb.addBookmark(req.query.userid, req.query.route);
   res.send('addBookmark');
 });
 
@@ -173,5 +173,14 @@ app.get('/getBookmarks', function(req, res){
   userDb.getBookmarks(req.query.userid).then(function (o) {
     res.send(o);
   });
-    
+});
+
+app.get('/checkBookmark', function(req, res){
+  console.log(req.query.userid);
+  //var x = userDb.checkBookmark(req.query.userid, req.query.route);
+  userDb.checkBookmark(req.query.userid, req.query.route).then(function (o) {
+    console.log('server');
+    console.log(o);
+    res.send(o);
+  })
 });
