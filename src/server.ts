@@ -170,17 +170,11 @@ app.get('/delBookmark', function(req, res){
 
 app.get('/getBookmarks', function(req, res){
   console.log(req.query.userid);
-  userDb.getBookmarks(req.query.userid).then(function (o) {
-    res.send(o);
-  });
+  userDb.getBookmarks(req.query.userid).then(o => res.send(o));
 });
 
 app.get('/checkBookmark', function(req, res){
   console.log(req.query.userid);
-  //var x = userDb.checkBookmark(req.query.userid, req.query.route);
-  userDb.checkBookmark(req.query.userid, req.query.route).then(function (o) {
-    console.log('server');
-    console.log(o);
-    res.send(o);
-  })
+  userDb.checkBookmark(req.query.userid, req.query.route).then(o => res.send(o));
 });
+

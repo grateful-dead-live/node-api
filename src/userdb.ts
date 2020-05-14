@@ -27,39 +27,19 @@ export async function delBookmark(userid, route) : Promise<ObjectID> {
     )
 }
 
-// NOT WORKING
-/* 
-export async function getBookmarks(userid) : Promise<ObjectID> {
-    var x = db.collection('testcollection').find( 
-        { "_id" : ObjectID(userid)}, 
-        {"bookmarks" : 1 }
-    ).toArray()
-    return x;
-}
-*/
 export async function getBookmarks(userid) : Promise<ObjectID> {
     var x = await db.collection('testcollection').find( { 
         _id : ObjectID(userid) 
-    }).project({bookmarks:1}).toArray()
+    }).project({bookmarks:1}).toArray();
     return x;
 }
 
-export async function checkBookmark(userid, route) : Promise<any> {
+
+export async function checkBookmark(userid, route) {
     var s = route.split('/');
     var c = await db.collection('testcollection').count({_id: ObjectID(userid) , ["bookmarks."+s[1]]: { $in: [s[2]] } } );
     console.log(c);
-    return c
+    return c+''
 }
 
-
-export async function _checkBookmark(userid, route) : Promise<any> {
-    var s = route.split('/');
-    //db.collection('testcollection').find({_id: ObjectID(userid) , ["bookmarks."+s[1]]: { $in: [s[2]] } } ).count()
-    return db.collection('testcollection').count({_id: ObjectID(userid) , ["bookmarks."+s[1]]: { $in: [s[2]] } } )
-    .then(function(result){
-            console.log(result)
-            return result
-    });    
-    //return c;
-}
 
