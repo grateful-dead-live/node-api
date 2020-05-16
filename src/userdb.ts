@@ -42,4 +42,32 @@ export async function checkBookmark(userid, route) {
     return c+''
 }
 
+export async function getComments(route) : Promise<ObjectID> {
+    var s = route.split('/');
+    var x = await db.collection('testcollection').find( { 
+        name : 'comments',
+    }).project({ [s[2]]:1}).toArray();
+    return x;
+}
 
+export async function addComment(comment, route) : Promise<ObjectID> {
+    var s = route.split('/');
+    var c = JSON.parse(decodeURIComponent(comment));
+    console.log(c)       
+    db.collection('testcollection').updateOne( 
+        { name : 'comments'},
+        { $addToSet: { [s[2]] : c } }
+    )
+}
+
+export async function checkComment(msgId, route) {
+    var s = route.split('/');
+
+    console.log(s[2]+'.msgId')
+    var x = await db.collection('testcollection').find( { 
+        name : 'comments',
+        [s[2]+'.msgId'] : [Number(msgId)] 
+    }).toArray()
+    console.log(x);
+    return x
+}

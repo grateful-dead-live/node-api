@@ -178,3 +178,19 @@ app.get('/checkBookmark', function(req, res){
   userDb.checkBookmark(req.query.userid, req.query.route).then(o => res.send(o));
 });
 
+app.get('/getComments', function(req, res){
+  userDb.getComments(req.query.route).then(o => res.send(o));
+});
+
+app.get('/addComment', function(req, res){
+  //var j = JSON.parse(req.query.comment+'')
+  //console.log(j)
+  console.log(req.query.comment)
+  userDb.addComment(req.query.comment, req.query.route);
+  res.send('addComment');
+});
+
+app.get('/checkComment', function(req, res){
+  console.log(req.query.msgId);
+  userDb.checkComment(req.query.msgId, req.query.route).then(o => res.send(o));
+});
