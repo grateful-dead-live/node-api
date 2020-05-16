@@ -14,7 +14,7 @@ export async function addBookmark(userid, route) : Promise<ObjectID> {
     console.log(s)
     db.collection('testcollection').updateOne( 
         { _id : ObjectID(userid)},
-        { $addToSet: { ["bookmarks."+s[1]] : s[2] } } ,
+        { $addToSet: { ["bookmarks."+s[1]] : s[2] } },
         { upsert: true }
     )
 }
@@ -52,10 +52,12 @@ export async function getComments(route) : Promise<ObjectID> {
 export async function addComment(comment, route) : Promise<ObjectID> {
     var s = route.split('/');
     var c = JSON.parse(decodeURIComponent(comment));
-    console.log(c)       
+    console.log(c)  
+
     db.collection('testcollection').updateOne( 
         { name : 'comments'},
-        { $addToSet: { [s[2]] : c } }
+        { $push: { [s[2]] : c } },
+        { upsert: true }
     )
 }
 
