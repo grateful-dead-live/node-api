@@ -34,7 +34,6 @@ export async function getBookmarks(userid) : Promise<ObjectID> {
     return x;
 }
 
-
 export async function checkBookmark(userid, route) {
     var s = route.split('/');
     var c = await db.collection('testcollection').count({_id: ObjectID(userid) , ["bookmarks."+s[1]]: { $in: [s[2]] } } );
@@ -64,9 +63,9 @@ export async function checkComment(msgId, route) {
     var s = route.split('/');
     console.log('userdb: '+msgId)
     console.log(s[2]+'.msgId')
-    var x = await db.collection('testcollection').find( { 
+    var x = await db.collection('testcollection').count( { 
         name : 'comments',
         [s[2]+'.msgId'] : Number(msgId)
-    }).toArray()
-    return x
+    })
+    return x+''
 }
