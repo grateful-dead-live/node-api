@@ -191,6 +191,6 @@ app.get('/addComment', function(req, res){
 });
 
 app.get('/checkComment', function(req, res){
-  console.log(req.query.msgId);
+  //console.log(req.query.msgId);
   userDb.checkComment(req.query.msgId, req.query.route).then(o => res.send(o));
 });

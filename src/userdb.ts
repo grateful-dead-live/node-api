@@ -62,12 +62,11 @@ export async function addComment(comment, route) : Promise<ObjectID> {
 
 export async function checkComment(msgId, route) {
     var s = route.split('/');
-
+    console.log('userdb: '+msgId)
     console.log(s[2]+'.msgId')
     var x = await db.collection('testcollection').find( { 
         name : 'comments',
-        [s[2]+'.msgId'] : [Number(msgId)] 
+        [s[2]+'.msgId'] : Number(msgId)
     }).toArray()
-    console.log(x);
     return x
 }
