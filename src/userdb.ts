@@ -9,57 +9,85 @@ export async function connect() {
     db = client.db(MONGODBNAME);
   }
 
-export async function addBookmark(userid, route) : Promise<ObjectID> {
-    var s = route.split('/');       
-    console.log(s)
+export async function addBookmark(userid, route) {
     db.collection('testcollection').updateOne( 
-        { name : 'bookmarks'},
-        { $addToSet: { [userid+'.'+s[1]] : s[2] } },
+        { userId : userid },
+        { $addToSet: { bookmarks : route } },
         { upsert: true }
     )
 }
 
-export async function delBookmark(userid, route) : Promise<ObjectID> {
-    var s = route.split('/');
+export async function delBookmark(userid, route) {
     db.collection('testcollection').updateOne( 
-        { name : 'bookmarks'},
-        { $pull: { [userid+'.'+s[1]] : s[2] } } 
+        { userId : userid },
+        { $pull: { bookmarks : route } } 
     )
 }
 
-export async function getBookmarks(userid) : Promise<ObjectID> {
-    var x = await db.collection('testcollection').find( { 
-        name : 'bookmarks' 
-    }).project({[userid]:1}).toArray();
-    return x;
-}
-
 export async function checkBookmark(userid, route) {
-    var s = route.split('/');
-    var c = await db.collection('testcollection').count({name: 'bookmarks' , [userid+'.'+s[1]]: { $in: [s[2]] } } );
+    var c = await db.collection('testcollection').count( { 
+        userId : userid, 
+        bookmarks : { $in: [route] } } );
     console.log(c);
     return c+''
 }
 
-export async function getComments(route) : Promise<ObjectID> {
+export async function getBookmarks(userid) {
+    var x = await db.collection('testcollection').find( { 
+        userId : userid, 
+    }).project({['bookmarks']:1}).toArray();
+    return x;
+}
+
+
+export async function _getComments(route) {
     var s = route.split('/');
     var x = await db.collection('testcollection').find( { 
         name : 'comments',
     }).project({ [s[2]]:1}).toArray();
+    this.getComments2(route);
     return x;
 }
 
-export async function addComment(comment, route) : Promise<ObjectID> {
+export async function getComments(route) {
+    var s = route.split('/');
+    var result = await db.collection('testcollection').aggregate([
+        {$match: {'comments.route': route}},
+        {$project: {
+            comments: {$filter: {
+                input: '$comments',
+                as: 'comment',
+                cond: {$eq: ['$$comment.route', route]}
+            }},
+            _id: 0
+        }},
+    ]).toArray();
+    var b = [];
+    result.forEach(i => i.comments.forEach(r => b.push(r.comment)));
+    return b;
+}
+
+export async function addComment(comment, route, userid) {
     var s = route.split('/');
     var c = JSON.parse(decodeURIComponent(comment));
     console.log(c)  
-
     db.collection('testcollection').updateOne( 
         { name : 'comments'},
         { $push: { [s[2]] : c } },
         { upsert: true }
     )
+    await this.addComment2(comment, route, userid)
 }
+
+export async function addComment2(comment, route, userid) {
+    var c = JSON.parse(decodeURIComponent(comment));
+    db.collection('testcollection').updateOne( 
+        { userId : userid },
+        { $addToSet: { comments : { comment : c, route: route} } },
+        { upsert: true }
+    )
+}
+
 
 export async function checkComment(msgId, route) {
     var s = route.split('/');
@@ -68,6 +96,14 @@ export async function checkComment(msgId, route) {
     var x = await db.collection('testcollection').count( { 
         name : 'comments',
         [s[2]+'.msgId'] : Number(msgId)
-    })
+    });
     return x+''
+}
+
+export async function getUserCommentRoutes(userid) {
+    var x = await db.collection('testcollection').find( 
+       { name: 'comments',
+        userId: "[userid]"}
+    ).toArray();
+    console.log(x);
 }
