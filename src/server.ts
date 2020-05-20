@@ -157,7 +157,8 @@ app.get('/search', function(req, res){
 app.get('/addBookmark', function(req, res){
   console.log(req.query.userid);
   console.log(req.query.route);
-  userDb.addBookmark(req.query.userid, req.query.route);
+  console.log(req.query.time);
+  userDb.addBookmark(req.query.userid, req.query.route, req.query.time);
   res.send('addBookmark');
 });
 

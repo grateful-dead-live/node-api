@@ -9,10 +9,10 @@ export async function connect() {
     db = client.db(MONGODBNAME);
   }
 
-export async function addBookmark(userid, route) {
+export async function addBookmark(userid, route, time) {
     db.collection('testcollection').updateOne( 
         { userId : userid },
-        { $addToSet: { bookmarks : route } },
+        { $addToSet: { bookmarks : {route: route, timestamp: time} } },
         { upsert: true }
     )
 }
@@ -20,14 +20,14 @@ export async function addBookmark(userid, route) {
 export async function delBookmark(userid, route) {
     db.collection('testcollection').updateOne( 
         { userId : userid },
-        { $pull: { bookmarks : route } } 
+        { $pull: { bookmarks : {route:route} } } 
     )
 }
 
 export async function checkBookmark(userid, route) {
     var c = await db.collection('testcollection').count( { 
         userId : userid, 
-        bookmarks : { $in: [route] } } );
+        'bookmarks.route' : route } );
     console.log(c);
     return c+''
 }
@@ -85,12 +85,18 @@ export async function checkComment(msgId, route) {
     return result+'';
 }
 
-// TODO: make work!
+//TODO: make work!
 export async function getUserCommentRoutes(userid) {   
     var result = await db.collection('testcollection').find( 
         { 'userId': userid }
         ).project({'comments.route':1}).toArray();
-    console.log(result)
+    var r = [];
+    if (result != []){ 
+        result[0].comments.forEach(i => {
+            r = r.filter(f => f !== i.route).concat([i.route])
+        })
+    }
+    return r
 }
 
 
