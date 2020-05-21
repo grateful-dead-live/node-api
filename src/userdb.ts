@@ -1,5 +1,6 @@
 import { MongoClient, Db, ObjectID } from 'mongodb';
 import { MONGOURL, MONGODBNAME} from './config';
+import { MailService } from './mail-service';
 
 let db: Db;
 
@@ -99,4 +100,15 @@ export async function getUserCommentRoutes(userid) {
     return r
 }
 
-
+export async function sendCommentReport(comment, userid) {
+    var res;
+    var c = JSON.stringify(JSON.parse(decodeURIComponent(comment)), null, 2 );
+    let mailService = new MailService();
+    await mailService.sendMail(  
+        'a comment has been reported',  
+        'The following comment has been reported by user ' + userid + ':\n' + c).then( (msg) => { 
+          //console.log(`sendMail result :(${msg})`); 
+          res = msg;
+      } );
+    return res.startsWith('Message Sent');
+}

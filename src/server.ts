@@ -200,3 +200,9 @@ app.get('/getUserCommentRoutes', function(req, res){
   //console.log(req.query.msgId);
   userDb.getUserCommentRoutes(req.query.userId).then(o => res.send(o));
 });
+
+app.get('/sendCommentReport', function(req, res){
+  //console.log(req.query.msgId);
+  userDb.sendCommentReport(req.query.comment, req.query.userid).then(o => res.send(o));
+});
+
