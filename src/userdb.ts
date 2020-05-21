@@ -104,11 +104,9 @@ export async function sendCommentReport(comment, userid) {
     var res;
     var c = JSON.stringify(JSON.parse(decodeURIComponent(comment)), null, 2 );
     let mailService = new MailService();
-    await mailService.sendMail(  
+    return mailService.sendMail(  
         'a comment has been reported',  
-        'The following comment has been reported by user ' + userid + ':\n' + c).then( (msg) => { 
-          //console.log(`sendMail result :(${msg})`); 
-          res = msg;
-      } );
-    return res.startsWith('Message Sent');
+        'The following comment has been reported by user ' + userid + ':\n' + c)
+        .then( msg => { return msg } )
+        .catch(err => { return err } );
 }

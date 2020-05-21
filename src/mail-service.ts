@@ -33,10 +33,8 @@ import { GMAILUSER, GMAILPASS } from './config'
                   console.log(`error: ${error}`); 
                   reject(error); 
                 } else { 
-                    console.log(`Message Sent 
-                      ${info.response}`); 
-                    resolve(`Message Sent  
-                      ${info.response}`); 
+                    console.log(`message sent: ${info.response}`); 
+                    resolve(`${info.response}`); 
                 } 
             }) 
           } 
