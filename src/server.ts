@@ -170,12 +170,12 @@ app.get('/delBookmark', function(req, res){
 });
 
 app.get('/getBookmarks', function(req, res){
-  console.log(req.query.userid);
+  //console.log(req.query.userid);
   userDb.getBookmarks(req.query.userid).then(o => res.send(o));
 });
 
 app.get('/checkBookmark', function(req, res){
-  console.log(req.query.userid);
+  //console.log(req.query.userid);
   userDb.checkBookmark(req.query.userid, req.query.route).then(o => res.send(o));
 });
 
@@ -193,7 +193,7 @@ app.get('/addComment', function(req, res){
 
 app.get('/checkComment', function(req, res){
   //console.log(req.query.msgId);
-  userDb.checkComment(req.query.msgId, req.query.route).then(o => res.send(o));
+  userDb.checkComment(req.query.msgId).then(o => res.send(o));
 });
 
 app.get('/getUserCommentRoutes', function(req, res){
@@ -207,7 +207,16 @@ app.get('/sendCommentReport', function(req, res){
 });
 
 app.get('/addPlaylist', function(req, res){
-  userDb.addPlaylist(req.query.playlist, req.query.playlistid, req.query.userid);
+  userDb.addPlaylist(req.query.name, req.query.playlist, req.query.playlistid, req.query.userid, req.query.time);
   res.send('addPlaylist');
+});
+
+app.get('/getPlaylists', function(req, res){
+  userDb.getPlaylists(req.query.userid).then(o => res.send(o));
+});
+
+app.get('/delPlaylist', function(req, res){
+  userDb.delPlaylist(req.query.userid, req.query.playlistid);
+  res.send('delPlaylist');
 });
 

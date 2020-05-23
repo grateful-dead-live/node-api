@@ -66,7 +66,7 @@ export async function addComment(comment, route, userid) {
     )
 }
 
-export async function checkComment(msgId, route) {
+export async function checkComment(msgId) {
     var result = await db.collection('testcollection').count({
         'comments.comment.msgId': Number(msgId)
     });
@@ -99,11 +99,26 @@ export async function sendCommentReport(comment, userid) {
         .catch(err => { return err } );
 }
 
-export async function addPlaylist(playlist, playlistid, userid) {
+export async function addPlaylist(name, playlist, playlistid, userid, time) {
     var p = JSON.parse(decodeURIComponent(playlist));
     db.collection('testcollection').updateOne( 
         { userId: userid },
-        { $addToSet: { playlists : { playlist : p, id: playlistid} } },
+        { $addToSet: { playlists : { name: name, playlist : p, id: playlistid, timestamp: time } } },
         { upsert: true }
+    )
+}
+
+export async function getPlaylists(userid) {
+    var res = await db.collection('testcollection').find( { 
+        userId : userid, 
+    }).project({'playlists':1}).toArray();
+    return res;
+}
+
+export async function delPlaylist(userid, playlistid) {
+    console.log('delete: ' + playlistid);
+    db.collection('testcollection').updateOne( 
+        { userId : userid },
+        { $pull: { playlists : {id:playlistid} } } 
     )
 }
