@@ -66,18 +66,6 @@ export async function addComment(comment, route, userid) {
     )
 }
 
-
-export async function _checkComment(msgId, route) {
-    var s = route.split('/');
-    console.log('userdb: '+msgId)
-    console.log(s[2]+'.msgId')
-    var x = await db.collection('testcollection').count( { 
-        name : 'comments',
-        [s[2]+'.msgId'] : Number(msgId)
-    });
-    return x+''
-}
-
 export async function checkComment(msgId, route) {
     var result = await db.collection('testcollection').count({
         'comments.comment.msgId': Number(msgId)
@@ -109,4 +97,13 @@ export async function sendCommentReport(comment, userid) {
         'The following comment has been reported by user ' + userid + ':\n' + c)
         .then( msg => { return msg } )
         .catch(err => { return err } );
+}
+
+export async function addPlaylist(playlist, playlistid, userid) {
+    var p = JSON.parse(decodeURIComponent(playlist));
+    db.collection('testcollection').updateOne( 
+        { userId: userid },
+        { $addToSet: { playlists : { playlist : p, id: playlistid} } },
+        { upsert: true }
+    )
 }

@@ -206,3 +206,8 @@ app.get('/sendCommentReport', function(req, res){
   userDb.sendCommentReport(req.query.comment, req.query.userid).then(o => res.send(o));
 });
 
+app.get('/addPlaylist', function(req, res){
+  userDb.addPlaylist(req.query.playlist, req.query.playlistid, req.query.userid);
+  res.send('addPlaylist');
+});
+
