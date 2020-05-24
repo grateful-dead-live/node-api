@@ -120,6 +120,6 @@ export async function deleteComment(msgid, userid) {
     console.log('delete: ' + msgid);
     db.collection('testcollection').updateOne( 
         { userId : userid },
-        { $pull: {'comments.comment' : {'msgId':msgid} } } 
+        { $pull: {'comments' : {'comment.msgId': Number(msgid)} } } 
     )
 }
