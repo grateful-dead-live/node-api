@@ -158,7 +158,8 @@ app.get('/addBookmark', function(req, res){
   console.log(req.query.userid);
   console.log(req.query.route);
   console.log(req.query.time);
-  userDb.addBookmark(req.query.userid, req.query.route, req.query.time);
+  console.log(req.query.title);
+  userDb.addBookmark(req.query.userid, req.query.route, req.query.time, req.query.title);
   res.send('addBookmark');
 });
 
@@ -187,7 +188,7 @@ app.get('/addComment', function(req, res){
   //var j = JSON.parse(req.query.comment+'')
   //console.log(j)
   console.log(req.query.comment)
-  userDb.addComment(req.query.comment, req.query.route, req.query.userid);
+  userDb.addComment(req.query.comment, req.query.route, req.query.userid, req.query.title);
   res.send('addComment');
 });
 
@@ -196,9 +197,9 @@ app.get('/checkComment', function(req, res){
   userDb.checkComment(req.query.msgId).then(o => res.send(o));
 });
 
-app.get('/getUserCommentRoutes', function(req, res){
-  //console.log(req.query.msgId);
-  userDb.getUserCommentRoutes(req.query.userId).then(o => res.send(o));
+app.get('/getUserComments', function(req, res){
+  //console.log(req.query.userid);
+  userDb.getUserComments(req.query.userid).then(o => res.send(o));
 });
 
 app.get('/sendCommentReport', function(req, res){

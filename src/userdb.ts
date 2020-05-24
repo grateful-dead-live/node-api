@@ -10,10 +10,10 @@ export async function connect() {
     db = client.db(MONGODBNAME);
   }
 
-export async function addBookmark(userid, route, time) {
+export async function addBookmark(userid, route, time, title) {
     db.collection('testcollection').updateOne( 
         { userId : userid },
-        { $addToSet: { bookmarks : {route: route, timestamp: time} } },
+        { $addToSet: { bookmarks : {route: route, timestamp: time, title: title} } },
         { upsert: true }
     )
 }
@@ -57,11 +57,11 @@ export async function getComments(route) {
     return b;
 }
 
-export async function addComment(comment, route, userid) {
+export async function addComment(comment, route, userid, title) {
     var c = JSON.parse(decodeURIComponent(comment));
     db.collection('testcollection').updateOne( 
         { userId: userid },
-        { $addToSet: { comments : { comment : c, route: route} } },
+        { $addToSet: { comments : { comment : c, route: route, title: title} } },
         { upsert: true }
     )
 }
@@ -74,18 +74,11 @@ export async function checkComment(msgId) {
     return result+'';
 }
 
-//TODO: make work!
-export async function getUserCommentRoutes(userid) {   
-    var result = await db.collection('testcollection').find( 
-        { 'userId': userid }
-        ).project({'comments.route':1}).toArray();
-    var r = [];
-    if (result != []){ 
-        result[0].comments.forEach(i => {
-            r = r.filter(f => f !== i.route).concat([i.route])
-        })
-    }
-    return r
+export async function getUserComments(userid) {
+    var res = await db.collection('testcollection').find( { 
+        userId : userid, 
+    }).project({'comments':1}).toArray();
+    return res;
 }
 
 export async function sendCommentReport(comment, userid) {
