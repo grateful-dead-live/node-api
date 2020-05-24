@@ -115,3 +115,11 @@ export async function delPlaylist(userid, playlistid) {
         { $pull: { playlists : {id:playlistid} } } 
     )
 }
+
+export async function deleteComment(msgid, userid) {
+    console.log('delete: ' + msgid);
+    db.collection('testcollection').updateOne( 
+        { userId : userid },
+        { $pull: {'comments.comment' : {'msgId':msgid} } } 
+    )
+}

@@ -221,3 +221,8 @@ app.get('/delPlaylist', function(req, res){
   res.send('delPlaylist');
 });
 
+app.get('/deleteComment', function(req, res){
+  userDb.deleteComment(req.query.msgid, req.query.userid);
+  res.send('deleteComment');
+});
+
