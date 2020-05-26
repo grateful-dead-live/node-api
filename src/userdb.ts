@@ -70,7 +70,6 @@ export async function checkComment(msgId) {
     var result = await db.collection('testcollection').count({
         'comments.comment.msgId': Number(msgId)
     });
-    console.log(result);
     return result+'';
 }
 
