@@ -29,7 +29,6 @@ export async function checkBookmark(userid, route) {
     var c = await db.collection('testcollection').count( { 
         userId : userid, 
         'bookmarks.route' : route } );
-    console.log(c);
     return c+''
 }
 
@@ -68,7 +67,7 @@ export async function addComment(comment, route, userid, title) {
 
 export async function checkComment(msgId) {
     var result = await db.collection('testcollection').count({
-        'comments.comment.msgId': Number(msgId)
+        'comments.comment.msgId': msgId
     });
     return result+'';
 }
@@ -119,6 +118,6 @@ export async function deleteComment(msgid, userid) {
     console.log('delete: ' + msgid);
     db.collection('testcollection').updateOne( 
         { userId : userid },
-        { $pull: {'comments' : {'comment.msgId': Number(msgid)} } } 
+        { $pull: {'comments' : {'comment.msgId': msgid} } } 
     )
 }
