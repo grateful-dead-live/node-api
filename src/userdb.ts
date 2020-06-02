@@ -5,7 +5,7 @@ import { MailService } from './mail-service';
 let db: Db;
 
 export async function connect() {
-    let client = await MongoClient.connect(MONGOURL, { useNewUrlParser: true });
+    let client = await MongoClient.connect(MONGOURL, { useNewUrlParser: true, useUnifiedTopology: true });
     //const dbname = MONGOURL.split("/").pop();
     db = client.db(MONGODBNAME);
   }
@@ -26,7 +26,7 @@ export async function delBookmark(userid, route) {
 }
 
 export async function checkBookmark(userid, route) {
-    var c = await db.collection('testcollection').count( { 
+    var c = await db.collection('testcollection').countDocuments( { 
         userId : userid, 
         'bookmarks.route' : route } );
     return c+''
@@ -58,14 +58,14 @@ export async function unlike(userid, route) {
 }
 
 export async function checkLike(userid, route) {
-    var c = await db.collection('testcollection').count( { 
+    var c = await db.collection('testcollection').countDocuments( { 
         userId : userid, 
         'likes.route' : route } );
     return c+''
 }
 
 export async function countLikes(route) {
-    var x = await db.collection('testcollection').count( { 
+    var x = await db.collection('testcollection').countDocuments( { 
        'likes.route' : route
     } )
     return x+'';
@@ -109,7 +109,7 @@ export async function addComment(comment, route, userid, title) {
 }
 
 export async function checkComment(msgId) {
-    var result = await db.collection('testcollection').count({
+    var result = await db.collection('testcollection').countDocuments({
         'comments.comment.msgId': msgId
     });
     return result+'';
