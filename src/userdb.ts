@@ -39,6 +39,49 @@ export async function getBookmarks(userid) {
     return x;
 }
 
+
+
+
+export async function like(userid, route, time, title) {
+    db.collection('testcollection').updateOne( 
+        { userId : userid },
+        { $addToSet: { likes : {route: route, timestamp: time, title: title} } },
+        { upsert: true }
+    )
+}
+
+export async function unlike(userid, route) {
+    db.collection('testcollection').updateOne( 
+        { userId : userid },
+        { $pull: { likes : {route:route} } } 
+    )
+}
+
+export async function checkLike(userid, route) {
+    var c = await db.collection('testcollection').count( { 
+        userId : userid, 
+        'likes.route' : route } );
+    return c+''
+}
+
+export async function countLikes(route) {
+    var x = await db.collection('testcollection').count( { 
+       'likes.route' : route
+    } )
+    return x+'';
+}
+
+export async function getLikes(userid) {
+    var x = await db.collection('testcollection').find( { 
+        userId : userid, 
+    }).project({'likes':1}).toArray();
+    console.log(x)
+    return x;
+}
+
+
+
+
 export async function getComments(route) {
     var result = await db.collection('testcollection').aggregate([
         {$match: {'comments.route': route}},

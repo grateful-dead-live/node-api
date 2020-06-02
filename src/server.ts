@@ -180,6 +180,40 @@ app.get('/checkBookmark', function(req, res){
   userDb.checkBookmark(req.query.userid, req.query.route).then(o => res.send(o));
 });
 
+
+
+app.get('/like', function(req, res){
+  console.log(req.query.userid);
+  console.log(req.query.route);
+  console.log(req.query.time);
+  console.log(req.query.title);
+  userDb.like(req.query.userid, req.query.route, req.query.time, req.query.title);
+  res.send('like');
+});
+
+app.get('/unlike', function(req, res){
+  console.log(req.query.userid);
+  console.log(req.query.route);
+  userDb.unlike(req.query.userid, req.query.route);
+  res.send('unlike');
+});
+
+app.get('/checkLike', function(req, res){
+  //console.log(req.query.userid);
+  userDb.checkLike(req.query.userid, req.query.route).then(o => res.send(o));
+});
+
+app.get('/countLikes', function(req, res){
+  //console.log(req.query.userid);
+  userDb.countLikes(req.query.route).then(o => res.send(o));
+});
+
+app.get('/getLikes', function(req, res){
+  //console.log(req.query.userid);
+  userDb.getLikes(req.query.userid).then(o => res.send(o));
+});
+
+
 app.get('/getComments', function(req, res){
   userDb.getComments(req.query.route).then(o => res.send(o));
 });
