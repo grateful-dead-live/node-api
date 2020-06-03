@@ -120,7 +120,7 @@ export function getSongDetails(songId: string): SongDetails {
     return Object.assign(info, {
       audio: SONGMAP[info.name.toLowerCase()],
       eventIds: store.getSongEvents(toLmoId(songId)).map(toShortId),
-      songId: songId
+      id: songId
     });
   }
 }
