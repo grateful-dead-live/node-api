@@ -7,6 +7,7 @@ import * as etree from './etree';
 import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
   SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording, RecordingDetails,
   AudioTrack } from './types';
+import { setMaxListeners } from 'cluster';
 
 interface SongMap {
   [songName: string]: {
@@ -114,10 +115,12 @@ export function getSetlist(eventId: string): Set[] {
 
 export function getSongDetails(songId: string): SongDetails {
   const info = getSongInfo(songId);
+  console.log(songId)
   if (info) {
     return Object.assign(info, {
       audio: SONGMAP[info.name.toLowerCase()],
-      eventIds: store.getSongEvents(toLmoId(songId)).map(toShortId)
+      eventIds: store.getSongEvents(toLmoId(songId)).map(toShortId),
+      songId: songId
     });
   }
 }
@@ -144,7 +147,7 @@ export function getDiachronicSongDetails(songname: string, count = 10, skip = 0)
 }
 
 export async function getRecordingDetails(recordingId: string): Promise<RecordingDetails> {
-  const recording = makeIdShort(store.getRecording(toLmoId(recordingId)));
+  const recording = makeIdShort(store.getRecording(toLmoId(recordingId)))
   return Object.assign(recording, {
     info: await etree.getInfoFromEtree(recording.etreeId),
     tracks: getTracksForRecording(recordingId)
@@ -155,17 +158,36 @@ export function getTracksForRecording(recordingId: string): AudioTrack[] {
   recordingId = toLmoId(recordingId);
   //etree info seems unreliable for tracks!! but anyway it's sooo slow...
   //const tracks = etreeInfo.tracks.map(n => getTrackFromRecMap(etreeId, n));
-  const etreeId = store.getRecording(recordingId).etreeId;
+  const etreeId = store.getRecording(recordingId).etreeId;  // TODO: include name
   const eventId = store.getEventIdForRecording(recordingId);
   const setlist = getSetlist(eventId);
-  const songs = _.flatten(setlist.map(l => l.songs.map(s => getSongDetails(s.id))));
+  //console.log(setlist)
+  //const songs = _.flatten(setlist.map(l => l.songs.map(s => getSongDetails(s.id))));
   //sometimes audio for recording not there!!
-  return _.flatten(songs.map(s => s.audio[etreeId]).filter(s => s));
+  console.log('---------')
+
+  //sometimes multiple song ids for track
+
+  var ttracks =  _.flatten(setlist.map(l => l.songs.map(s => SONGMAP[s.name.toLowerCase()][etreeId] ? getAudioInfo(s, etreeId): undefined)));
+  var testtracks = _.flatten(ttracks).filter(function (el) {
+    return el != null;
+  });
+
+  //console.log(testtracks)
+  //console.log( _.flatten(songs.map(s => s.audio[etreeId]).filter(s => s)));
+  //return _.flatten(songs.map(s => s.audio[etreeId]).filter(s => s));
+  return testtracks
 }
 
 /*function getTrackFromRecMap(etreeId: string, filename: string): AudioTrack {
   return RECMAP[etreeId].filter(t => t.filename === filename)[0]
 }*/
+
+function getAudioInfo(s, etreeId){
+  var a = SONGMAP[s.name.toLowerCase()][etreeId];
+  a[0]['id'] = s.id;
+  return a;
+}
 
 async function getPerformers(eventId: string): Promise<Artist[]> {
   return Promise.all(store.getPerformers(eventId).map(addDbpediaInfo));

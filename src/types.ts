@@ -79,7 +79,8 @@ export interface AudioTrack {
   filename: string,
   format: string,
   title: string,
-  track: string
+  track: string,
+  id: string
 }
 
 export interface ArtistDetails extends Artist, GdEventsObject {
