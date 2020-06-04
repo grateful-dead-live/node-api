@@ -161,22 +161,15 @@ export function getTracksForRecording(recordingId: string): AudioTrack[] {
   const etreeId = store.getRecording(recordingId).etreeId;  // TODO: include name
   const eventId = store.getEventIdForRecording(recordingId);
   const setlist = getSetlist(eventId);
-  //console.log(setlist)
   //const songs = _.flatten(setlist.map(l => l.songs.map(s => getSongDetails(s.id))));
   //sometimes audio for recording not there!!
-  console.log('---------')
-
   //sometimes multiple song ids for track
-
+  //return _.flatten(songs.map(s => s.audio[etreeId]).filter(s => s));
   var ttracks =  _.flatten(setlist.map(l => l.songs.map(s => SONGMAP[s.name.toLowerCase()][etreeId] ? getAudioInfo(s, etreeId): undefined)));
-  var testtracks = _.flatten(ttracks).filter(function (el) {
+  var tracks = _.flatten(ttracks).filter(function (el) {
     return el != null;
   });
-
-  //console.log(testtracks)
-  //console.log( _.flatten(songs.map(s => s.audio[etreeId]).filter(s => s)));
-  //return _.flatten(songs.map(s => s.audio[etreeId]).filter(s => s));
-  return testtracks
+  return tracks
 }
 
 /*function getTrackFromRecMap(etreeId: string, filename: string): AudioTrack {
