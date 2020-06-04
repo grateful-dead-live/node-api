@@ -1,17 +1,20 @@
 import { MongoClient, Db, ObjectID } from 'mongodb';
 import { MONGOURL, MONGODBNAME} from './config';
 import { MailService } from './mail-service';
+import { MONGODBCOLLECTION } from './config'
 
 let db: Db;
+let dbcollection: any;
 
 export async function connect() {
     let client = await MongoClient.connect(MONGOURL, { useNewUrlParser: true, useUnifiedTopology: true });
     //const dbname = MONGOURL.split("/").pop();
     db = client.db(MONGODBNAME);
+    dbcollection = db.collection(MONGODBCOLLECTION);
   }
 
 export async function addBookmark(userid, route, time, title) {
-    db.collection('testcollection').updateOne( 
+    dbcollection.updateOne( 
         { userId : userid },
         { $addToSet: { bookmarks : {route: route, timestamp: time, title: title} } },
         { upsert: true }
@@ -19,21 +22,21 @@ export async function addBookmark(userid, route, time, title) {
 }
 
 export async function delBookmark(userid, route) {
-    db.collection('testcollection').updateOne( 
+    dbcollection.updateOne( 
         { userId : userid },
         { $pull: { bookmarks : {route:route} } } 
     )
 }
 
 export async function checkBookmark(userid, route) {
-    var c = await db.collection('testcollection').countDocuments( { 
+    var c = await dbcollection.countDocuments( { 
         userId : userid, 
         'bookmarks.route' : route } );
     return c+''
 }
 
 export async function getBookmarks(userid) {
-    var x = await db.collection('testcollection').find( { 
+    var x = await dbcollection.find( { 
         userId : userid, 
     }).project({'bookmarks':1}).toArray();
     return x;
@@ -43,7 +46,7 @@ export async function getBookmarks(userid) {
 
 
 export async function like(userid, route, time, title) {
-    db.collection('testcollection').updateOne( 
+    dbcollection.updateOne( 
         { userId : userid },
         { $addToSet: { likes : {route: route, timestamp: time, title: title} } },
         { upsert: true }
@@ -51,28 +54,28 @@ export async function like(userid, route, time, title) {
 }
 
 export async function unlike(userid, route) {
-    db.collection('testcollection').updateOne( 
+    dbcollection.updateOne( 
         { userId : userid },
         { $pull: { likes : {route:route} } } 
     )
 }
 
 export async function checkLike(userid, route) {
-    var c = await db.collection('testcollection').countDocuments( { 
+    var c = await dbcollection.countDocuments( { 
         userId : userid, 
         'likes.route' : route } );
     return c+''
 }
 
 export async function countLikes(route) {
-    var x = await db.collection('testcollection').countDocuments( { 
+    var x = await dbcollection.countDocuments( { 
        'likes.route' : route
     } )
     return x+'';
 }
 
 export async function getLikes(userid) {
-    var x = await db.collection('testcollection').find( { 
+    var x = await dbcollection.find( { 
         userId : userid, 
     }).project({'likes':1}).toArray();
     console.log(x)
@@ -83,7 +86,7 @@ export async function getLikes(userid) {
 
 
 export async function getComments(route) {
-    var result = await db.collection('testcollection').aggregate([
+    var result = await dbcollection.aggregate([
         {$match: {'comments.route': route}},
         {$project: {
             comments: {$filter: {
@@ -101,7 +104,7 @@ export async function getComments(route) {
 
 export async function addComment(comment, route, userid, title) {
     var c = JSON.parse(decodeURIComponent(comment));
-    db.collection('testcollection').updateOne( 
+    dbcollection.updateOne( 
         { userId: userid },
         { $addToSet: { comments : { comment : c, route: route, title: title} } },
         { upsert: true }
@@ -109,14 +112,14 @@ export async function addComment(comment, route, userid, title) {
 }
 
 export async function checkComment(msgId) {
-    var result = await db.collection('testcollection').countDocuments({
+    var result = await dbcollection.countDocuments({
         'comments.comment.msgId': msgId
     });
     return result+'';
 }
 
 export async function getUserComments(userid) {
-    var res = await db.collection('testcollection').find( { 
+    var res = await dbcollection.find( { 
         userId : userid, 
     }).project({'comments':1}).toArray();
     return res;
@@ -135,7 +138,7 @@ export async function sendCommentReport(comment, userid) {
 
 export async function addPlaylist(name, playlist, playlistid, userid, time) {
     var p = JSON.parse(decodeURIComponent(playlist));
-    db.collection('testcollection').updateOne( 
+    dbcollection.updateOne( 
         { userId: userid },
         { $addToSet: { playlists : { name: name, playlist : p, id: playlistid, timestamp: time } } },
         { upsert: true }
@@ -143,7 +146,7 @@ export async function addPlaylist(name, playlist, playlistid, userid, time) {
 }
 
 export async function getPlaylists(userid) {
-    var res = await db.collection('testcollection').find( { 
+    var res = await dbcollection.find( { 
         userId : userid, 
     }).project({'playlists':1}).toArray();
     return res;
@@ -151,7 +154,7 @@ export async function getPlaylists(userid) {
 
 export async function delPlaylist(userid, playlistid) {
     console.log('delete: ' + playlistid);
-    db.collection('testcollection').updateOne( 
+    dbcollection.updateOne( 
         { userId : userid },
         { $pull: { playlists : {id:playlistid} } } 
     )
@@ -159,7 +162,7 @@ export async function delPlaylist(userid, playlistid) {
 
 export async function deleteComment(msgid, userid) {
     console.log('delete: ' + msgid);
-    db.collection('testcollection').updateOne( 
+    dbcollection.updateOne( 
         { userId : userid },
         { $pull: {'comments' : {'comment.msgId': msgid} } } 
     )

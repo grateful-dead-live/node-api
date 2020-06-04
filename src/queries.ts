@@ -164,12 +164,14 @@ export function getTracksForRecording(recordingId: string): AudioTrack[] {
   //const songs = _.flatten(setlist.map(l => l.songs.map(s => getSongDetails(s.id))));
   //sometimes audio for recording not there!!
   //sometimes multiple song ids for track
+  //console.log( _.flatten(songs.map(s => s.audio[etreeId]).filter(s => s)));
   //return _.flatten(songs.map(s => s.audio[etreeId]).filter(s => s));
   var ttracks =  _.flatten(setlist.map(l => l.songs.map(s => SONGMAP[s.name.toLowerCase()][etreeId] ? getAudioInfo(s, etreeId): undefined)));
   var tracks = _.flatten(ttracks).filter(function (el) {
     return el != null;
   });
   return tracks
+  
 }
 
 /*function getTrackFromRecMap(etreeId: string, filename: string): AudioTrack {
