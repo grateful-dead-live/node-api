@@ -6,7 +6,8 @@ import * as news from './news';
 import * as etree from './etree';
 import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
   SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording, RecordingDetails,
-  AudioTrack } from './types';
+  AudioTrack, 
+  RecordingInfo} from './types';
 import { setMaxListeners } from 'cluster';
 import * as archive from './archive';
 
@@ -248,7 +249,7 @@ function toDbpediaId(id: string) {
 
 
 
-export async function getRecordingInfo(recordingId: string, etreeId: string): Promise<any> {
+export async function getRecordingInfo(recordingId: string, etreeId: string): Promise<RecordingInfo> {
   var info = await archive.getArchiveinfo(etreeId);
   info['date'] = info['date'].split('T')[0];
   info['etree_id'] = etreeId;

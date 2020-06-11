@@ -169,12 +169,11 @@ export async function deleteComment(msgid, userid) {
 }
 
 export async function getTracklist(etreeid) {
-    console.log(etreeid + '11111')
     var res = await dbtracklists.find( { 
         etree_id : etreeid, 
     }).project({'tracklist':1}).toArray();
-    //console.log(res[0].tracklist);
-    return res[0].tracklist
+    res = sortTracklist(res[0].tracklist)
+    return res
 }
 
 
@@ -182,7 +181,15 @@ export async function getSongsById(songid) {
     var result = await dbtracklists.find(
         { 'tracklist.sort.song_id': songid },
     ).project({ 'tracklist.$':1, etree_id: 1, _id: 0}).toArray();
-
     return result
+}
 
+function sortTracklist(t){
+    if (t[0].track) {
+        t.sort(function(a, b) { return a.track - b.track });
+    }
+    else {
+        t.sort((a, b) => { a.filename.localeCompare(b.filename)});
+    }
+    return t
 }
