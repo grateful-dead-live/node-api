@@ -5,12 +5,14 @@ import { MONGODBCOLLECTION } from './config'
 
 let db: Db;
 let dbcollection: any;
+let dbtracklists: any;
 
 export async function connect() {
     let client = await MongoClient.connect(MONGOURL, { useNewUrlParser: true, useUnifiedTopology: true });
     //const dbname = MONGOURL.split("/").pop();
     db = client.db(MONGODBNAME);
     dbcollection = db.collection(MONGODBCOLLECTION);
+    dbtracklists = db.collection('tracklists');
   }
 
 export async function addBookmark(userid, route, time, title) {
@@ -83,8 +85,6 @@ export async function getLikes(userid) {
 }
 
 
-
-
 export async function getComments(route) {
     var result = await dbcollection.aggregate([
         {$match: {'comments.route': route}},
@@ -126,7 +126,6 @@ export async function getUserComments(userid) {
 }
 
 export async function sendCommentReport(comment, userid) {
-    var res;
     var c = JSON.stringify(JSON.parse(decodeURIComponent(comment)), null, 2 );
     let mailService = new MailService();
     return mailService.sendMail(  
@@ -166,4 +165,24 @@ export async function deleteComment(msgid, userid) {
         { userId : userid },
         { $pull: {'comments' : {'comment.msgId': msgid} } } 
     )
+
+}
+
+export async function getTracklist(etreeid) {
+    console.log(etreeid + '11111')
+    var res = await dbtracklists.find( { 
+        etree_id : etreeid, 
+    }).project({'tracklist':1}).toArray();
+    //console.log(res[0].tracklist);
+    return res[0].tracklist
+}
+
+
+export async function getSongsById(songid) {
+    var result = await dbtracklists.find(
+        { 'tracklist.sort.song_id': songid },
+    ).project({ 'tracklist.$':1, etree_id: 1, _id: 0}).toArray();
+
+    return result
+
 }

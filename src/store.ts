@@ -143,6 +143,7 @@ export async function isReady() {
   await readRdfIntoStore('rdf-data/weather.ttl');
   await readRdfIntoStore('rdf-data/datetimeobjects.ttl');
   await readRdfIntoStore('rdf-data/tours.ttl');
+  //await readRdfIntoStore('rdf-data/recording_tracks.ttl');
 }
 
 export function getEventIds() {
@@ -222,7 +223,7 @@ export function getRecordings(eventId: string): Recording[] {
 export function getRecording(recordingId: string): Recording {
   return {
     id: recordingId,
-    etreeId: getObject(recordingId, LMO_ETREE_ID),
+    etreeId: getObject(recordingId, LMO_ETREE_ID),              // NOT WORKING?
     isSoundboard: getObject(recordingId, LMO_REC_SOURCE) != null
   }
 }

@@ -8,6 +8,7 @@ import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
   SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording, RecordingDetails,
   AudioTrack } from './types';
 import { setMaxListeners } from 'cluster';
+import * as archive from './archive';
 
 interface SongMap {
   [songName: string]: {
@@ -22,6 +23,10 @@ interface SongMap {
 const LMO_PREFIX = 'https://w3id.org/lmo/resource/';
 const DBP_PREFIX = 'http://dbpedia.org/resource/';
 const SONGMAP: SongMap = JSON.parse(fs.readFileSync('json-data/app_song_map.json', 'utf8'));
+const RECORDINGDICT = JSON.parse(fs.readFileSync('json-data/recording_dict.json', 'utf8'));
+//const SONGDICT = JSON.parse(fs.readFileSync('json-data/song_dict.json', 'utf8'));
+ 
+
 /*const tracksByRecording: [string, AudioTrack[]][] =
   _.flatten(_.values(SONGMAP).map(_.toPairs));
 const grouped = _.groupBy(tracksByRecording, p => p[0]);
@@ -155,12 +160,13 @@ export async function getRecordingDetails(recordingId: string): Promise<Recordin
 }
 
 export function getTracksForRecording(recordingId: string): AudioTrack[] {
-  recordingId = toLmoId(recordingId);
+  var recordingId = toLmoId(recordingId);
   //etree info seems unreliable for tracks!! but anyway it's sooo slow...
   //const tracks = etreeInfo.tracks.map(n => getTrackFromRecMap(etreeId, n));
   const etreeId = store.getRecording(recordingId).etreeId;  // TODO: include name
   const eventId = store.getEventIdForRecording(recordingId);
   const setlist = getSetlist(eventId);
+  //setlist.forEach( i => i.songs.forEach( s => console.log(s)))
   //const songs = _.flatten(setlist.map(l => l.songs.map(s => getSongDetails(s.id))));
   //sometimes audio for recording not there!!
   //sometimes multiple song ids for track
@@ -170,6 +176,9 @@ export function getTracksForRecording(recordingId: string): AudioTrack[] {
   var tracks = _.flatten(ttracks).filter(function (el) {
     return el != null;
   });
+
+  //etree.getInfoFromEtree(etreeId).then( r => console.log(r));
+  //console.log(tracks)
   return tracks
   
 }
@@ -235,4 +244,21 @@ function toLmoId(id: string) {
 
 function toDbpediaId(id: string) {
   return id.indexOf(DBP_PREFIX) < 0 ? DBP_PREFIX+id : id;
+}
+
+
+
+export async function getRecordingInfo(recordingId: string, etreeId: string): Promise<any> {
+  var info = await archive.getArchiveinfo(etreeId);
+  info['date'] = info['date'].split('T')[0];
+  info['etree_id'] = etreeId;
+  info['show_id'] = toShortId(store.getEventIdForRecording(toLmoId(recordingId)));
+  info['venue_id'] = toShortId(store.getVenueForEvent(toLmoId(info['show_id'])));
+  info['venue_name'] = toShortId(store.getVenueNameForEvent(toLmoId(info['show_id'])));
+  info['location_id'] = toShortId(store.getLocationForEvent(toLmoId(info['show_id'])));
+  const state = toShortId(store.getStateOrCountry(toDbpediaId(info['location_id'])));
+  const city =  toShortId(store.getLocationNameForEvent(toLmoId(info['show_id'])));
+  info['location_name'] = city + ', ' + state;
+  info['recording_id'] = recordingId;
+  return info;
 }

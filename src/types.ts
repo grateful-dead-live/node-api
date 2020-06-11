@@ -77,7 +77,7 @@ export interface Recording {
 
 export interface AudioTrack {
   filename: string,
-  format: string,
+  //format: string,
   title: string,
   track: string,
   id: string

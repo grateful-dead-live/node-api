@@ -12,6 +12,8 @@ const PORT = process.env.PORT || 8060;
 //const ADDRESS = "http://localhost:8060/";
 const ADDRESS = "https://grateful-dead-api.herokuapp.com/";
 const SEARCHJSON = JSON.parse(fs.readFileSync('json-data/search.json', 'utf8'));
+const RECORDINGDICT = JSON.parse(fs.readFileSync('json-data/recording_dict.json', 'utf8'));
+const SONGDICT = JSON.parse(fs.readFileSync('json-data/song_dict.json', 'utf8'));
 
 var options = {
   shouldSort: true,
@@ -73,6 +75,7 @@ app.get('/setlist', (req, res) => {
 });
 
 app.get('/song', (req, res) => {
+  //userDb.getSongsById(req.query.id);
   res.send(queries.getSongDetails(<string> req.query.id));
 });
 
@@ -81,6 +84,7 @@ app.get('/artist', async (req, res) => {
 });
 
 app.get('/recording', async (req, res) => {
+  //await userDb.getTracklist(req.query.id);
   res.send(await queries.getRecordingDetails(<string> req.query.id));
 });
 
@@ -258,4 +262,24 @@ app.get('/delPlaylist', function(req, res){
 app.get('/deleteComment', function(req, res){
   userDb.deleteComment(req.query.msgid, req.query.userid);
   res.send('deleteComment');
+});
+
+app.get('/getRecordingInfo', function(req, res){
+  const etree_id = RECORDINGDICT[<string> req.query.recordingid];
+  queries.getRecordingInfo(<string> req.query.recordingid, etree_id).then(o => res.send(o)); 
+});
+
+app.get('/getTracklist', function(req, res){
+  const etree_id = RECORDINGDICT[<string> req.query.recordingid];
+  userDb.getTracklist(etree_id).then(l => {
+    l.forEach(t => {
+      if (t.song) {
+        var songlist = [];
+        t.song.forEach(s => songlist.push({ 'song_name': s, 'song_id': SONGDICT[s] }));
+        //t.song.forEach(s => songlist.push({ 'song_name': s, 'song_id': store.getSongId }));
+      };
+      t.song = songlist;
+    });
+    res.send(l)}
+    );  
 });
