@@ -254,6 +254,10 @@ app.get('/getPlaylists', function(req, res){
   userDb.getPlaylists(req.query.userid).then(o => res.send(o));
 });
 
+app.get('/getPlaylist', function(req, res){
+  userDb.getPlaylist(req.query.playlistid).then(o => res.send(o));
+});
+
 app.get('/delPlaylist', function(req, res){
   userDb.delPlaylist(req.query.userid, req.query.playlistid);
   res.send('delPlaylist');

@@ -151,6 +151,13 @@ export async function getPlaylists(userid) {
     return res;
 }
 
+export async function getPlaylist(playlistid) {
+    var res = await dbcollection.find( { 
+        'playlists.id' : playlistid, 
+    }).project({'playlists.$':1, userId: 1, _id: 0}).toArray();
+    return res[0];
+}
+
 export async function delPlaylist(userid, playlistid) {
     console.log('delete: ' + playlistid);
     dbcollection.updateOne( 
