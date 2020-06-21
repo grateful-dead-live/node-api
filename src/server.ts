@@ -153,7 +153,7 @@ app.listen(PORT, async () => {
 });
 
 app.get('/search', function(req, res){
-  console.log(req.query.q)
+  //console.log(req.query.q)
   var result = fuse.search(<string> req.query.q);
   res.send(result);
 });

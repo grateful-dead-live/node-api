@@ -121,7 +121,7 @@ export function getSetlist(eventId: string): Set[] {
 
 export function getSongDetails(songId: string): SongDetails {
   const info = getSongInfo(songId);
-  console.log(songId)
+  //console.log(songId)
   if (info) {
     return Object.assign(info, {
       audio: SONGMAP[info.name.toLowerCase()],
@@ -137,7 +137,7 @@ function getSongInfo(songId: string): SongInfo {
 
 export function getDiachronicSongDetails(songname: string, count = 10, skip = 0): SongDetails {
   const songId = store.getSongId(songname);
-  console.log(songname, songId);
+  //console.log(songname, songId);
   const songDetails = getSongDetails(songId);
   const events = songDetails.eventIds.map(getEventInfo);
   events.sort((a, b) => parseFloat(a.date.replace(/-/g, ''))
@@ -153,6 +153,7 @@ export function getDiachronicSongDetails(songname: string, count = 10, skip = 0)
 }
 
 export async function getRecordingDetails(recordingId: string): Promise<RecordingDetails> {
+  console.log('etree: getRecordingDetails');
   const recording = makeIdShort(store.getRecording(toLmoId(recordingId)))
   return Object.assign(recording, {
     info: await etree.getInfoFromEtree(recording.etreeId),
@@ -161,6 +162,7 @@ export async function getRecordingDetails(recordingId: string): Promise<Recordin
 }
 
 export function getTracksForRecording(recordingId: string): AudioTrack[] {
+  //console.log('getTracksForRecording')
   var recordingId = toLmoId(recordingId);
   //etree info seems unreliable for tracks!! but anyway it's sooo slow...
   //const tracks = etreeInfo.tracks.map(n => getTrackFromRecMap(etreeId, n));
