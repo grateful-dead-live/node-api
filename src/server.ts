@@ -7,6 +7,7 @@ import * as chunker from './chunker';
 import * as queries from './queries';
 import * as Fuse from 'fuse.js';
 import * as userDb from './userdb';
+import * as youtube from './youtube';
 
 const PORT = process.env.PORT || 8060;
 //const ADDRESS = "http://localhost:8060/";
@@ -286,4 +287,8 @@ app.get('/getTracklist', function(req, res){
     });
     res.send(l)}
     );  
+});
+
+app.get('/youtube', function(req, res){
+  youtube.getYouTubeList(req.query.id, req.query.searcharray).then(o => res.send(o)); 
 });

@@ -6,6 +6,7 @@ import { MONGODBCOLLECTION } from './config'
 let db: Db;
 let dbcollection: any;
 let dbtracklists: any;
+let dbyoutube: any;
 
 export async function connect() {
     let client = await MongoClient.connect(MONGOURL, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -13,6 +14,7 @@ export async function connect() {
     db = client.db(MONGODBNAME);
     dbcollection = db.collection(MONGODBCOLLECTION);
     dbtracklists = db.collection('tracklists');
+    dbyoutube = db.collection('youtube');
   }
 
 export async function addBookmark(userid, route, time, title) {
@@ -196,7 +198,22 @@ function sortTracklist(t){
         t.sort(function(a, b) { return a.track - b.track });
     }
     else {
-        t.sort((a, b) => { a.filename.localeCompare(b.filename)});
+        t.sort((a, b) => { a.filename.localeCompare(b.filename) });
     }
     return t
+}
+
+export async function getYoutubeList(id) {
+    var res = await dbyoutube.find( { 
+        id : id, 
+    }).project({_id: 0, id: 0}).toArray();
+    return res[0];
+}
+
+export async function addYoutubelist(id, list, timestamp) {
+    dbyoutube.updateOne( 
+        { id: id },
+        { $set: {list: list, timestamp: timestamp } },
+        { upsert: true }
+    )
 }
