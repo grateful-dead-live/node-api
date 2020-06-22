@@ -27,8 +27,7 @@ async function fetchYoutubeVideos(searchArray): Promise<any>{
     var result;
     if (!r.items) result = undefined;
     else { 
-        var res;
-        res = r.items;
+        var res = r.items;
         r = await getPage(searchString, r.nextPageToken);
         res.push(...r.items);
         result = [];
