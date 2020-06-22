@@ -6,13 +6,14 @@ import { YOUTUBEAPIKEY } from './config'
 export async function getYouTubeList(id, searchArray) {
     var timestamp = new Date;
     var y = await userDb.getYoutubeList(id);
+    if (y) y = y.list;
     if (!y || timestamp.getTime() - y.timestamp > 604800000) {
         var res = await fetchYoutubeVideos(searchArray);
         if (res) userDb.addYoutubelist(id, res, timestamp.getTime());
         else res = y;
     }
     else res = y;
-    //console.log(res)
+    console.log(res);
     return res  
 }
 
