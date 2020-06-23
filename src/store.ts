@@ -325,6 +325,10 @@ export function getLabel(id: string): string {
   return getObject(id, RDFS_LABEL);
 }
 
+export function getVenueName(id: string): string {
+  return getObject(id, LMO_VENUE_NAME);
+}
+
 export function getSameAs(id: string): string {
   return getObject(id, LMO_DBPEDIA);
 }

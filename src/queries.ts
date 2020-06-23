@@ -90,10 +90,12 @@ export async function getVenue(venueId: string): Promise<Venue> {
   const LMO_DBPEDIA = "https://w3id.org/lmo/vocabulary/dbpedia";
   if (venueId) {
     const venueDbpedia = store.getObject(venueId, LMO_DBPEDIA);
-    const label = store.getLabel(venueId);
+    //const label = store.getLabel(venueId);
+    const venueName = store.getVenueName(venueId);
     return Object.assign({
       id: toShortId(venueId),
-      name: label ? label : store.toName(venueId),
+      //name: label ? label : store.toName(venueId),
+      name: venueName ? venueName : store.toName(venueId),
       eventIds: store.getVenueEvents(venueId).map(toShortId),
     }, await getDbpediaInfo(venueDbpedia, true));
   }
