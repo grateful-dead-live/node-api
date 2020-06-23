@@ -20,8 +20,8 @@ export async function getYouTubeList(id, searchArray) {
 async function fetchYoutubeVideos(searchArray): Promise<any>{
     searchArray = JSON.parse(searchArray);
     var searchString = '';
-    searchArray.forEach(s => searchString += '"'+s+'"' + '+');
-    searchString = searchString.slice(0, -1);
+    searchArray.forEach(s => searchString += '%22'+s+'%22' + '+');
+    searchString = searchString.slice(0, -1).replace(/ /g, '+');
     console.log('youtube: ' + searchString);
     var r = await getPage(searchString);
     //console.log(r)
