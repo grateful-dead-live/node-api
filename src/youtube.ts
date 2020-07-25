@@ -14,7 +14,7 @@ export async function getYouTubeList(id, searchArray) {
     }
     else res = y;
     console.log(res);
-    return res  
+    return res;  
 }
 
 async function fetchYoutubeVideos(searchArray): Promise<any>{
