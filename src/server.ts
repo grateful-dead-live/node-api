@@ -8,8 +8,12 @@ import * as queries from './queries';
 import * as Fuse from 'fuse.js';
 import * as userDb from './userdb';
 import * as youtube from './youtube';
+import * as cors from 'cors';
+
+const cors = require('cors');
 
 const PORT = process.env.PORT || 8060;
+//const PORT = process.env.PORT || process.argv[2] || 8060
 //const ADDRESS = "http://localhost:8060/";
 const ADDRESS = "https://grateful-dead-api.herokuapp.com/";
 const SEARCHJSON = JSON.parse(fs.readFileSync('json-data/search.json', 'utf8'));
@@ -39,12 +43,16 @@ var fuse = new Fuse(SEARCHJSON, options);
 
 const app = express();
 
+app.use(cors())
+
+
+/*
 app.use((_, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
-
+*/
 
 
 app.get('/coordinates', (_, res) =>
