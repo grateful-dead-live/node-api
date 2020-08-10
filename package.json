@@ -21,7 +21,8 @@
     "nodemailer": "^6.4.6",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
-    "wav": "^1.0.2"
+    "wav": "^1.0.2",
+    "youtube": "^0.1.0"
   },
   "devDependencies": {
     "@types/express": "^4.16.1",

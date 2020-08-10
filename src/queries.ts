@@ -8,7 +8,7 @@ import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
   SongInfo, SongDetails, Artist, ArtistDetails, Set, Recording, RecordingDetails,
   AudioTrack, 
   RecordingInfo} from './types';
-import { setMaxListeners } from 'cluster';
+//import { setMaxListeners } from 'cluster';
 import * as archive from './archive';
 
 interface SongMap {
