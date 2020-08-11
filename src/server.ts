@@ -13,8 +13,8 @@ import * as cors from 'cors';
 const cors = require('cors');
 
 const PORT = process.env.PORT || 8060;
-//const ADDRESS = "http://localhost:8060/";
-const ADDRESS = "https://grateful-dead-api.herokuapp.com/";
+const ADDRESS = "http://localhost:8060/";
+//const ADDRESS = "https://grateful-dead-api.herokuapp.com/";
 const SEARCHJSON = JSON.parse(fs.readFileSync('json-data/search.json', 'utf8'));
 const RECORDINGDICT = JSON.parse(fs.readFileSync('json-data/recording_dict.json', 'utf8'));
 const SONGDICT = JSON.parse(fs.readFileSync('json-data/song_dict.json', 'utf8'));
