@@ -4,6 +4,10 @@ import * as N3 from 'n3';
 import { Weather, Artist, ArtistDetails, SongInfo, Recording, VenueDetails,
   Artifact, ArtifactType } from './types';
 
+
+
+//const VENUEDETAILS = JSON.parse(fs.readFileSync('json-data/venueDetailsList.json', 'utf8'));
+
 const LMO = "https://w3id.org/lmo/vocabulary/";
 const LMO_LOCATION = LMO+"location";
 const LMO_SHOW = LMO+"LiveMusicShow";
@@ -432,7 +436,11 @@ function getDateTimeInterval(eventId: string) {
   return triples[0].subject;
 }
 
-export function getVenueDetails(): VenueDetails[] {
+
+//export function getVenueDetails(): VenueDetails[] {
+//  return VENUEDETAILS;
+
+  /*
   let venueDetailsList = [];
   getSubjects(RDF_TYPE, LMO_VENUE_CLASS).forEach((s: string) => {
     var shows = [];
@@ -460,9 +468,12 @@ export function getVenueDetails(): VenueDetails[] {
       });
     }
   })
-  return venueDetailsList;
+  //let data = JSON.stringify(venueDetailsList);
+  //fs.writeFileSync('venueDetailsList.json', data);
 
-}
+  return venueDetailsList;
+*/
+//}
 
 
 export function getTourDetails(): any {
