@@ -433,7 +433,7 @@ function getDateTimeInterval(eventId: string) {
   return triples[0].subject;
 }
 
- /*
+// unused, stored result in json instead
 export function getVenueDetails(): VenueDetails[] {
   let venueDetailsList = [];
   getSubjects(RDF_TYPE, LMO_VENUE_CLASS).forEach((s: string) => {
@@ -466,8 +466,7 @@ export function getVenueDetails(): VenueDetails[] {
   //fs.writeFileSync('venue_details_list.json', data);
 
   return venueDetailsList;
-*/
-//}
+}
 
 
 export function getTourDetails(): any {
