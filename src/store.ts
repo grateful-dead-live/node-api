@@ -433,7 +433,7 @@ function getDateTimeInterval(eventId: string) {
   return triples[0].subject;
 }
 
-// unused, stored result in json instead
+// could load and return json instead
 export function getVenueDetails(): VenueDetails[] {
   let venueDetailsList = [];
   getSubjects(RDF_TYPE, LMO_VENUE_CLASS).forEach((s: string) => {
