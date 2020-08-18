@@ -36,8 +36,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "NODE_ENV=development ts-node src/server.ts",
-    "start-prod": "NODE_ENV=production pm2 start src/server.ts --watch",
-    "start-dev": "NODE_ENV=development ts-node src/server.ts"
+    "start-prod": "NODE_ENV=production pm2 start src/server.ts",
+    "start-dev": "NODE_ENV=development pm2 start src/server.ts --watch"
   },
   "repository": {
     "type": "git",
