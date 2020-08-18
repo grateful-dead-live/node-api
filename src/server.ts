@@ -10,8 +10,9 @@ import * as userDb from './userdb';
 import * as youtube from './youtube';
 import * as cors from 'cors';
 import { ADDRESS } from './config'
+import * as compression from 'compression';
 
-const cors = require('cors');
+//const cors = require('cors');
 
 const PORT = process.env.PORT || 8060;
 //const ADDRESS = "http://localhost:8060/";
@@ -39,19 +40,22 @@ var options = {
   ]
 };
 
-var fuse = new Fuse(SEARCHJSON, options);
+
 
 let app = express();
 
 
+app.options('*', cors());
 app.use(
     cors({
         credentials: true,
         origin: true
     })
 );
-app.options('*', cors());
 
+app.use(compression())
+
+var fuse = new Fuse(SEARCHJSON, options);
 
 /*
 app.use((_, res, next) => {
