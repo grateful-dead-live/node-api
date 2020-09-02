@@ -64,6 +64,9 @@ function getEventInfo(eventId: string): DeadEventInfo {
 export async function getEventDetails(eventId: string): Promise<DeadEventDetails> {
   eventId = toLmoId(eventId);
   const date = store.getTime(eventId);
+  if (!date){ 
+    return <DeadEventDetails>{};
+  }
   const [loc, ven, per, nw1, nw2] = await Promise.all([
     getLocation(store.getLocationForEvent(eventId)),
     getVenue(store.getVenueForEvent(eventId)),
