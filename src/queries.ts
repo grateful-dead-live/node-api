@@ -100,7 +100,8 @@ export async function getVenue(venueId: string): Promise<Venue> {
     return Object.assign({
       id: toShortId(venueId),
       //name: label ? label : store.toName(venueId),
-      name: venueName ? venueName : store.toName(venueId),
+      //name: venueName ? venueName : store.toName(venueId),  # TODO: check why store.toName(venueId) if no name
+      name: venueName,
       eventIds: store.getVenueEvents(venueId).map(toShortId),
     }, await getDbpediaInfo(venueDbpedia, true));
   }

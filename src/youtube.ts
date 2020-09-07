@@ -13,7 +13,7 @@ export async function getYouTubeList(id, searchArray) {
         else res = y;
     }
     else res = y;
-    console.log(res);
+    //console.log(res);
     return res;  
 }
 
