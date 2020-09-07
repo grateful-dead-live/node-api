@@ -261,6 +261,7 @@ function toDbpediaId(id: string) {
 
 export async function getRecordingInfo(recordingId: string, etreeId: string): Promise<RecordingInfo> {
   var info = await archive.getArchiveinfo(etreeId);
+  if (!info.date) { return null };
   info['date'] = info['date'].split('T')[0];
   info['etree_id'] = etreeId;
   info['show_id'] = toShortId(store.getEventIdForRecording(toLmoId(recordingId)));
