@@ -9,7 +9,7 @@ import * as Fuse from 'fuse.js';
 import * as userDb from './userdb';
 import * as youtube from './youtube';
 import * as cors from 'cors';
-import { ADDRESS } from './config'
+import { ADDRESS, SSL } from './config'
 import * as compression from 'compression';
 import * as https from 'https';
 
@@ -161,41 +161,40 @@ app.get('/diachronic', async (req, res) => {
   res.send(await queries.getDiachronicSongDetails(<string> songname, <number> count, <number> skip));
 });
 
-
-https.createServer({
-  key: fs.readFileSync('ssl/server.key'),
-  cert: fs.readFileSync('ssl/server.cert')
-}, app)
-.listen(PORT,  async () => {
-  await store.isReady();
-  await userDb.connect();
-  console.log('grateful dead server started at https://localhost:' + PORT)
-})
-
-
-/*
-app.listen(PORT, async () => {
-  await store.isReady();
-  await userDb.connect();
-  console.log('grateful dead server started on port ' + PORT);
-  //userDb.testpost("5eb1880a6636510be9f970c5");
-  //console.log(JSON.stringify(await queries.getTracksForRecording('recording_aade498bc5ce490c98785a67f88cbfd9')))
-  //console.log(JSON.stringify((await queries.getEventDetails(_.sample(queries.getAllEventInfos()).id)).recordings));
-  //console.log(await queries.getNews2(id))
-  //console.log(queries.getDiachronicSongDetails('Looks Like Rain'));
-  //const AUDIO_URI = 'http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3';
-  //console.log(await store.getEventId('gd1969-11-08.sbd.wise.17433.shnf'))
-  //console.log(await store.getEventId('gd1969-11-02.sbd.miller.32273.flac16'))
-  //console.log(await store.getEventId('d1969-11-07.sbd.kaplan.21762.shnf'))
-  //console.log(await chunker.getMp3Chunk(AUDIO_URI, 0, 30));
-  //features.correctSummarizedFeatures();
-  //chunker.pipeMp3Chunk(AUDIO_URI, 10, 12, null);
-  //console.log(await features.loadFeature('gd66-01-08.d1t45', 'beats'));
-  //console.log(await features.getDiachronicVersionsAudio('goodlovin', 10));
-  //console.log(await features.loadSummarizedFeatures('http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3'))
-  //console.log(await features.loadSummarizedFeatures('goodlovin', 'gd1969-11-21.set2.sbd.gmb.96580.flac16/gd1969-11-21t01.mp3'));
-});
-*/
+if (SSL) {
+  https.createServer({
+    key: fs.readFileSync('ssl/server.key'),
+    cert: fs.readFileSync('ssl/server.cert')
+  }, app)
+  .listen(PORT,  async () => {
+    await store.isReady();
+    await userDb.connect();
+    console.log('grateful dead server started at https://localhost:' + PORT)
+  })
+}
+else {
+  app.listen(PORT, async () => {
+    await store.isReady();
+    await userDb.connect();
+    console.log('grateful dead server started at http://localhost:' + PORT);
+    //userDb.testpost("5eb1880a6636510be9f970c5");
+    //console.log(JSON.stringify(await queries.getTracksForRecording('recording_aade498bc5ce490c98785a67f88cbfd9')))
+    //console.log(JSON.stringify((await queries.getEventDetails(_.sample(queries.getAllEventInfos()).id)).recordings));
+    //console.log(await queries.getNews2(id))
+    //console.log(queries.getDiachronicSongDetails('Looks Like Rain'));
+    //const AUDIO_URI = 'http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3';
+    //console.log(await store.getEventId('gd1969-11-08.sbd.wise.17433.shnf'))
+    //console.log(await store.getEventId('gd1969-11-02.sbd.miller.32273.flac16'))
+    //console.log(await store.getEventId('d1969-11-07.sbd.kaplan.21762.shnf'))
+    //console.log(await chunker.getMp3Chunk(AUDIO_URI, 0, 30));
+    //features.correctSummarizedFeatures();
+    //chunker.pipeMp3Chunk(AUDIO_URI, 10, 12, null);
+    //console.log(await features.loadFeature('gd66-01-08.d1t45', 'beats'));
+    //console.log(await features.getDiachronicVersionsAudio('goodlovin', 10));
+    //console.log(await features.loadSummarizedFeatures('http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3'))
+    //console.log(await features.loadSummarizedFeatures('goodlovin', 'gd1969-11-21.set2.sbd.gmb.96580.flac16/gd1969-11-21t01.mp3'));
+  });
+}
 
 app.get('/search', function(req, res){
   //console.log(req.query.q)
