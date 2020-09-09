@@ -9,13 +9,13 @@ import * as Fuse from 'fuse.js';
 import * as userDb from './userdb';
 import * as youtube from './youtube';
 import * as cors from 'cors';
-import { ADDRESS, SSL } from './config'
+import { ADDRESS, SSL, SETPORT } from './config'
 import * as compression from 'compression';
 import * as https from 'https';
 
 //const cors = require('cors');
 
-const PORT = process.env.PORT || 8060;
+const PORT = process.env.PORT || SETPORT;
 
 
 
