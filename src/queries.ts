@@ -288,9 +288,9 @@ export async function getShowIndex(): Promise<any> {
     shows.push({
       "showId": toShortId(s),
       "date": store.getTime(s),
-      "locationId": toShortId(store.getLocationForEvent(s)),
+      //"locationId": toShortId(store.getLocationForEvent(s)),
       "locationName": store.getLocationNameForEvent(s),
-      "venueId": toShortId(store.getVenueForEvent(s)),
+      //"venueId": toShortId(store.getVenueForEvent(s)),
       "venueName": store.getVenueNameForEvent(s)
     })
   });
