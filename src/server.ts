@@ -335,3 +335,8 @@ app.get('/getTracklist', function(req, res){
 app.get('/youtube', function(req, res){
   youtube.getYouTubeList(req.query.id, req.query.searcharray).then(o => res.send(o)); 
 });
+
+app.get('/showindex', async function(req, res){
+  //queries.getShowIndex().then(o => res.send(o));
+  res.send(await queries.getShowIndex());
+});

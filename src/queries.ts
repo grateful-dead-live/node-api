@@ -246,7 +246,14 @@ function makeIdShort<T extends {id: string}>(object: T) {
 }
 
 function toShortId(id: string) {
-  return id.slice(_.lastIndexOf(id, '/')+1);
+  console.log(id)
+  if (id) {
+    return id.slice(_.lastIndexOf(id, '/')+1);
+  }
+  else {
+    return id
+  }
+  
 }
 
 function toLmoId(id: string) {
@@ -273,4 +280,28 @@ export async function getRecordingInfo(recordingId: string, etreeId: string): Pr
   info['location_name'] = city + ', ' + state;
   info['recording_id'] = recordingId;
   return info;
+}
+
+export async function getShowIndex(): Promise<any> {
+  var shows = [];
+  store.getEventIds().forEach(s => {
+    shows.push({
+      "showId": toShortId(s),
+      "date": store.getTime(s),
+      "locationId": toShortId(store.getLocationForEvent(s)),
+      "locationName": store.getLocationNameForEvent(s),
+      "venueId": toShortId(store.getVenueForEvent(s)),
+      "venueName": store.getVenueNameForEvent(s)
+    })
+  });
+  //console.log(shows)
+  return sortByKey(shows, "date");
+}
+
+
+function sortByKey(array, key) {
+  return array.sort(function(a, b) {
+      var x = a[key]; var y = b[key];
+      return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+  });
 }
