@@ -337,6 +337,17 @@ app.get('/youtube', function(req, res){
 });
 
 app.get('/showindex', async function(req, res){
-  //queries.getShowIndex().then(o => res.send(o));
   res.send(await queries.getShowIndex());
+});
+
+app.get('/venueindex', async function(req, res){
+  res.send(await queries.getVenueIndex());
+});
+
+app.get('/locationindex', async function(req, res){
+  res.send(await queries.getLocationIndex());
+});
+
+app.get('/songindex', async function(req, res){
+  res.send(await queries.getSongIndex());
 });

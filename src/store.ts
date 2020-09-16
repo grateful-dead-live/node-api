@@ -8,6 +8,7 @@ import { Weather, Artist, ArtistDetails, SongInfo, Recording, VenueDetails,
 const LMO = "https://w3id.org/lmo/vocabulary/";
 const LMO_LOCATION = LMO+"location";
 const LMO_SHOW = LMO+"LiveMusicShow";
+const LMO_SONG = LMO+"Song";
 const LMO_VENUE = LMO+"venue";
 const LMO_VENUE_CLASS = LMO+"Venue";
 const LMO_VENUE_NAME = LMO+"venue_name";
@@ -168,6 +169,26 @@ export function getVenueEvents(venueId: string): string[] {
   return getSubjects(LMO_VENUE, venueId);
 }
 
+export function getLocations(){
+  return store.getTriples(null, DBO_COUNTRY, null).concat(store.getTriples(null, DBO_ISPARTOF, null)).map(i => {
+    return {
+      "locationId": i.subject,
+      "locationName": toName(i.subject),
+      "country": i.predicate == DBO_COUNTRY ? toName(i.object) : "United States"
+    }
+  })
+}
+
+export function getSongs() {
+  return getSubjects(RDF_TYPE, LMO_SONG).map(s => {
+    return {
+      "songId": s,
+      "songName": getObject(s, LMO_SONG_NAME)
+    }
+  });
+}
+
+
 export function getStateOrCountry(locationId: string): string {
   let countryId = getObject(locationId, DBO_COUNTRY);
   let stateId = getObject(locationId, DBO_ISPARTOF);
@@ -283,6 +304,8 @@ export function getSongId(songname: string): string {
   return getSubjectForLiteral(LMO_SONG_NAME, songname);
 }
 
+
+
 export function getPerformers(eventId: string): Artist[] {
   const performanceIds: string[] =
     getObjects(getObject(eventId, LMO_LINEUP), LMO_PERFORMANCE);
@@ -328,6 +351,17 @@ export function getLabel(id: string): string {
 
 export function getVenueName(id: string): string {
   return getObject(id, LMO_VENUE_NAME);
+}
+
+export function getVenueIds() {
+  return getSubjects(RDF_TYPE, LMO_VENUE_CLASS);
+}
+
+export function getLocationNameForVenue(id: string) {
+  let location = getObject(id, LMO_LOCATION);
+  let state = getStateOrCountry(location)
+  //return toName(location) + ", " + toName(state); 
+  return state ? toName(location) + ", " + toName(state) : toName(location);
 }
 
 export function getSameAs(id: string): string {

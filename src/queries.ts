@@ -246,7 +246,7 @@ function makeIdShort<T extends {id: string}>(object: T) {
 }
 
 function toShortId(id: string) {
-  console.log(id)
+  //console.log(id)
   if (id) {
     return id.slice(_.lastIndexOf(id, '/')+1);
   }
@@ -282,21 +282,38 @@ export async function getRecordingInfo(recordingId: string, etreeId: string): Pr
   return info;
 }
 
+
 export async function getShowIndex(): Promise<any> {
-  var shows = [];
-  store.getEventIds().forEach(s => {
-    shows.push({
-      "showId": toShortId(s),
-      "date": store.getTime(s),
-      //"locationId": toShortId(store.getLocationForEvent(s)),
-      "locationName": store.getLocationNameForEvent(s),
-      //"venueId": toShortId(store.getVenueForEvent(s)),
-      "venueName": store.getVenueNameForEvent(s)
-    })
-  });
-  //console.log(shows)
+  var shows = store.getEventIds().map(s => ({
+    "showId": toShortId(s),
+    "date": store.getTime(s),
+    "locationName": store.getLocationNameForEvent(s),
+    "venueName": store.getVenueNameForEvent(s)
+  }));
   return sortByKey(shows, "date");
 }
+
+export async function getVenueIndex(): Promise<any> {
+  var venues = store.getVenueIds().map(v => ({
+    "venueId": toShortId(v),
+    "locationName": store.getLocationNameForVenue(v),
+    "venueName": store.getVenueName(v)
+  }));
+  return sortByKey(venues, "venueName");
+}
+
+export async function getLocationIndex(): Promise<any> {
+  var locations = store.getLocations();
+  locations.forEach(i => i.locationId = toShortId(i.locationId));
+  return sortByKey(locations, "locationName");
+}
+
+export async function getSongIndex(): Promise<any> {
+  var songs = store.getSongs();
+  songs.forEach(i => i.songId = toShortId(i.songId));
+  return sortByKey(songs, "songName");
+}
+
 
 
 function sortByKey(array, key) {
