@@ -48,10 +48,11 @@ var options = {
   ]
 };
 
-
+var fuse = new Fuse(SEARCHJSON, options);
 
 let app = express();
 
+//const app = require('express')();
 
 
 
@@ -65,7 +66,33 @@ app.use(
 
 app.use(compression())
 
-var fuse = new Fuse(SEARCHJSON, options);
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+
+http.listen(PORT, async () => {
+  await store.isReady();
+  await userDb.connect();
+  console.log('grateful dead server started at http://localhost:' + PORT);
+});
+
+
+
+io.on('connection', (socket) => {
+  console.log('a user connected');
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+
+  socket.on('comment', (msg) => {
+    console.log('comment: ' + msg);
+    io.emit('broadcast comment', `server: ${msg}`);
+  });
+
+
+});
+
+
+
 
 /*
 app.use((_, res, next) => {
@@ -161,6 +188,7 @@ app.get('/diachronic', async (req, res) => {
   res.send(await queries.getDiachronicSongDetails(<string> songname, <number> count, <number> skip));
 });
 
+/*
 if (SSL) {
   https.createServer({
     key: fs.readFileSync('ssl/server.key'),
@@ -195,6 +223,7 @@ else {
     //console.log(await features.loadSummarizedFeatures('goodlovin', 'gd1969-11-21.set2.sbd.gmb.96580.flac16/gd1969-11-21t01.mp3'));
   });
 }
+*/
 
 app.get('/search', function(req, res){
   //console.log(req.query.q)
