@@ -69,11 +69,14 @@ app.use(compression())
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 
+
+
 http.listen(PORT, async () => {
   await store.isReady();
   await userDb.connect();
   console.log('grateful dead server started at http://localhost:' + PORT);
 });
+
 
 
 
@@ -83,12 +86,50 @@ io.on('connection', (socket) => {
     console.log('user disconnected');
   });
 
-  socket.on('comment', (msg) => {
-    console.log('comment: ' + msg);
-    io.emit('broadcast comment', `server: ${msg}`);
+  let previousRoom;
+  socket.on('joinroom', function(currentRoom) {
+    if (previousRoom) {
+      console.log('leave: ' + previousRoom);
+      socket.leave(previousRoom);
+    }
+    socket.leave(previousRoom);
+    console.log('join: ' + currentRoom);
+    socket.join(currentRoom);
+    previousRoom = currentRoom;
   });
 
+  //socket.on('leaveroom', function(room) {
+  //  console.log('leave: ' + room);
+  //  socket.leave(room);
+  //  previousRoom = null;
+  //});
 
+  // https://www.digitalocean.com/community/tutorials/angular-socket-io
+  
+  
+  socket.on('postAddComment', msg => {
+    console.log(msg.payload.msg)
+    socket.to(msg.room).emit('addcomment', msg);
+  });
+
+  /*
+  socket.on('_postComment', room => {
+    console.log('post comment')
+    //console.log(io.sockets.adapter.sids[socket.id][room])
+    socket.to(room).emit('comment', true);
+    //io.emit('comment', true);
+  });
+  */
+ 
+ socket.on('postDeleteComment', msg => {
+  console.log(msg)
+  socket.to(msg.room).emit('deletecomment', msg);
+});
+
+  socket.on('end', () => {
+    console.log('END');
+    socket.disconnect();
+  })
 });
 
 
@@ -102,14 +143,30 @@ app.use((_, res, next) => {
 });
 */
 
-
+/*
+app.get('/socket', (req, res) => {
+  console.log('SOCKET')
+  io.on('connection', (socket) => {
+    console.log('a user connected');
+    socket.on('disconnect', () => {
+      console.log('user disconnected');
+    });
+  
+    socket.on('comment', (msg) => {
+      console.log('comment: ' + msg);
+      io.emit('broadcast comment', `server: ${msg}`);
+    });
+  });
+  }
+);
+*/
 
 app.get('/coordinates', (_, res) =>
-res.send(queries.getAllCoordinates())
+  res.send(queries.getAllCoordinates())
 );
 
 app.get('/tours', (_, res) =>
-res.send(queries.getTours())
+  res.send(queries.getTours())
 );
 
 app.get('/events', (_, res) =>
@@ -365,18 +422,18 @@ app.get('/youtube', function(req, res){
   youtube.getYouTubeList(req.query.id, req.query.searcharray).then(o => res.send(o)); 
 });
 
-app.get('/showindex', async function(req, res){
+app.get('/showindex', async function(_, res){
   res.send(await queries.getShowIndex());
 });
 
-app.get('/venueindex', async function(req, res){
+app.get('/venueindex', async function(_, res){
   res.send(await queries.getVenueIndex());
 });
 
-app.get('/locationindex', async function(req, res){
+app.get('/locationindex', async function(_, res){
   res.send(await queries.getLocationIndex());
 });
 
-app.get('/songindex', async function(req, res){
+app.get('/songindex', async function(_, res){
   res.send(await queries.getSongIndex());
 });
