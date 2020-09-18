@@ -59,7 +59,7 @@ let app = express();
 app.options('*', cors());
 app.use(
     cors({
-        credentials: false,
+        credentials: true,
         origin: true
     })
 );
