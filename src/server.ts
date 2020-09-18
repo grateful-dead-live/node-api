@@ -56,7 +56,7 @@ let app = express();
 
 
 
-app.options('*', cors());
+app.options('https://grateful-dead-live.github.io', cors());
 app.use(
     cors({
         credentials: true,
