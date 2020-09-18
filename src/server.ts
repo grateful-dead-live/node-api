@@ -68,7 +68,7 @@ app.use(compression())
 
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-
+io.origins('*:*');
 
 
 http.listen(PORT, async () => {
