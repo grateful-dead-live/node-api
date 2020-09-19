@@ -20,9 +20,6 @@ const PORT = process.env.PORT || SETPORT;
 
 
 
-
-
-
 //const ADDRESS = "http://localhost:8060/";
 //const ADDRESS = "https://grateful-dead-api.herokuapp.com/";
 const SEARCHJSON = JSON.parse(fs.readFileSync('json-data/search.json', 'utf8'));
@@ -66,10 +63,36 @@ app.use(
 
 app.use(compression())
 
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
-io.origins('*:*');
+var server;
+var htt;
 
+if (SSL) {
+  server = https.createServer({
+    key: fs.readFileSync('ssl/server.key'),
+    cert: fs.readFileSync('ssl/server.cert')
+  }, app);
+  htt = 'https'
+  
+}
+
+else {
+  server = require('http').Server(app);
+  htt = 'http'
+}
+server.listen(PORT,  async () => {
+  await store.isReady();
+  await userDb.connect();
+  console.log('grateful dead server started at ' + htt + '://localhost:' + PORT)
+})
+
+//const http = require('http').Server(app);
+
+
+//const io = require('socket.io')(http);
+//io.origins('*:*');
+
+
+/*
 
 http.listen(PORT, async () => {
   await store.isReady();
@@ -77,8 +100,13 @@ http.listen(PORT, async () => {
   console.log('grateful dead server started at http://localhost:' + PORT);
 });
 
+*/
 
 
+
+
+
+var io = require('socket.io')(server);
 
 io.on('connection', (socket) => {
   console.log('a user connected');
