@@ -137,27 +137,26 @@ io.on('connection', (socket) => {
   
   socket.on('postAddComment', msg => {
     console.log(msg.payload.msg)
-    socket.to(msg.room).emit('addcomment', msg);
+    socket.to(msg.room).emit('addcomment', msg.payload);
   });
 
-  /*
-  socket.on('_postComment', room => {
-    console.log('post comment')
-    //console.log(io.sockets.adapter.sids[socket.id][room])
-    socket.to(room).emit('comment', true);
-    //io.emit('comment', true);
-  });
-  */
  
- socket.on('postDeleteComment', msg => {
-  console.log(msg)
-  socket.to(msg.room).emit('deletecomment', msg);
-});
+  socket.on('postDeleteComment', msg => {
+    console.log(msg)
+    socket.to(msg.room).emit('deletecomment', msg.msgId);
+  });
 
   socket.on('end', () => {
     console.log('END');
     socket.disconnect();
   })
+
+  socket.on('postLike', msg => {
+    console.log(msg)
+    socket.to(msg.room).emit('like', msg.bool);
+  });
+
+
 });
 
 
