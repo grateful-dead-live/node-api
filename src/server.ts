@@ -153,7 +153,7 @@ io.on('connection', (socket) => {
 
   socket.on('postLike', msg => {
     console.log(msg)
-    socket.to(msg.room).emit('like', msg.bool);
+    socket.to(msg.room).emit('like', msg.msg);
   });
 
 
