@@ -1,4 +1,5 @@
 import * as fetch from 'node-fetch';
+import { logger } from './config';
 
 const BUFFER = new Map<string, Map<string, string>>();
 
@@ -39,7 +40,7 @@ async function getObjectFromDbpedia(resource: string, predicate: string, languag
       .then(t => JSON.parse(t))
       .then(j => j.results.bindings[0].object.value)
       .then(j => setBuffered(resource, predicate, j))
-      .catch(() => console.log("no "+predicate+" found for "+resource));
+      .catch(() => logger("no "+predicate+" found for "+resource));
   }
 }
 

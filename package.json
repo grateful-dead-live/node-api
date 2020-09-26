@@ -17,6 +17,7 @@
     "fuse.js": "^3.4.5",
     "lame": "github:suldashi/node-lame",
     "lodash": "^4.17.15",
+    "log-to-file": "^2.0.2",
     "mongodb": "^3.5.7",
     "n3": "^0.11.3",
     "node-fetch": "^1.7.3",

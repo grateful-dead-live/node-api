@@ -9,7 +9,7 @@ import * as Fuse from 'fuse.js';
 import * as userDb from './userdb';
 import * as youtube from './youtube';
 import * as cors from 'cors';
-import { ADDRESS, SSL, SETPORT } from './config'
+import { ADDRESS, SSL, SETPORT, logger } from './config'
 import * as compression from 'compression';
 import * as https from 'https';
 
@@ -97,37 +97,41 @@ server.listen(PORT,  async () => {
 http.listen(PORT, async () => {
   await store.isReady();
   await userDb.connect();
-  console.log('grateful dead server started at http://localhost:' + PORT);
+  logger('grateful dead server started at http://localhost:' + PORT);
 });
 
 */
 
 
 
-
+var userCount = 0;
 
 var io = require('socket.io')(server);
 
 io.on('connection', (socket) => {
-  console.log('a user connected');
+  logger('a user connected');
+  userCount++;
+  console.log('connected users: ' + userCount);
   socket.on('disconnect', () => {
-    console.log('user disconnected');
+    userCount--;
+    console.log('connected users: ' + userCount);
+    logger('user disconnected');
   });
 
   let previousRoom;
   socket.on('joinroom', function(currentRoom) {
     if (previousRoom) {
-      console.log('leave: ' + previousRoom);
+      logger('leave: ' + previousRoom);
       socket.leave(previousRoom);
     }
     socket.leave(previousRoom);
-    console.log('join: ' + currentRoom);
+    logger('join: ' + currentRoom);
     socket.join(currentRoom);
     previousRoom = currentRoom;
   });
 
   //socket.on('leaveroom', function(room) {
-  //  console.log('leave: ' + room);
+  //  logger('leave: ' + room);
   //  socket.leave(room);
   //  previousRoom = null;
   //});
@@ -136,23 +140,23 @@ io.on('connection', (socket) => {
   
   
   socket.on('postAddComment', msg => {
-    console.log(msg.payload.msg)
+    logger(msg.payload.msg)
     socket.to(msg.room).emit('addcomment', msg.payload);
   });
 
  
   socket.on('postDeleteComment', msg => {
-    console.log(msg)
+    logger(msg)
     socket.to(msg.room).emit('deletecomment', msg.msgId);
   });
 
   socket.on('end', () => {
-    console.log('END');
+    logger('END');
     socket.disconnect();
   })
 
   socket.on('postLike', msg => {
-    console.log(msg)
+    logger(msg)
     socket.to(msg.room).emit('like', msg.msg);
   });
 
@@ -172,15 +176,15 @@ app.use((_, res, next) => {
 
 /*
 app.get('/socket', (req, res) => {
-  console.log('SOCKET')
+  logger('SOCKET')
   io.on('connection', (socket) => {
-    console.log('a user connected');
+    logger('a user connected');
     socket.on('disconnect', () => {
-      console.log('user disconnected');
+      logger('user disconnected');
     });
   
     socket.on('comment', (msg) => {
-      console.log('comment: ' + msg);
+      logger('comment: ' + msg);
       io.emit('broadcast comment', `server: ${msg}`);
     });
   });
@@ -281,96 +285,96 @@ if (SSL) {
   .listen(PORT,  async () => {
     await store.isReady();
     await userDb.connect();
-    console.log('grateful dead server started at https://localhost:' + PORT)
+    logger('grateful dead server started at https://localhost:' + PORT)
   })
 }
 else {
   app.listen(PORT, async () => {
     await store.isReady();
     await userDb.connect();
-    console.log('grateful dead server started at http://localhost:' + PORT);
+    logger('grateful dead server started at http://localhost:' + PORT);
     //userDb.testpost("5eb1880a6636510be9f970c5");
-    //console.log(JSON.stringify(await queries.getTracksForRecording('recording_aade498bc5ce490c98785a67f88cbfd9')))
-    //console.log(JSON.stringify((await queries.getEventDetails(_.sample(queries.getAllEventInfos()).id)).recordings));
-    //console.log(await queries.getNews2(id))
-    //console.log(queries.getDiachronicSongDetails('Looks Like Rain'));
+    //logger(JSON.stringify(await queries.getTracksForRecording('recording_aade498bc5ce490c98785a67f88cbfd9')))
+    //logger(JSON.stringify((await queries.getEventDetails(_.sample(queries.getAllEventInfos()).id)).recordings));
+    //logger(await queries.getNews2(id))
+    //logger(queries.getDiachronicSongDetails('Looks Like Rain'));
     //const AUDIO_URI = 'http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3';
-    //console.log(await store.getEventId('gd1969-11-08.sbd.wise.17433.shnf'))
-    //console.log(await store.getEventId('gd1969-11-02.sbd.miller.32273.flac16'))
-    //console.log(await store.getEventId('d1969-11-07.sbd.kaplan.21762.shnf'))
-    //console.log(await chunker.getMp3Chunk(AUDIO_URI, 0, 30));
+    //logger(await store.getEventId('gd1969-11-08.sbd.wise.17433.shnf'))
+    //logger(await store.getEventId('gd1969-11-02.sbd.miller.32273.flac16'))
+    //logger(await store.getEventId('d1969-11-07.sbd.kaplan.21762.shnf'))
+    //logger(await chunker.getMp3Chunk(AUDIO_URI, 0, 30));
     //features.correctSummarizedFeatures();
     //chunker.pipeMp3Chunk(AUDIO_URI, 10, 12, null);
-    //console.log(await features.loadFeature('gd66-01-08.d1t45', 'beats'));
-    //console.log(await features.getDiachronicVersionsAudio('goodlovin', 10));
-    //console.log(await features.loadSummarizedFeatures('http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3'))
-    //console.log(await features.loadSummarizedFeatures('goodlovin', 'gd1969-11-21.set2.sbd.gmb.96580.flac16/gd1969-11-21t01.mp3'));
+    //logger(await features.loadFeature('gd66-01-08.d1t45', 'beats'));
+    //logger(await features.getDiachronicVersionsAudio('goodlovin', 10));
+    //logger(await features.loadSummarizedFeatures('http://archive.org/download/gd1969-11-08.sbd.wise.17433.shnf/gd69-11-08d1t02.mp3'))
+    //logger(await features.loadSummarizedFeatures('goodlovin', 'gd1969-11-21.set2.sbd.gmb.96580.flac16/gd1969-11-21t01.mp3'));
   });
 }
 */
 
 app.get('/search', function(req, res){
-  //console.log(req.query.q)
+  //logger(req.query.q)
   var result = fuse.search(<string> req.query.q);
   res.send(result);
 });
 
 app.get('/addBookmark', function(req, res){
-  console.log(req.query.userid);
-  console.log(req.query.route);
-  console.log(req.query.time);
-  console.log(req.query.title);
+  logger(req.query.userid);
+  logger(req.query.route);
+  logger(req.query.time);
+  logger(req.query.title);
   userDb.addBookmark(req.query.userid, req.query.route, req.query.time, req.query.title);
   res.send('addBookmark');
 });
 
 app.get('/delBookmark', function(req, res){
-  console.log(req.query.userid);
-  console.log(req.query.route);
+  logger(req.query.userid);
+  logger(req.query.route);
   userDb.delBookmark(req.query.userid, req.query.route);
   res.send('delBookmark');
 });
 
 app.get('/getBookmarks', function(req, res){
-  //console.log(req.query.userid);
+  //logger(req.query.userid);
   userDb.getBookmarks(req.query.userid).then(o => res.send(o));
 });
 
 app.get('/checkBookmark', function(req, res){
-  //console.log(req.query.userid);
+  //logger(req.query.userid);
   userDb.checkBookmark(req.query.userid, req.query.route).then(o => res.send(o));
 });
 
 
 
 app.get('/like', function(req, res){
-  console.log(req.query.userid);
-  console.log(req.query.route);
-  console.log(req.query.time);
-  console.log(req.query.title);
+  logger(req.query.userid);
+  logger(req.query.route);
+  logger(req.query.time);
+  logger(req.query.title);
   userDb.like(req.query.userid, req.query.route, req.query.time, req.query.title);
   res.send('like');
 });
 
 app.get('/unlike', function(req, res){
-  console.log(req.query.userid);
-  console.log(req.query.route);
+  logger(req.query.userid);
+  logger(req.query.route);
   userDb.unlike(req.query.userid, req.query.route);
   res.send('unlike');
 });
 
 app.get('/checkLike', function(req, res){
-  //console.log(req.query.userid);
+  //logger(req.query.userid);
   userDb.checkLike(req.query.userid, req.query.route).then(o => res.send(o));
 });
 
 app.get('/countLikes', function(req, res){
-  //console.log(req.query.userid);
+  //logger(req.query.userid);
   userDb.countLikes(req.query.route).then(o => res.send(o));
 });
 
 app.get('/getLikes', function(req, res){
-  //console.log(req.query.userid);
+  //logger(req.query.userid);
   userDb.getLikes(req.query.userid).then(o => res.send(o));
 });
 
@@ -381,24 +385,24 @@ app.get('/getComments', function(req, res){
 
 app.get('/addComment', function(req, res){
   //var j = JSON.parse(req.query.comment+'')
-  //console.log(j)
-  console.log(req.query.comment)
+  //logger(j)
+  logger(req.query.comment)
   userDb.addComment(req.query.comment, req.query.route, req.query.userid, req.query.title);
   res.send('addComment');
 });
 
 app.get('/checkComment', function(req, res){
-  //console.log(req.query.msgId);
+  //logger(req.query.msgId);
   userDb.checkComment(req.query.msgId).then(o => res.send(o));
 });
 
 app.get('/getUserComments', function(req, res){
-  //console.log(req.query.userid);
+  //logger(req.query.userid);
   userDb.getUserComments(req.query.userid).then(o => res.send(o));
 });
 
 app.get('/sendCommentReport', function(req, res){
-  //console.log(req.query.msgId);
+  //logger(req.query.msgId);
   userDb.sendCommentReport(req.query.comment, req.query.userid).then(o => res.send(o));
 });
 

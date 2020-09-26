@@ -5,6 +5,7 @@ const ARCHIVE = 'http://archive.org/download/';
 const FOLDER = 'features/';
 const loader = new FeatureLoader();
 const audioToSongname = getAudioToSongname();
+const logger = require('./config.ts').logger;
 
 exports.loadFeature = function(songid, feature) {
   const file = getFile(songid, feature);
@@ -97,5 +98,5 @@ exports.correctSummarizedFeatures = function() {
       fs.writeFileSync(folder+path, JSON.stringify(json));
     });
   });
-  console.log("done");
+  logger("done");
 }

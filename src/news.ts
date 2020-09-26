@@ -1,6 +1,6 @@
 import * as request from 'request-promise';
 import * as _ from 'lodash';
-import { GUARDIANAPIKEY, NYTAPIKEY } from './config';
+import { GUARDIANAPIKEY, NYTAPIKEY, logger } from './config';
 import { News } from './types';
 const DAYS_PRIOR = 7;
 
@@ -59,7 +59,7 @@ export async function getNewsFromNytimes(toDate: string): Promise<News[]> {
       url: a.web_url
     }));
   } catch (err) {
-    console.log(err);
+    logger(err);
     return Promise.resolve([]);
   }
 }
@@ -83,7 +83,7 @@ export async function getNewsFromGuardian(toDate: string): Promise<News[]> {
       url: a.webUrl
     }));
   } catch (err) {
-    console.log(err);
+    logger(err);
     return Promise.resolve([]);
   }
 }

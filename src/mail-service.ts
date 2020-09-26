@@ -1,5 +1,5 @@
 import * as nodemailer from 'nodemailer';
-import { GMAILUSER, GMAILPASS } from './config'
+import { GMAILUSER, GMAILPASS, logger } from './config'
  
     export class MailService { 
       private _transporter: nodemailer.Transporter; 
@@ -30,10 +30,10 @@ import { GMAILUSER, GMAILPASS } from './config'
             this._transporter.sendMail(  
               options, (error, info) => { 
                 if (error) { 
-                  console.log(`error: ${error}`); 
+                  logger(`error: ${error}`); 
                   reject(error); 
                 } else { 
-                    console.log(`message sent: ${info.response}`); 
+                    logger(`message sent: ${info.response}`); 
                     resolve(`${info.response}`); 
                 } 
             }) 

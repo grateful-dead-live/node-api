@@ -1,26 +1,29 @@
+
 let fetch = require('node-fetch');
+const logger = require('./config.ts').logger;
+
 
 function createInfoQuery(resource) {
   let query = "PREFIX etree: <http://etree.linkedmusic.org/vocab/> SELECT ?notes ?source ?lineage { <http://etree.linkedmusic.org/performance/" + resource + ">"
   + " etree:notes ?notes ; "
   + "etree:source ?source ; "
   + "etree:lineage ?lineage . } "; 
- //console.log(query);
+ //logger(query);
   return "http://etree.linkedmusic.org/sparql?default-graph-uri=&query="+encodeURIComponent(query)+"&format=json";
 }
 
 function createKeywordQuery(resource){
   let query = "PREFIX etree: <http://etree.linkedmusic.org/vocab/> SELECT ?keyword { <http://etree.linkedmusic.org/performance/" + resource + ">"
 + " etree:keyword ?keyword . } "; 
-//console.log(query);
+//logger(query);
 return "http://etree.linkedmusic.org/sparql?default-graph-uri=&query="+encodeURIComponent(query)+"&format=json";
 
 }
 
 exports.getInfoFromEtree = function(resource) {
-  //console.log(resource);
+  //logger(resource);
 
-  //console.log(createTracksQuery(resource));
+  //logger(createTracksQuery(resource));
 
   return fetch(createInfoQuery(resource))
   .then(r => r.text())
@@ -35,7 +38,7 @@ exports.getInfoFromEtree = function(resource) {
     tracks: await getTracksFromEtree(resource)
     }))
   .catch(() => { 
-    console.log("etree linked data not found");
+    logger("etree linked data not found");
     return {
       id: resource,
       notes: "n/a",
@@ -48,13 +51,13 @@ exports.getInfoFromEtree = function(resource) {
 }
 
 function getKeywordFromEtree(resource) {
-  //console.log("KEYWORDS:")
+  //logger("KEYWORDS:")
   return fetch(createKeywordQuery(resource))
   .then(r => r.text())
   .then(t => JSON.parse(t))
   .then(j => { 
     let res = getString(j.results.bindings);
-    //console.log(res);
+    //logger(res);
     return res
   })
 }
@@ -65,7 +68,7 @@ function getString(res) {
     elements.push(res[i]["keyword"]["value"])
   }
   elements = elements.join(', ');
-  //console.log(elements);
+  //logger(elements);
   return elements;
 }
 
@@ -97,7 +100,7 @@ async function getTrackList(resource, res){
 }
 
 function getTracksFromEtree(resource) {
-  //console.log("TRACKS:")
+  //logger("TRACKS:")
   return fetch(createTracksQuery(resource))
   .then(r => r.text())
   .then(t => JSON.parse(t))
@@ -110,7 +113,7 @@ function getTracksFromEtree(resource) {
 
 function spectrogramExists(resource, track){
   let image_url = 'https://archive.org/download/' + resource + '/' + track + '_spectrogram.png'
-  //console.log(image_url)
+  //logger(image_url)
 
   return fetch(image_url)
   .then(r => r.status != 404)

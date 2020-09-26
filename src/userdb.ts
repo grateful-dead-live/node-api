@@ -1,7 +1,6 @@
 import { MongoClient, Db, ObjectID } from 'mongodb';
-import { MONGOURL, MONGODBNAME} from './config';
+import { MONGOURL, MONGODBNAME, MONGODBCOLLECTION, logger} from './config';
 import { MailService } from './mail-service';
-import { MONGODBCOLLECTION } from './config'
 
 let db: Db;
 let dbcollection: any;
@@ -82,7 +81,7 @@ export async function getLikes(userid) {
     var x = await dbcollection.find( { 
         userId : userid, 
     }).project({'likes':1}).toArray();
-    console.log(x)
+    logger(x)
     return x;
 }
 
@@ -161,7 +160,7 @@ export async function getPlaylist(playlistid) {
 }
 
 export async function delPlaylist(userid, playlistid) {
-    console.log('delete: ' + playlistid);
+    logger('delete: ' + playlistid);
     dbcollection.updateOne( 
         { userId : userid },
         { $pull: { playlists : {id:playlistid} } } 
@@ -169,7 +168,7 @@ export async function delPlaylist(userid, playlistid) {
 }
 
 export async function deleteComment(msgid, userid) {
-    console.log('delete: ' + msgid);
+    logger('delete: ' + msgid);
     dbcollection.updateOne( 
         { userId : userid },
         { $pull: {'comments' : {'comment.msgId': msgid} } } 

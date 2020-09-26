@@ -1,6 +1,6 @@
 import * as userDb from './userdb';
 import * as fetch from 'node-fetch';
-import { YOUTUBEAPIKEY } from './config'
+import { YOUTUBEAPIKEY, logger } from './config'
 
 
 export async function getYouTubeList(id, searchArray) {
@@ -13,7 +13,7 @@ export async function getYouTubeList(id, searchArray) {
         else res = y;
     }
     else res = y;
-    //console.log(res);
+    //logger(res);
     return res;  
 }
 
@@ -22,9 +22,9 @@ async function fetchYoutubeVideos(searchArray): Promise<any>{
     var searchString = '';
     searchArray.forEach(s => searchString += '%22'+s+'%22' + '+');
     searchString = searchString.slice(0, -1).replace(/ /g, '+');
-    console.log('youtube: ' + searchString);
+    logger('youtube: ' + searchString);
     var r = await getPage(searchString);
-    //console.log(r)
+    //logger(r)
     var result;
     if (!r.items) result = undefined;
     else { 
@@ -41,7 +41,7 @@ async function fetchYoutubeVideos(searchArray): Promise<any>{
                 thumbnail: v.snippet.thumbnails.default.url
             });
         })
-        //console.log(result);
+        //logger(result);
     }
     return result;
   }
@@ -55,5 +55,5 @@ async function getPage(searchString, nextPageToken?): Promise<any> {
     return fetch(url)
       .then(r => r.text())
       .then(t => JSON.parse(t))
-      .catch(e => console.log(e));
+      .catch(e => logger(e));
 }
