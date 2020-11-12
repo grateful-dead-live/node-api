@@ -1,5 +1,5 @@
 import * as fetch from 'node-fetch';
-import { logger } from './config';
+import { logger } from './logger';
 
 const BUFFER = new Map<string, Map<string, string>>();
 

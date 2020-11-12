@@ -1,5 +1,6 @@
 import * as nodemailer from 'nodemailer';
-import { GMAILUSER, GMAILPASS, logger } from './config'
+import { GMAILUSER, GMAILPASS } from './config';
+import { logger } from './logger';
  
     export class MailService { 
       private _transporter: nodemailer.Transporter; 

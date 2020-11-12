@@ -1,5 +1,6 @@
 import { MongoClient, Db, ObjectID } from 'mongodb';
-import { MONGOURL, MONGODBNAME, MONGODBCOLLECTION, logger} from './config';
+import { MONGOURL, MONGODBNAME, MONGODBCOLLECTION } from './config';
+import { logger} from './logger';
 import { MailService } from './mail-service';
 
 let db: Db;

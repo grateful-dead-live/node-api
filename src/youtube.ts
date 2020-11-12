@@ -1,6 +1,7 @@
 import * as userDb from './userdb';
 import * as fetch from 'node-fetch';
-import { YOUTUBEAPIKEY, logger } from './config'
+import { YOUTUBEAPIKEY } from './config';
+import { logger } from './logger';
 
 
 export async function getYouTubeList(id, searchArray) {

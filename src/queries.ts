@@ -10,7 +10,7 @@ import { DeadEventInfo, DeadEventDetails, Venue, Location, DbpediaObject,
   RecordingInfo} from './types';
 //import { setMaxListeners } from 'cluster';
 import * as archive from './archive';
-import { logger } from './config';
+import { logger } from './logger';
 
 interface SongMap {
   [songName: string]: {

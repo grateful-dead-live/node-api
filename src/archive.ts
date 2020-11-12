@@ -1,7 +1,7 @@
 
 
 import * as fetch from 'node-fetch';
-import { logger } from './config';
+import { logger } from './logger';
 
 
 export async function getArchiveinfo(etree_id) {

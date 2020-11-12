@@ -1,6 +1,7 @@
 import * as request from 'request-promise';
 import * as _ from 'lodash';
-import { GUARDIANAPIKEY, NYTAPIKEY, logger } from './config';
+import { GUARDIANAPIKEY, NYTAPIKEY } from './config';
+import { logger} from './logger';
 import { News } from './types';
 const DAYS_PRIOR = 7;
 

@@ -9,7 +9,8 @@ import * as Fuse from 'fuse.js';
 import * as userDb from './userdb';
 import * as youtube from './youtube';
 import * as cors from 'cors';
-import { ADDRESS, SSL, SETPORT, logger } from './config'
+import { ADDRESS, SSL, SETPORT } from './config';
+import { logger } from './logger';
 import * as compression from 'compression';
 import * as https from 'https';
 
