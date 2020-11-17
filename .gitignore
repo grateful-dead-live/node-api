@@ -2,12 +2,8 @@
 node_modules
 package-lock.json
 
-features
 features.zip
 
-temp-audio/*
-json-data/*
-rdf-data/*
 
 lib/
 
