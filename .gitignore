@@ -6,6 +6,8 @@ features
 features.zip
 
 temp-audio/*
+json-data/*
+rdf-data/*
 
 lib/
 
