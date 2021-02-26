@@ -7,6 +7,7 @@ let db: Db;
 let dbcollection: any;
 let dbtracklists: any;
 let dbyoutube: any;
+let dbnews: any;
 
 export async function connect() {
     let client = await MongoClient.connect(MONGOURL, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -15,6 +16,7 @@ export async function connect() {
     dbcollection = db.collection(MONGODBCOLLECTION);
     dbtracklists = db.collection('tracklists');
     dbyoutube = db.collection('youtube');
+    dbnews= db.collection('news');
   }
 
 export async function addBookmark(userid, route, time, title) {
@@ -205,7 +207,7 @@ function sortTracklist(t){
 
 export async function getYoutubeList(id) {
     var res = await dbyoutube.find( { 
-        id : id, 
+        id: id, 
     }).project({_id: 0, id: 0}).toArray();
     return res[0];
 }
@@ -213,7 +215,23 @@ export async function getYoutubeList(id) {
 export async function addYoutubelist(id, list, timestamp) {
     dbyoutube.updateOne( 
         { id: id },
-        { $set: {list: list, timestamp: timestamp } },
+        { $set: { list: list, timestamp: timestamp } },
+        { upsert: true }
+    )
+}
+
+export async function getNews(id, source) {
+    var res = await dbnews.find( { 
+        id : id, 
+        source: source
+    }).project({_id: 0, id: 0}).toArray();
+    return res[0];
+}
+
+export async function addNews(id, list, timestamp, source) {
+    dbnews.updateOne( 
+        { id: id, source: source },
+        { $set: { list: list, timestamp: timestamp, source: source } },
         { upsert: true }
     )
 }

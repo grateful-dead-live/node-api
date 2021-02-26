@@ -72,8 +72,10 @@ export async function getEventDetails(eventId: string): Promise<DeadEventDetails
     getLocation(store.getLocationForEvent(eventId)),
     getVenue(store.getVenueForEvent(eventId)),
     getPerformers(eventId),
-    news.getNewsFromNytimes(date),
-    news.getNewsFromGuardian(date)
+    //news.getNews(eventId, date, 'The New York Times'),
+    //news.getNews(eventId, date, 'The Guardian')
+    news.getNewsFromNytimes(toShortId(eventId), date),
+    news.getNewsFromGuardian(toShortId(eventId), date)
   ]);
   const artifacts = store.getArtefacts(eventId);
   const recs = makeIdsShort(store.getRecordings(eventId));

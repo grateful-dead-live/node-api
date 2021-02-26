@@ -4,6 +4,7 @@ import { GUARDIANAPIKEY, NYTAPIKEY } from './config';
 import { logger} from './logger';
 import { News } from './types';
 const DAYS_PRIOR = 7;
+import * as userDb from './userdb';
 
 interface TimesNews { //selected fields
   web_url: string, //'https://www.nytimes.com/1994/03/17/business/company-news-heinz-to-acquire-foreign-baby-food-businesses.html'
@@ -40,7 +41,43 @@ interface GuardianNews {
   pillarName: string //"News"
 }
 
-export async function getNewsFromNytimes(toDate: string): Promise<News[]> {
+/*
+export async function getNews(id, toDate: string, source: string) {
+  console.log('news')
+  var timestamp = new Date;
+  var y = await userDb.getNews(id, source);
+  if (y) y = y.list;
+  if (!y || timestamp.getTime() - y.timestamp > 604800000) {
+    if (source == 'The New York Times') {
+      var res = await fetchNewsFromNytimes(toDate);
+    }
+    else if (source == 'The Guardian') {
+      var res = await fetchNewsFromGuardian(toDate);
+    }
+    if (res) userDb.addNews(id, res, timestamp.getTime(), source);
+    else res = y;
+  }
+  else res = y;
+  return res;  
+}
+*/
+
+export async function getNewsFromNytimes(id, toDate: string) {
+  var timestamp = new Date;
+  var y = await userDb.getNews(id, 'The New York Times');
+  if (y) y = y.list;
+  if (!y || timestamp.getTime() - y.timestamp > 604800000) {
+    var res = await fetchNewsFromNytimes(toDate);
+    if (res) userDb.addNews(id, res, timestamp.getTime(), 'The New York Times');
+    else res = y;
+  }
+  else res = y;
+  return res;  
+} 
+
+
+
+export async function fetchNewsFromNytimes(toDate: string): Promise<News[]> {
   try {
     const fromDate = getFromDate(toDate);
     const body = await request({
@@ -65,7 +102,21 @@ export async function getNewsFromNytimes(toDate: string): Promise<News[]> {
   }
 }
 
-export async function getNewsFromGuardian(toDate: string): Promise<News[]> {
+export async function getNewsFromGuardian(id, toDate: string) {
+  var timestamp = new Date;
+  var y = await userDb.getNews(id, 'The Guardian');
+  if (y) y = y.list;
+  if (!y || timestamp.getTime() - y.timestamp > 604800000) {
+    var res = await fetchNewsFromGuardian(toDate);
+    if (res) userDb.addNews(id, res, timestamp.getTime(), 'The Guardian');
+    else res = y;
+  }
+  else res = y;
+  return res;  
+}
+
+
+export async function fetchNewsFromGuardian(toDate: string): Promise<News[]> {
   const fromDate = getFromDate(toDate);
   try {
     const body = await request({
