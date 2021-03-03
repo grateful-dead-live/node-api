@@ -19,7 +19,7 @@ import { logger } from './logger';
 
       sendMail(subject: string, content: string) : Promise<void> {   
         let options = { 
-          from: GMAILUSER + '@gmail.com', 
+          from: 'WEB APP <' + GMAILUSER + '@gmail.com>', 
           to: GMAILUSER + '@gmail.com', 
           subject: subject, 
           text: content 

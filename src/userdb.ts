@@ -139,6 +139,16 @@ export async function sendCommentReport(comment, userid) {
         .catch(err => { return err } );
 }
 
+export async function sendFeedback(comment, userid) {
+    var c = JSON.stringify(JSON.parse(decodeURIComponent(comment)), null, 2 );
+    let mailService = new MailService();
+    return mailService.sendMail(  
+        'app feedback',  
+        'The following feedback has been sent by user ' + userid + ':\n' + c)
+        .then( msg => { return msg } )
+        .catch(err => { return err } );
+}
+
 export async function addPlaylist(name, playlist, playlistid, userid, time) {
     var p = JSON.parse(decodeURIComponent(playlist));
     dbcollection.updateOne( 

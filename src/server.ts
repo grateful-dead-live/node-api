@@ -403,8 +403,12 @@ app.get('/getUserComments', function(req, res){
 });
 
 app.get('/sendCommentReport', function(req, res){
-  //logger(req.query.msgId);
+  console.log("send feedback");
   userDb.sendCommentReport(req.query.comment, req.query.userid).then(o => res.send(o));
+});
+
+app.get('/sendFeedback', function(req, res){
+  userDb.sendFeedback(req.query.comment, req.query.userid).then(o => res.send(o));
 });
 
 app.get('/addPlaylist', function(req, res){
