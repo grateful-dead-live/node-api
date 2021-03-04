@@ -9,7 +9,7 @@ import * as Fuse from 'fuse.js';
 import * as userDb from './userdb';
 import * as youtube from './youtube';
 import * as cors from 'cors';
-import { ADDRESS, SSL, SETPORT } from './config';
+import { ADDRESS, SSL, SETPORT, KEY, CERT } from './config';
 import { logger } from './logger';
 import * as compression from 'compression';
 import * as https from 'https';
@@ -69,8 +69,10 @@ var htt;
 
 if (SSL) {
   server = https.createServer({
-    key: fs.readFileSync('ssl/server.key'),
-    cert: fs.readFileSync('ssl/server.cert')
+    //key: fs.readFileSync('ssl/server.key'),
+    //cert: fs.readFileSync('ssl/server.cert')
+    cert: fs.readFileSync(CERT),
+    key: fs.readFileSync(KEY)
   }, app);
   htt = 'https'
   
