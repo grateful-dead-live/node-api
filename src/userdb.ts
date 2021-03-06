@@ -245,3 +245,9 @@ export async function addNews(id, list, timestamp, source) {
         { upsert: true }
     )
 }
+
+export async function getNumberofUsers() {
+    var res = await dbcollection.countDocuments();
+    return res+''
+    //return res[0];
+}

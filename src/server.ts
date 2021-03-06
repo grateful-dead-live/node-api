@@ -405,7 +405,7 @@ app.get('/getUserComments', function(req, res){
 });
 
 app.get('/sendCommentReport', function(req, res){
-  console.log("send feedback");
+  //console.log("send feedback");
   userDb.sendCommentReport(req.query.comment, req.query.userid).then(o => res.send(o));
 });
 
@@ -474,4 +474,8 @@ app.get('/locationindex', async function(_, res){
 
 app.get('/songindex', async function(_, res){
   res.send(await queries.getSongIndex());
+});
+
+app.get('/numberofusers', async function(_, res){
+  res.send(await userDb.getNumberofUsers());
 });
