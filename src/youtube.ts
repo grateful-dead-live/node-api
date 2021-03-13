@@ -39,7 +39,9 @@ async function fetchYoutubeVideos(searchArray): Promise<any>{
             result.push({
                 videoId: v.id.videoId,
                 title: v.snippet.title,
-                thumbnail: v.snippet.thumbnails.default.url
+                thumbnail: v.snippet.thumbnails.default.url,
+                hqthumbnail: v.snippet.thumbnails.high.url,
+                description: v.snippet.description   // TODO: get full description https://stackoverflow.com/questions/37480042/how-to-get-full-description-of-youtube-video-using-youtube-api-v3
             });
         })
         //logger(result);

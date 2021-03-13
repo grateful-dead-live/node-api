@@ -15,8 +15,8 @@ export async function connect() {
     db = client.db(MONGODBNAME);
     dbcollection = db.collection(MONGODBCOLLECTION);
     dbtracklists = db.collection('tracklists');
-    dbyoutube = db.collection('youtube');
-    dbnews= db.collection('news');
+    dbyoutube = db.collection('youtube2');
+    dbnews= db.collection('news2');
   }
 
 export async function addBookmark(userid, route, time, title) {
