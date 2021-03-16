@@ -346,8 +346,12 @@ export async function getLocationIndex(): Promise<any> {
 }
 
 export async function getSongIndex(): Promise<any> {
-  var songs = store.getSongs();
-  songs.forEach(i => i.songId = toShortId(i.songId));
+  var songs = store.getSongs() as any; 
+  songs.forEach(i => {
+    const numEvents = store.getSongEvents(i.songId).length;
+    i.songId = toShortId(i.songId);
+    i.numEvents = numEvents;
+  });
   return sortByKey(songs, "songName");
 }
 
