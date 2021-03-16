@@ -287,27 +287,61 @@ export async function getRecordingInfo(recordingId: string, etreeId: string): Pr
 
 
 export async function getShowIndex(): Promise<any> {
-  var shows = store.getEventIds().map(s => ({
-    "showId": toShortId(s),
-    "date": store.getTime(s),
-    "locationName": store.getLocationNameForEvent(s),
-    "venueName": store.getVenueNameForEvent(s)
-  }));
+  var shows = [];
+  store.getEventIds().forEach(s => {
+    const a = store.getArtefacts(s);
+    shows.push({
+      "showId": toShortId(s),
+      "date": store.getTime(s),
+      "locationName": store.getLocationNameForEvent(s),
+      "venueName": store.getVenueNameForEvent(s),
+      "artefacts": a.filter(i => i.type != 'photo').length,
+      "photos": a.filter(i => i.type == 'photo').length
+    })
+  })
   return sortByKey(shows, "date");
 }
 
 export async function getVenueIndex(): Promise<any> {
-  var venues = store.getVenueIds().map(v => ({
-    "venueId": toShortId(v),
-    "locationName": store.getLocationNameForVenue(v),
-    "venueName": store.getVenueName(v)
-  }));
+  var venues = [];
+  const venueIds = store.getVenueIds();
+  venueIds.forEach((v: string) => {
+    var numArtefacts = 0;
+    var numPhotos = 0;
+    const venueEvents = store.getVenueEvents(v);
+    venueEvents.forEach(e => {
+      const a = store.getArtefacts(e);
+      numArtefacts += a.filter(i => i.type != 'photo').length;
+      numPhotos += a.filter(i => i.type == 'photo').length;
+    });
+    venues.push({
+      "venueId": toShortId(v),
+      "locationName": store.getLocationNameForVenue(v),
+      "venueName": store.getVenueName(v),
+      "numEvents": venueEvents.length,
+      "numPhotos": numPhotos,
+      "numArtefacts": numArtefacts
+      })
+    });
   return sortByKey(venues, "venueName");
 }
 
 export async function getLocationIndex(): Promise<any> {
   var locations = store.getLocations();
-  locations.forEach(i => i.locationId = toShortId(i.locationId));
+  locations.forEach(l => {
+    var numArtefacts = 0;
+    var numPhotos = 0;
+    const locationEvents = store.getLocationEvents(l.locationId);
+    locationEvents.forEach(e => {
+      const a = store.getArtefacts(e);
+      numArtefacts += a.filter(i => i.type != 'photo').length;
+      numPhotos += a.filter(i => i.type == 'photo').length;
+    });
+    l.locationId = toShortId(l.locationId);
+    l.numEvents = locationEvents.length;
+    l.numPhotos = numPhotos;
+    l.numArtefacts = numArtefacts;
+  });
   return sortByKey(locations, "locationName");
 }
 
@@ -316,8 +350,6 @@ export async function getSongIndex(): Promise<any> {
   songs.forEach(i => i.songId = toShortId(i.songId));
   return sortByKey(songs, "songName");
 }
-
-
 
 function sortByKey(array, key) {
   return array.sort(function(a, b) {
