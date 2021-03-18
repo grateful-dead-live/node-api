@@ -3,7 +3,8 @@ node_modules
 package-lock.json
 
 features.zip
-
+rdf-data
+json-data
 
 lib/
 
