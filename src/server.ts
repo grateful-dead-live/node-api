@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as fs from 'fs';
 import * as _ from 'lodash';
 import * as store from './store';
-import * as features from './features';
+//import * as features from './features';
 import * as chunker from './chunker';
 import * as queries from './queries';
 import * as Fuse from 'fuse.js';
@@ -23,9 +23,9 @@ const PORT = process.env.PORT || SETPORT;
 
 //const ADDRESS = "http://localhost:8060/";
 //const ADDRESS = "https://grateful-dead-api.herokuapp.com/";
-const SEARCHJSON = JSON.parse(fs.readFileSync('json-data/search.json', 'utf8'));
-const RECORDINGDICT = JSON.parse(fs.readFileSync('json-data/recording_dict.json', 'utf8'));
-const SONGDICT = JSON.parse(fs.readFileSync('json-data/song_dict.json', 'utf8'));
+const SEARCHJSON = JSON.parse(fs.readFileSync('data/json/search.json', 'utf8'));
+const RECORDINGDICT = JSON.parse(fs.readFileSync('data/json/recording_dict.json', 'utf8'));
+const SONGDICT = JSON.parse(fs.readFileSync('data/json/song_dict.json', 'utf8'));
 
 var options = {
   shouldSort: true,
@@ -240,7 +240,7 @@ app.get('/recording', async (req, res) => {
 app.get('/tracks', async (req, res) => {
   res.send(await queries.getTracksForRecording(<string> req.query.id));
 });
-
+/*
 app.get('/feature', async (req, res) => {
   res.send(await features.loadFeature(<string> req.query.songid, <string> req.query.feature));
 });

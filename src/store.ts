@@ -125,27 +125,27 @@ const WIND_DICT = {
 const store = N3.Store();
 
 export async function isReady() {
-  await readRdfIntoStore('rdf-data/artists.ttl');
-  await readRdfIntoStore('rdf-data/deadlists.ttl');
-  await readRdfIntoStore('rdf-data/events_shows_dates.ttl');
-  await readRdfIntoStore('rdf-data/gdao.ttl');
-  await readRdfIntoStore('rdf-data/lineups.ttl');
-  await readRdfIntoStore('rdf-data/psilo.ttl');
-  await readRdfIntoStore('rdf-data/recordings.ttl');
-  await readRdfIntoStore('rdf-data/recording_sources.ttl');
-  await readRdfIntoStore('rdf-data/setlists.ttl');
-  await readRdfIntoStore('rdf-data/events_deadlists.ttl');
-  await readRdfIntoStore('rdf-data/events_gdao.ttl');
-  await readRdfIntoStore('rdf-data/events_psilo.ttl');
-  await readRdfIntoStore('rdf-data/shows_venue.ttl');
-  await readRdfIntoStore('rdf-data/songs.ttl');
-  await readRdfIntoStore('rdf-data/songs_played_at.ttl');
-  await readRdfIntoStore('rdf-data/states_countries.ttl');
-  await readRdfIntoStore('rdf-data/venues.ttl');
-  await readRdfIntoStore('rdf-data/weather.ttl');
-  await readRdfIntoStore('rdf-data/datetimeobjects.ttl');
-  await readRdfIntoStore('rdf-data/tours.ttl');
-  //await readRdfIntoStore('rdf-data/recording_tracks.ttl');
+  await readRdfIntoStore('data/rdf/artists.ttl');
+  await readRdfIntoStore('data/rdf/deadlists.ttl');
+  await readRdfIntoStore('data/rdf/events_shows_dates.ttl');
+  await readRdfIntoStore('data/rdf/gdao.ttl');
+  await readRdfIntoStore('data/rdf/lineups.ttl');
+  await readRdfIntoStore('data/rdf/psilo.ttl');
+  await readRdfIntoStore('data/rdf/recordings.ttl');
+  await readRdfIntoStore('data/rdf/recording_sources.ttl');
+  await readRdfIntoStore('data/rdf/setlists.ttl');
+  await readRdfIntoStore('data/rdf/events_deadlists.ttl');
+  await readRdfIntoStore('data/rdf/events_gdao.ttl');
+  await readRdfIntoStore('data/rdf/events_psilo.ttl');
+  await readRdfIntoStore('data/rdf/shows_venue.ttl');
+  await readRdfIntoStore('data/rdf/songs.ttl');
+  await readRdfIntoStore('data/rdf/songs_played_at.ttl');
+  await readRdfIntoStore('data/rdf/states_countries.ttl');
+  await readRdfIntoStore('data/rdf/venues.ttl');
+  await readRdfIntoStore('data/rdf/weather.ttl');
+  await readRdfIntoStore('data/rdf/datetimeobjects.ttl');
+  await readRdfIntoStore('data/rdf/tours.ttl');
+  //await readRdfIntoStore('data/rdf/recording_tracks.ttl');
 }
 
 export function getEventIds() {
